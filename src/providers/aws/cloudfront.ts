@@ -1,18 +1,46 @@
-import { BaseBuilder } from "../../core/resource.ts";
-import { S3BucketBuilder } from "./s3.ts";
-import { ACMCertificateBuilder } from "./acm.ts";
-import { Route53Builder } from "./route53.ts";
+import {
+  ListDistributionsCommand,
+  GetDistributionCommand,
+  CreateDistributionCommand,
+  GetDistributionConfigCommand,
+} from '@aws-sdk/client-cloudfront';
+import { BaseBuilder } from '../../core/resource.ts';
+import { S3BucketBuilder } from './s3.ts';
+import { ACMCertificateBuilder } from './acm.ts';
+import { Route53Builder } from './route53.ts';
+import { getCFClient } from './api.ts';
 
 export class CloudFrontBuilder extends BaseBuilder {
   resolvedArn: string | null = null;
+  resolvedId: string | null = null;
   private _origin: any;
   private _aliases: string[] = [];
+  private _prefixes: string[] = [];
+  private _zone?: Route53Builder;
   private _referenceId?: string;
   private _kvsName?: string;
   private _certRef?: ACMCertificateBuilder;
 
   constructor(name: string) {
     super(name);
+    this.discoveryPromise = this.discoverDistribution(name);
+  }
+
+  private async discoverDistribution(name: string): Promise<any> {
+    try {
+      const cf = getCFClient();
+      const list = await cf.send(new ListDistributionsCommand({}));
+      const items = list.DistributionList?.Items ?? [];
+      const match = items.find(d => d.Comment === name);
+      if (match) {
+        this.resolvedId = match.Id!;
+        this.resolvedArn = match.ARN!;
+      }
+      return match ?? null;
+    } catch (e: any) {
+      if (e.name === 'CredentialsProviderError') return null;
+      throw e;
+    }
   }
 
   withRedirector(opts: { kvs: string }) {
@@ -25,10 +53,10 @@ export class CloudFrontBuilder extends BaseBuilder {
     return this;
   }
 
-  // Clone reference distribution and attach domain aliases + cert from a Route53Builder.
-  // prefixes become subdomain aliases: ['ec', 'nc'] → ['ec.domain.com', 'nc.domain.com']
   forDomain(zone: Route53Builder, prefixes: string[]) {
-    this._aliases = prefixes.map((p) => `${p}.${zone.zoneName}`);
+    this._zone = zone;
+    this._prefixes = prefixes;
+    this._aliases = prefixes.map(p => `${p}.${zone.zoneName}`);
     const cert = zone.cert();
     if (cert) this._certRef = cert;
     return this;
@@ -36,11 +64,6 @@ export class CloudFrontBuilder extends BaseBuilder {
 
   origin(source: S3BucketBuilder | string) {
     this._origin = source;
-    if (source instanceof S3BucketBuilder) {
-      console.log(
-        `   💡 [Auto] Detected S3 Origin. Preparing OAC and Bucket Policy for "${source.bucketName}"`,
-      );
-    }
     return this;
   }
 
@@ -51,53 +74,123 @@ export class CloudFrontBuilder extends BaseBuilder {
 
   async deploy() {
     const dryRun = this.isDryRunActive();
+    const existing = await this.discoveryPromise;
+    const cf = getCFClient();
+
     console.log(`\n⚡ Finalizing CloudFront Distribution "${this.name}"...`);
 
+    if (existing) {
+      this.resolvedId = existing.Id;
+      this.resolvedArn = existing.ARN;
+      console.log(`   ✅ Distribution "${this.name}" exists (id=${this.resolvedId})`);
+      if (this._aliases.length) console.log(`   ✅ Aliases: [${this._aliases.join(', ')}]`);
+      return { id: this.resolvedId, arn: this.resolvedArn, name: this.name };
+    }
+
+    if (dryRun) {
+      console.log(`   📝 [PLAN] Create distribution "${this.name}"`);
+      if (this._referenceId) console.log(`      └─ Clone config from: ${this._referenceId}`);
+      if (this._aliases.length) console.log(`      └─ Aliases: [${this._aliases.join(', ')}]`);
+      if (this._certRef?.resolvedArn) console.log(`      └─ Certificate: ${this._certRef.resolvedArn}`);
+      if (this._kvsName) console.log(`      └─ KVS redirector: ${this._kvsName}`);
+      if (this._zone && this._prefixes.length) {
+        console.log(`   📝 [PLAN] Add Route53 CNAMEs in ${this._zone.zoneName}:`);
+        for (const p of this._prefixes) {
+          console.log(`      └─ ${p}.${this._zone.zoneName} → <cf-domain>.cloudfront.net`);
+        }
+      }
+      this.resolvedArn = `arn:aws:cloudfront::DRYRUN:distribution/PENDING`;
+      this.resolvedId = 'PENDING';
+      return { id: this.resolvedId, arn: this.resolvedArn, name: this.name };
+    }
+
+    let distroConfig: any;
+
     if (this._referenceId) {
-      console.log(
-        `   ✅ [${dryRun ? "PLAN" : "OK"}] Cloning config from reference distribution: ${this._referenceId}`,
-      );
+      // Clone from reference distribution
+      const ref = await cf.send(new GetDistributionConfigCommand({ Id: this._referenceId }));
+      distroConfig = ref.DistributionConfig!;
+      console.log(`   📋 Cloning config from ${this._referenceId}`);
+    } else {
+      distroConfig = this.buildBaseConfig();
     }
 
-    if (this._aliases.length > 0) {
-      console.log(
-        `   ✅ [${dryRun ? "PLAN" : "OK"}] Aliases: [${this._aliases.join(", ")}]`,
-      );
+    // Override comment (used as our "name")
+    distroConfig.Comment = this.name;
+
+    // Override aliases + cert if provided
+    if (this._aliases.length) {
+      distroConfig.Aliases = { Quantity: this._aliases.length, Items: this._aliases };
+    }
+    if (this._certRef?.resolvedArn) {
+      distroConfig.ViewerCertificate = {
+        ACMCertificateArn: this._certRef.resolvedArn,
+        SSLSupportMethod: 'sni-only',
+        MinimumProtocolVersion: 'TLSv1.2_2021',
+        CertificateSource: 'acm',
+      };
     }
 
-    if (this._certRef) {
-      const certArn = this._certRef.resolvedArn ?? "pending";
-      console.log(
-        `   ✅ [${dryRun ? "PLAN" : "OK"}] ACM Certificate: ${certArn}`,
-      );
-    }
+    // Remove CallerReference from cloned config — AWS will reject it
+    delete distroConfig.CallerReference;
 
-    if (this._kvsName) {
-      console.log(
-        `   ✅ [${dryRun ? "PLAN" : "OK"}] Associating CloudFront Function + KVS Store: ${this._kvsName}`,
-      );
-    }
-
-    if (this._origin) {
-      const originName =
-        this._origin instanceof S3BucketBuilder
-          ? this._origin.bucketName
-          : this._origin;
-      console.log(`   ✅ [${dryRun ? "PLAN" : "OK"}] Origin: ${originName}`);
-    }
-
-    const mockId = `CF-${this.name.toUpperCase().replace(/[^A-Z0-9]/g, "")}`;
-    this.resolvedArn = `arn:aws:cloudfront::123456789012:distribution/${mockId}`;
-
-    await this.waitFor(
-      `distribution "${this.name}" to finish deploying`,
-      async () => {
-        // Real: check cloudfront.getDistribution() status === 'Deployed'
-        return true; // mock: immediately deployed
+    const result = await cf.send(new CreateDistributionCommand({
+      DistributionConfig: {
+        ...distroConfig,
+        CallerReference: `opsdsl-${this.name}-${Date.now()}`,
       },
-      { intervalMs: 20_000, timeoutMs: 1_200_000 }, // CF propagation can take ~15-20 min
-    );
+    }));
 
-    return { id: mockId, arn: this.resolvedArn, name: this.name };
+    this.resolvedId = result.Distribution!.Id!;
+    this.resolvedArn = result.Distribution!.ARN!;
+    console.log(`🚀 Created distribution "${this.name}" (id=${this.resolvedId})`);
+
+    await this.waitFor(`distribution "${this.name}" to finish deploying`, async () => {
+      const d = await cf.send(new GetDistributionCommand({ Id: this.resolvedId! }));
+      return d.Distribution?.Status === 'Deployed';
+    }, { intervalMs: 30_000, timeoutMs: 1_200_000 });
+
+    const cfDomain = result.Distribution!.DomainName!;
+    console.log(`   🌐 Domain: ${cfDomain}`);
+
+    if (this._zone && this._prefixes.length) {
+      await this._zone.upsertCnames(
+        this._prefixes.map(p => ({ name: p, value: cfDomain })),
+      );
+    }
+
+    return { id: this.resolvedId, arn: this.resolvedArn, name: this.name };
+  }
+
+  private buildBaseConfig() {
+    const originId = `opsdsl-origin-${this.name}`;
+    const originDomain =
+      this._origin instanceof S3BucketBuilder
+        ? `${this._origin.bucketName}.s3.amazonaws.com`
+        : this._origin ?? 'example.com';
+
+    return {
+      Comment: this.name,
+      Enabled: true,
+      HttpVersion: 'http2',
+      Origins: {
+        Quantity: 1,
+        Items: [{
+          Id: originId,
+          DomainName: originDomain,
+          S3OriginConfig: { OriginAccessIdentity: '' },
+        }],
+      },
+      DefaultCacheBehavior: {
+        TargetOriginId: originId,
+        ViewerProtocolPolicy: 'redirect-to-https',
+        CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6', // Managed-CachingOptimized
+        AllowedMethods: { Quantity: 2, Items: ['GET', 'HEAD'], CachedMethods: { Quantity: 2, Items: ['GET', 'HEAD'] } },
+        Compress: true,
+        ForwardedValues: { QueryString: false, Cookies: { Forward: 'none' } },
+        MinTTL: 0,
+      },
+      PriceClass: 'PriceClass_All',
+    };
   }
 }

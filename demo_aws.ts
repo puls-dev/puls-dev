@@ -3,12 +3,9 @@ import { DISTRO, REGION } from "./src/types/aws.ts";
 import { Stack } from "./src/core/stack.ts";
 import { Deploy, DryRun } from "./src/core/decorators.ts";
 
-@Deploy({ region: REGION.EU_WEST_1 })
+@Deploy({ region: REGION.EU_WEST_1, dryRun: true })
 class NLCEnvironment extends Stack {
-  domain = AWS.Route53()
-    .randomDomain() // → e.g. "k7xq2nm9abp3.com"
-    .register()
-    .withWildcardSSL(); // ACM wildcard cert sidecar, DNS-validated
+  domain = AWS.Route53().randomDomain().register().withWildcardSSL();
 
   cdn = AWS.CloudFront("nlc-cdn")
     .copyFrom(DISTRO.TURKEY_CDN) // clone reference distribution
