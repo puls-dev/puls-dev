@@ -8,5 +8,8 @@ DO.init({ token: process.env.DO_TOKEN! });
 
 @Destroy
 class StagingInfra extends Stack {
-  web = DO.Droplet("staging-web").size(SIZE.SMALL).region(REGION.FRA);
+  web = DO.Droplet("staging-web")
+    .size(SIZE.SMALL)
+    .region(REGION.FRA)
+    .sslKey("~/.ssh/id_ed25519.pub");
 }

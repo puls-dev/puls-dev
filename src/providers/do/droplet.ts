@@ -1,10 +1,12 @@
+import { readFileSync } from 'fs';
+import { homedir } from 'os';
 import { OS, REGION, SIZE, NETWORK } from '../../types/do.ts';
 import { Config } from '../../core/config.ts';
 import { BaseBuilder } from '../../core/resource.ts';
 import { FirewallBuilder } from './firewall.ts';
 import { DomainBuilder } from './domain.ts';
 import { LoadBalancerBuilder } from './load_balancer.ts';
-import { getDoApi } from './api.ts';
+import { getDoApi, DoApiClient } from './api.ts';
 
 export class DropletBuilder extends BaseBuilder {
   public config: any = {
@@ -15,6 +17,7 @@ export class DropletBuilder extends BaseBuilder {
 
   private dropletId?: number;
   private resolvedIp?: string;
+  private sshKeyPath?: string;
 
   constructor(name: string) {
     super(name);
@@ -63,6 +66,25 @@ export class DropletBuilder extends BaseBuilder {
     return this;
   }
 
+  sslKey(keyPath: string) {
+    this.sshKeyPath = keyPath.replace('~', homedir());
+    return this;
+  }
+
+  private async resolveOrRegisterSshKey(api: DoApiClient): Promise<number> {
+    const pubPath = this.sshKeyPath!.replace(/\.pub$/, '') + '.pub';
+    const pubKey = readFileSync(pubPath, 'utf8').trim();
+
+    const { ssh_keys } = await api.get<{ ssh_keys: any[] }>('/account/keys?per_page=200');
+    const existing = ssh_keys.find(k => k.public_key.trim() === pubKey);
+    if (existing) return existing.id;
+
+    const keyName = pubPath.split('/').pop()!.replace('.pub', '');
+    const result = await api.post<{ ssh_key: any }>('/account/keys', { name: keyName, public_key: pubKey });
+    console.log(`   🔑 Registered SSH key "${keyName}" (id=${result.ssh_key.id})`);
+    return result.ssh_key.id;
+  }
+
   async deploy() {
     const dryRun = this.isDryRunActive();
     const existing = await this.discoveryPromise;
@@ -77,7 +99,8 @@ export class DropletBuilder extends BaseBuilder {
     if (dryRun) {
       console.log(`\n🔍 [DRY RUN] "${this.name}"...`);
       if (!existing) {
-        console.log(`   📝 Plan: Create droplet ${this.name} (${this.config.size} in ${this.config.region})`);
+        const keyHint = this.sshKeyPath ? ` + key ${this.sshKeyPath.split('/').pop()}` : '';
+        console.log(`   📝 Plan: Create droplet ${this.name} (${this.config.size} in ${this.config.region}${keyHint})`);
       } else if (hasChanges) {
         console.log(`   📝 Plan: Resize ${this.name} → ${this.config.size}`);
       } else {
@@ -90,11 +113,13 @@ export class DropletBuilder extends BaseBuilder {
     console.log(`\n⏳ Finalizing "${this.name}"...`);
 
     if (!existing) {
+      const sshKeyIds = this.sshKeyPath ? [await this.resolveOrRegisterSshKey(api)] : [];
       const result = await api.post<{ droplet: any }>('/droplets', {
         name: this.name,
         region: this.config.region,
         size: this.config.size,
         image: this.config.image,
+        ...(sshKeyIds.length && { ssh_keys: sshKeyIds }),
       });
       this.dropletId = result.droplet.id;
       console.log(`🚀 Created droplet ${this.name} (id=${this.dropletId})`);
