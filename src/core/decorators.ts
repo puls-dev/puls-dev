@@ -22,7 +22,12 @@ export function Destroy(target: any, propertyKey?: string) {
 
 // THE "MAGIC": Auto-executing Stack Decorator
 export function Deploy(
-  opts: { token?: string; region?: string; dryRun?: boolean } = {},
+  opts: {
+    token?: string;
+    region?: string;
+    dryRun?: boolean;
+    proxmox?: { url: string; user: string; tokenName: string; tokenSecret: string; nodes?: string[]; storage?: string; dnsDomain?: string; dnsServers?: string[]; verifySsl?: boolean };
+  } = {},
 ) {
   return function (constructor: any) {
     // 1. Setup Config
@@ -35,6 +40,11 @@ export function Deploy(
     if (opts.region) {
       Config.set({
         providers: { ...Config.get().providers, aws: { region: opts.region } },
+      });
+    }
+    if (opts.proxmox) {
+      Config.set({
+        providers: { ...Config.get().providers, proxmox: opts.proxmox },
       });
     }
 
