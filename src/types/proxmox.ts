@@ -1,7 +1,6 @@
 export const OS = {
   UBUNTU_22_04: "ubuntu-22.04",
-  UBUNTU_24_04: "ubuntu-24.04",
-  UBUNTU_26_04: "9017",
+  UBUNTU_24_04: "9017",
   DEBIAN_11: "debian-11",
   DEBIAN_12: "debian-12",
 } as const;

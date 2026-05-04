@@ -1,4 +1,5 @@
 import { DO, OS, REGION, SIZE } from "./dsl.ts";
+import { Destroy } from "./src/core/decorators.ts";
 
 async function main() {
   console.log("--- Case 1: Existing Resource with Changes ---");

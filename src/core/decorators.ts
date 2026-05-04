@@ -1,66 +1,74 @@
 import "reflect-metadata";
 import { Config } from "./config.ts";
 
+type ProviderOpts = {
+  token?: string;
+  region?: string;
+  dryRun?: boolean;
+  proxmox?: {
+    url: string;
+    user: string;
+    tokenName: string;
+    tokenSecret: string;
+    nodes?: string[];
+    storage?: string;
+    dnsDomain?: string;
+    dnsServers?: string[];
+    verifySsl?: boolean;
+  };
+};
+
+function applyConfig(opts: ProviderOpts) {
+  if (opts.dryRun !== undefined) Config.set({ dryRun: opts.dryRun });
+  if (opts.token) Config.set({ providers: { ...Config.get().providers, do: { token: opts.token } } });
+  if (opts.region) Config.set({ providers: { ...Config.get().providers, aws: { region: opts.region } } });
+  if (opts.proxmox) Config.set({ providers: { ...Config.get().providers, proxmox: opts.proxmox } });
+}
+
 export function Protected(target: any, propertyKey: string) {
   Reflect.defineMetadata("protected", true, target, propertyKey);
 }
 
-export function Destroy(target: any, propertyKey?: string) {
-  if (propertyKey === undefined) {
-    // Class decorator — tears down all resources in the stack
-    Promise.resolve().then(async () => {
-      const instance = new target();
-      if (typeof instance.destroy === "function") {
-        await instance.destroy();
-      }
-    });
-  } else {
-    // Property decorator — marks a single resource for destruction within a deploy
-    Reflect.defineMetadata("destroy", true, target, propertyKey);
+// Property decorator: @Destroy on a field inside a Stack
+export function Destroy(target: any, propertyKey: string): void;
+// Class decorator without options: @Destroy
+export function Destroy(target: Function): void;
+// Class decorator with options: @Destroy({ proxmox: { ... } })
+export function Destroy(opts: ProviderOpts): (constructor: any) => void;
+export function Destroy(optsOrTarget: any, propertyKey?: string): any {
+  if (propertyKey !== undefined) {
+    Reflect.defineMetadata("destroy", true, optsOrTarget, propertyKey);
+    return;
   }
+  if (typeof optsOrTarget === "function") {
+    Promise.resolve().then(async () => {
+      const instance = new optsOrTarget();
+      if (typeof instance.destroy === "function") await instance.destroy();
+    });
+    return;
+  }
+  return function (constructor: any) {
+    applyConfig(optsOrTarget);
+    Promise.resolve().then(async () => {
+      const instance = new constructor();
+      if (typeof instance.destroy === "function") await instance.destroy();
+    });
+  };
 }
 
 // THE "MAGIC": Auto-executing Stack Decorator
-export function Deploy(
-  opts: {
-    token?: string;
-    region?: string;
-    dryRun?: boolean;
-    proxmox?: { url: string; user: string; tokenName: string; tokenSecret: string; nodes?: string[]; storage?: string; dnsDomain?: string; dnsServers?: string[]; verifySsl?: boolean };
-  } = {},
-) {
+export function Deploy(opts: ProviderOpts = {}) {
   return function (constructor: any) {
-    // 1. Setup Config
-    if (opts.dryRun !== undefined) Config.set({ dryRun: opts.dryRun });
-    if (opts.token) {
-      Config.set({
-        providers: { ...Config.get().providers, do: { token: opts.token } },
-      });
-    }
-    if (opts.region) {
-      Config.set({
-        providers: { ...Config.get().providers, aws: { region: opts.region } },
-      });
-    }
-    if (opts.proxmox) {
-      Config.set({
-        providers: { ...Config.get().providers, proxmox: opts.proxmox },
-      });
-    }
-
-    // 2. Schedule Execution for the end of the event loop
+    applyConfig(opts);
     Promise.resolve().then(async () => {
       const instance = new constructor();
-      if (typeof instance.deploy === "function") {
-        await instance.deploy();
-      }
+      if (typeof instance.deploy === "function") await instance.deploy();
     });
   };
 }
 
 // Shortcut for Dry Run — accepts the same options as @Deploy
-export function DryRun(opts: { token?: string; region?: string } | any = {}) {
-  // Handles both @DryRun and @DryRun({ region: ... })
+export function DryRun(opts: ProviderOpts | any = {}) {
   if (typeof opts === "function") {
     Deploy({ dryRun: true })(opts);
   } else {
