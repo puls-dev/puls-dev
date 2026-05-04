@@ -3,16 +3,28 @@ import {
   RequestCertificateCommand,
   DescribeCertificateCommand,
 } from '@aws-sdk/client-acm';
+import { ChangeResourceRecordSetsCommand } from '@aws-sdk/client-route-53';
 import { BaseBuilder } from '../../core/resource.ts';
-import { getACMClient } from './api.ts';
+import { getACMClient, getR53Client } from './api.ts';
+
+interface ZoneRef {
+  zoneId?: string;
+  zoneName: string;
+}
 
 export class ACMCertificateBuilder extends BaseBuilder {
   resolvedArn: string | null = null;
   validationRecords: { name: string; value: string }[] = [];
+  private _zone?: ZoneRef;
 
   constructor(public domainName: string, public wildcard: boolean = true) {
     super(`acm-${domainName}`);
     this.discoveryPromise = this.discoverCertificate(domainName, wildcard);
+  }
+
+  forZone(zone: ZoneRef) {
+    this._zone = zone;
+    return this;
   }
 
   private async discoverCertificate(domain: string, wildcard: boolean): Promise<any> {
@@ -49,7 +61,7 @@ export class ACMCertificateBuilder extends BaseBuilder {
 
     if (dryRun) {
       console.log(`   📝 [PLAN] Request ${this.wildcard ? 'wildcard ' : ''}certificate: ${primaryName}`);
-      console.log(`   📝 [PLAN] DNS validation — CNAME records will be added to Route53`);
+      console.log(`   📝 [PLAN] DNS validation CNAMEs will be auto-written to Route53`);
       this.resolvedArn = `arn:aws:acm:us-east-1:DRYRUN:certificate/pending`;
       return { arn: this.resolvedArn };
     }
@@ -64,26 +76,44 @@ export class ACMCertificateBuilder extends BaseBuilder {
     this.resolvedArn = result.CertificateArn!;
     console.log(`🚀 Requested certificate ${primaryName} (arn=${this.resolvedArn})`);
 
-    // Wait for ACM to generate the DNS validation records
+    // Step 1: wait until ALL DomainValidationOptions have their ResourceRecord
+    // (wildcard + apex SANs each get an entry; ACM can generate them at different times)
     await this.waitFor('validation records to be generated', async () => {
       const detail = await acm.send(new DescribeCertificateCommand({ CertificateArn: this.resolvedArn! }));
       const options = detail.Certificate?.DomainValidationOptions ?? [];
-      const records = options.filter(o => o.ResourceRecord);
-      if (records.length === 0) return false;
-
-      this.validationRecords = records.map(o => ({
+      if (options.length === 0) return false;
+      const withRecords = options.filter(o => o.ResourceRecord);
+      if (withRecords.length < options.length) return false;
+      this.validationRecords = withRecords.map(o => ({
         name: o.ResourceRecord!.Name!,
         value: o.ResourceRecord!.Value!,
       }));
       return true;
     }, { intervalMs: 5_000, timeoutMs: 60_000 });
 
-    console.log(`   🔑 DNS validation records generated (add to Route53 to complete):`);
-    for (const r of this.validationRecords) {
-      console.log(`      └─ CNAME ${r.name} → ${r.value}`);
+    // Step 2: write them into Route53 automatically — no manual DNS work needed
+    if (this._zone?.zoneId) {
+      // Wildcard certs produce duplicate CNAME names across SANs — deduplicate before sending
+      const unique = Array.from(new Map(this.validationRecords.map(r => [r.name, r])).values());
+      const r53 = getR53Client();
+      await r53.send(new ChangeResourceRecordSetsCommand({
+        HostedZoneId: this._zone.zoneId,
+        ChangeBatch: {
+          Changes: unique.map(r => ({
+            Action: 'UPSERT',
+            ResourceRecordSet: {
+              Name: r.name.replace(/\.$/, ''),
+              Type: 'CNAME',
+              TTL: 300,
+              ResourceRecords: [{ Value: r.value.replace(/\.$/, '') }],
+            },
+          })),
+        },
+      }));
+      console.log(`   ✅ Auto-wrote ${unique.length} validation CNAME(s) to Route53`);
     }
 
-    // Actual validation wait happens after Route53 adds the records
+    // Step 3: now wait for ISSUED — records are in DNS so this will actually resolve
     await this.waitFor(`certificate "${this.domainName}" to be validated`, async () => {
       const detail = await acm.send(new DescribeCertificateCommand({ CertificateArn: this.resolvedArn! }));
       return detail.Certificate?.Status === 'ISSUED';

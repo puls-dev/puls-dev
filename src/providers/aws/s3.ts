@@ -12,18 +12,27 @@ import { Config } from '../../core/config.ts';
 export class S3BucketBuilder extends BaseBuilder {
   private _versioning: boolean = false;
   private _allowedDistributions: CloudFrontBuilder[] = [];
+  private _region?: string;
 
   constructor(public bucketName: string) {
     super(bucketName);
     this.discoveryPromise = this.discoverBucket(bucketName);
   }
 
+  region(r: string) {
+    this._region = r;
+    this.discoveryPromise = this.discoverBucket(this.bucketName);
+    return this;
+  }
+
   private async discoverBucket(name: string): Promise<boolean> {
     try {
-      await getS3Client().send(new HeadBucketCommand({ Bucket: name }));
+      await getS3Client(this._region).send(new HeadBucketCommand({ Bucket: name }));
       return true;
     } catch (e: any) {
-      if (e.name === 'NotFound' || e.$metadata?.httpStatusCode === 404) return false;
+      const status = e.$metadata?.httpStatusCode;
+      if (status === 404 || e.name === 'NotFound') return false;
+      if (status === 301 || status === 403) return true; // exists in different region or access denied
       if (e.name === 'CredentialsProviderError') return false;
       throw e;
     }
@@ -42,8 +51,8 @@ export class S3BucketBuilder extends BaseBuilder {
   async deploy() {
     const dryRun = this.isDryRunActive();
     const exists = await this.discoveryPromise;
-    const s3 = getS3Client();
-    const region = Config.get().providers.aws?.region ?? 'us-east-1';
+    const region = this._region ?? Config.get().providers.aws?.region ?? 'us-east-1';
+    const s3 = getS3Client(region);
 
     console.log(`\n🪣  Finalizing S3 Bucket "${this.bucketName}"...`);
 
@@ -96,11 +105,13 @@ export class S3BucketBuilder extends BaseBuilder {
       if (e.name !== 'NoSuchBucketPolicy') throw e;
     }
 
-    // Find or create the OAC statement
-    let stmt = policy.Statement.find((s: any) => s.Sid === 'AllowCloudFrontOAC');
+    // Find any existing CloudFront-principal statement regardless of Sid
+    let stmt = policy.Statement.find((s: any) =>
+      s.Principal?.Service === 'cloudfront.amazonaws.com' && s.Effect === 'Allow',
+    );
     if (!stmt) {
       stmt = {
-        Sid: 'AllowCloudFrontOAC',
+        Sid: 'AllowCloudFrontServicePrincipal',
         Effect: 'Allow',
         Principal: { Service: 'cloudfront.amazonaws.com' },
         Action: 's3:GetObject',
@@ -110,10 +121,16 @@ export class S3BucketBuilder extends BaseBuilder {
       policy.Statement.push(stmt);
     }
 
-    const existing = stmt.Condition.StringEquals['AWS:SourceArn'];
+    // Condition key may be 'aws:SourceArn' or 'AWS:SourceArn' depending on how it was created
+    const cond = stmt.Condition?.StringEquals ?? {};
+    const sourceArnKey = Object.keys(cond).find(k => k.toLowerCase() === 'aws:sourcearn') ?? 'AWS:SourceArn';
+    if (!stmt.Condition) stmt.Condition = { StringEquals: {} };
+    if (!stmt.Condition.StringEquals) stmt.Condition.StringEquals = {};
+
+    const existing = stmt.Condition.StringEquals[sourceArnKey];
     const existingArns: string[] = Array.isArray(existing) ? existing : existing ? [existing] : [];
     const merged = [...new Set([...existingArns, ...newArns])];
-    stmt.Condition.StringEquals['AWS:SourceArn'] = merged;
+    stmt.Condition.StringEquals[sourceArnKey] = merged;
 
     await s3.send(new PutBucketPolicyCommand({
       Bucket: this.bucketName,

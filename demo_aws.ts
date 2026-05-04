@@ -1,20 +1,21 @@
 import { AWS } from "./src/providers/aws/index.ts";
-import { DISTRO, REGION } from "./src/types/aws.ts";
+import { BUCKET, DISTRO, REGION } from "./src/types/aws.ts";
 import { Stack } from "./src/core/stack.ts";
-import { Deploy, DryRun } from "./src/core/decorators.ts";
+import { Deploy } from "./src/core/decorators.ts";
 
-@Deploy({ region: REGION.EU_WEST_1, dryRun: true })
+@Deploy({ region: REGION.US_EAST_1 })
 class NLCEnvironment extends Stack {
-  domain = AWS.Route53().randomDomain().register().withWildcardSSL();
+  domain = AWS.Route53("0w3aawk28u4c.com").withWildcardSSL();
 
   cdn = AWS.CloudFront("nlc-cdn")
-    .copyFrom(DISTRO.TURKEY_CDN) // clone reference distribution
+    .copyFrom(DISTRO.TURKEY_CDN)
     .forDomain(this.domain, ["ec", "nc"]);
 
   game = AWS.CloudFront("nlc-game")
     .copyFrom(DISTRO.TURKEY_GAME)
-    .forDomain(this.domain, ["eg", "ng"])
-    .withRedirector({ kvs: "turkey-game-redirect-url" });
+    .forDomain(this.domain, ["eg", "ng"]);
 
-  bucket = AWS.S3("nl-games-ureg").allowFrom(this.cdn, this.game); // appends new ARNs, preserves existing policy
+  bucket = AWS.S3(BUCKET.NLC_GAMES_UREG)
+    .allowFrom(this.cdn, this.game)
+    .region(REGION.EU_WEST_1);
 }

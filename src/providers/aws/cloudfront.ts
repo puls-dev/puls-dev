@@ -91,7 +91,8 @@ export class CloudFrontBuilder extends BaseBuilder {
       console.log(`   📝 [PLAN] Create distribution "${this.name}"`);
       if (this._referenceId) console.log(`      └─ Clone config from: ${this._referenceId}`);
       if (this._aliases.length) console.log(`      └─ Aliases: [${this._aliases.join(', ')}]`);
-      if (this._certRef?.resolvedArn) console.log(`      └─ Certificate: ${this._certRef.resolvedArn}`);
+      const dryRunCert = this._certRef ?? this._zone?.cert();
+      if (dryRunCert?.resolvedArn) console.log(`      └─ Certificate: ${dryRunCert.resolvedArn}`);
       if (this._kvsName) console.log(`      └─ KVS redirector: ${this._kvsName}`);
       if (this._zone && this._prefixes.length) {
         console.log(`   📝 [PLAN] Add Route53 CNAMEs in ${this._zone.zoneName}:`);
@@ -122,24 +123,36 @@ export class CloudFrontBuilder extends BaseBuilder {
     if (this._aliases.length) {
       distroConfig.Aliases = { Quantity: this._aliases.length, Items: this._aliases };
     }
-    if (this._certRef?.resolvedArn) {
+    // _certRef is set at construction time, but cert sidecar is added lazily in zone.deploy() —
+    // fall back to zone.cert() which is populated by the time CloudFront.deploy() runs
+    const certRef = this._certRef ?? this._zone?.cert();
+    if (certRef?.resolvedArn) {
       distroConfig.ViewerCertificate = {
-        ACMCertificateArn: this._certRef.resolvedArn,
+        ACMCertificateArn: certRef.resolvedArn,
         SSLSupportMethod: 'sni-only',
         MinimumProtocolVersion: 'TLSv1.2_2021',
-        CertificateSource: 'acm',
       };
     }
 
     // Remove CallerReference from cloned config — AWS will reject it
     delete distroConfig.CallerReference;
 
-    const result = await cf.send(new CreateDistributionCommand({
-      DistributionConfig: {
-        ...distroConfig,
-        CallerReference: `opsdsl-${this.name}-${Date.now()}`,
-      },
-    }));
+    const distroInput = { ...distroConfig, CallerReference: `opsdsl-${this.name}-${Date.now()}` };
+
+    // ACM ISSUED → CloudFront cert index replication can take up to ~5 min
+    const MAX_ATTEMPTS = 10;
+    let result: any;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        result = await cf.send(new CreateDistributionCommand({ DistributionConfig: distroInput }));
+        break;
+      } catch (e: any) {
+        if (e.name === 'InvalidViewerCertificate' && attempt < MAX_ATTEMPTS) {
+          console.log(`   ⏳ Cert not yet visible to CloudFront — retrying in 30s (${attempt}/${MAX_ATTEMPTS - 1})...`);
+          await new Promise(r => setTimeout(r, 30_000));
+        } else throw e;
+      }
+    }
 
     this.resolvedId = result.Distribution!.Id!;
     this.resolvedArn = result.Distribution!.ARN!;

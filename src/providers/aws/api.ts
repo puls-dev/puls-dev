@@ -1,6 +1,7 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { CloudFrontClient } from '@aws-sdk/client-cloudfront';
 import { Route53Client } from '@aws-sdk/client-route-53';
+import { Route53DomainsClient } from '@aws-sdk/client-route-53-domains';
 import { ACMClient } from '@aws-sdk/client-acm';
 import { Config } from '../../core/config.ts';
 
@@ -10,9 +11,10 @@ function getRegion(): string {
   return region;
 }
 
-export const getS3Client = () => new S3Client({ region: getRegion() });
+export const getS3Client = (region?: string) => new S3Client({ region: region ?? getRegion() });
 
-// CloudFront, Route53, and ACM (for CF) are all global — must use us-east-1
+// CloudFront, Route53, ACM, and Route53 Domains are all global — must use us-east-1
 export const getCFClient = () => new CloudFrontClient({ region: 'us-east-1' });
 export const getR53Client = () => new Route53Client({ region: 'us-east-1' });
+export const getR53DomainsClient = () => new Route53DomainsClient({ region: 'us-east-1' });
 export const getACMClient = () => new ACMClient({ region: 'us-east-1' });

@@ -12,7 +12,7 @@ export const DISTRO = {
 
 export const BUCKET = {
   NLC_GAMES_UREG: "nl-games-ureg",
-};
+} as const;
 
 export interface RegistrantContact {
   FIRSTNAME: string;
@@ -28,10 +28,10 @@ export interface RegistrantContact {
 }
 
 export const DOMAIN_REGISTER: RegistrantContact = {
-  FIRSTNAME: "user-register",
-  LASTNAME: "random-name",
-  EMAIL: "operations@nolimit.city",
-  MOBILE: "+46701231313",
+  FIRSTNAME: "bia",
+  LASTNAME: "andersson",
+  EMAIL: "bia@nolimit.city",
+  MOBILE: "+46.708339809",
   CONTACT_TYPE: "COMPANY",
   ORGANIZATION: "Nolimit City Stockholm",
   ADDRESSLINE: "Kungsgatan 49",
