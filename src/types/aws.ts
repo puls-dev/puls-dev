@@ -5,6 +5,7 @@ export const REGION = {
   EU_WEST_1: "eu-west-1",
 } as const;
 
+// ALWAYS ensure that these distros exists in CloudFront
 export const DISTRO = {
   TURKEY_CDN: "E1WU2O39ZREE9O",
   TURKEY_GAME: "E1KFYIGPYK8UVJ",

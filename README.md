@@ -3,95 +3,124 @@
 Intent-driven infrastructure-as-code. Describe what you want — OpsDSL figures out create, update, or skip.
 
 ```typescript
-@Deploy({ dryRun: true })
-class StagingInfra extends Stack {
-  web = DO.Droplet("staging-web").size(SIZE.SMALL).region(REGION.FRA);
+@Deploy({ proxmox: CONFIG.STAGING })
+class GameInfra extends Stack {
+  server = Proxmox.VM("ix-sto1-game01")
+    .image(OS.UBUNTU_24_04)
+    .cores(4).memory(8192)
+    .ip("10.8.10.83").vlan(2010)
+    .sshKey(KEYS)
+    .provision("config/default.yaml");
 }
 ```
 
-That's it. Two lines spin up a droplet (or update it if it exists, or skip it if it's already correct).
+No state files. No plan step. Runs against real APIs — idempotent by default.
 
 ---
 
 ## How it works
 
-OpsDSL uses **eager discovery**: the moment you declare a resource, it starts checking the real API in the background. By the time `deploy()` runs, it already knows the current state — no separate `plan` step needed.
+OpsDSL uses **eager discovery**: the moment you declare a resource, it checks the real API in the background. By the time `deploy()` runs, it already knows the current state.
 
 ```
-Declare resource → Discovery fires immediately (async)
-                 → You chain config (.size(), .region(), ...)
-                 → deploy() awaits discovery, diffs, acts
+Declare resource  →  Discovery fires immediately (async)
+                  →  You chain config (.cores(), .ip(), ...)
+                  →  deploy() awaits discovery, diffs, acts
 ```
 
-Resources are **idempotent** — running the same stack twice is always safe.
+Running the same stack twice is always safe — existing resources are detected and skipped.
 
 ---
 
 ## Providers
 
+| Provider | Resources |
+|----------|-----------|
+| [DigitalOcean](docs/providers/digitalocean.md) | Droplet, Domain, Firewall, Certificate, LoadBalancer |
+| [AWS](docs/providers/aws.md) | Route53, ACM (wildcard SSL), CloudFront, S3 |
+| [Proxmox](docs/providers/proxmox.md) | VM (clone, cloud-init, provision, replace) |
+
+---
+
+## Quick examples
+
 ### DigitalOcean
 
 ```typescript
-import "dotenv/config";
 import { DO } from "./src/providers/do/droplet.ts";
-import { REGION, SIZE } from "./src/types/do.ts";
+import { SIZE, REGION } from "./src/types/do.ts";
 import { Stack } from "./src/core/stack.ts";
-import { Deploy, Destroy } from "./src/core/decorators.ts";
+import { Deploy } from "./src/core/decorators.ts";
 
-DO.init({ token: process.env.DO_TOKEN! });
-
-@Deploy()
+@Deploy({ token: process.env.DO_TOKEN! })
 class Production extends Stack {
-  web = DO.Droplet("prod-web")
-    .size(SIZE.MEDIUM)
-    .region(REGION.FRA)
-    .allowPublicWeb();
-
-  db = DO.Droplet("prod-db")
-    .size(SIZE.LARGE)
-    .region(REGION.FRA);
-
-  dns = DO.Domain("example.com")
-    .pointer("@", this.web)      // resolves droplet IP automatically
-    .withSSL();
+  web = DO.Droplet("prod-web").size(SIZE.MEDIUM).region(REGION.FRA).allowPublicWeb();
+  dns = DO.Domain("example.com").pointer("@", this.web).withSSL();
 }
 ```
 
-**Supported resources:** Droplet, Domain, Firewall, Certificate, LoadBalancer
+### AWS
 
-**`.env`**
+```typescript
+import { AWS } from "./src/providers/aws/index.ts";
+import { DISTRO, BUCKET, DOMAIN_REGISTER, REGION } from "./src/types/aws.ts";
+import { Stack } from "./src/core/stack.ts";
+import { Deploy } from "./src/core/decorators.ts";
+
+@Deploy({ region: REGION.US_EAST_1 })
+class CDNStack extends Stack {
+  domain = AWS.Route53().randomDomain().register(DOMAIN_REGISTER).withWildcardSSL();
+
+  cdn = AWS.CloudFront(`CDN-${this.domain.zoneName.slice(0, 8)}`)
+    .copyFrom(DISTRO.TURKEY_CDN)
+    .forDomain(this.domain, ["ec", "nc"]);
+
+  bucket = AWS.S3(BUCKET.NLC_GAMES_UREG)
+    .allowFrom(this.cdn)
+    .region(REGION.EU_WEST_1);
+}
 ```
-DO_TOKEN=your_digitalocean_token
+
+### Proxmox
+
+```typescript
+import { Proxmox } from "./src/providers/proxmox/index.ts";
+import { CONFIG, OS, KEYS } from "./src/types/proxmox.ts";
+import { Stack } from "./src/core/stack.ts";
+import { Deploy, Destroy, Protected } from "./src/core/decorators.ts";
+
+@Deploy({ proxmox: CONFIG.STAGING })
+class StagingInfra extends Stack {
+  @Protected
+  db = Proxmox.VM("ix-sto1-db01")
+    .image(OS.UBUNTU_24_04)
+    .cores(2).memory(4096)
+    .ip("10.8.10.50").vlan(2010)
+    .sshKey(KEYS);
+
+  app = Proxmox.VM("ix-sto1-app01")
+    .image(OS.UBUNTU_24_04)
+    .cores(4).memory(8192)
+    .ip("10.8.10.51").vlan(2010)
+    .sshKey(KEYS)
+    .provision("config/default.yaml");
+}
 ```
-
-### AWS *(in progress)*
-
-CloudFront, S3, Route53, ACM — stubbed, real API coming next.
 
 ---
 
 ## Decorators
 
-| Decorator | Where | Effect |
-|-----------|-------|--------|
-| `@Deploy()` | Class | Deploy all resources in the stack |
-| `@Deploy({ dryRun: true })` | Class | Show plan without making changes |
-| `@Destroy` | Class | Tear down all resources in the stack |
-| `@Destroy` | Property | Destroy that one resource within a deploy |
-| `@Protected` | Property | Block changes to that resource |
+| Decorator | Effect |
+|-----------|--------|
+| `@Deploy({ ... })` | Deploy all resources in the stack |
+| `@Deploy({ dryRun: true })` | Print plan without making changes |
+| `@Destroy` | Tear down all resources in the stack |
+| `@Destroy({ proxmox: CONFIG.STAGING })` | Tear down with provider credentials |
+| `@DryRun` | Shorthand for `@Deploy({ dryRun: true })` |
+| `@Protected` (property) | Block changes/destruction of that resource |
 
----
-
-## Sidecars
-
-Some methods automatically create and manage related resources:
-
-```typescript
-DO.Droplet("web").allowPublicWeb()   // creates + attaches a Firewall
-DO.Domain("x.com").withSSL()         // creates a Let's Encrypt Certificate
-```
-
-Sidecars deploy after their parent and tear down before it.
+See [docs/decorators.md](docs/decorators.md) for full reference.
 
 ---
 
@@ -99,7 +128,27 @@ Sidecars deploy after their parent and tear down before it.
 
 ```bash
 npm install
-npx tsx demo.ts
+npx tsx your-stack.ts
 ```
 
-Requires Node 18+ (native `fetch`).
+Requires Node 20+.
+
+**.env**
+```
+# DigitalOcean
+DO_TOKEN=
+
+# AWS (standard SDK env vars)
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_REGION=us-east-1
+
+# Proxmox
+PROXMOX_URL=https://pve.example.com:8006
+PROXMOX_USER=root@pam
+PROXMOX_TOKEN_NAME=opsdsl
+PROXMOX_TOKEN_SECRET=
+PROXMOX_NODES=pve1,pve2
+PROXMOX_DNS_DOMAIN=nolimit.int
+PROXMOX_DNS_SERVERS=10.8.10.11,10.8.10.12
+```
