@@ -29,6 +29,6 @@
         mode: "0644"
         content: |
           [main]
-          certname = {{ ansible_hostname }}
+          certname = {{ ansible_facts['hostname'] }}
           environment = production
-          server = {{ puppet_server }}
+          server = {{ ansible_facts['puppet_server'] }}

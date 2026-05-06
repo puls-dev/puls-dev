@@ -4,7 +4,7 @@ import { CONFIG, KEYS, OS } from "../src/types/proxmox.ts";
 import { Stack } from "../src/core/stack.ts";
 import { Deploy, Destroy } from "../src/core/decorators.ts";
 
-@Deploy({ proxmox: CONFIG.STAGING, dryRun: true })
+@Deploy({ proxmox: CONFIG.STAGING, dryRun: false })
 class StagingInfra extends Stack {
   server = Proxmox.VM("ix-sto1-biawashere01")
     .image(OS.UBUNTU_24_04)
