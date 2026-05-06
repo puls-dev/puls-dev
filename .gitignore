@@ -5,6 +5,5 @@ dist/
 *.d.ts.map
 *.d.ts
 *.js
-!dsl.js
 plans/
 .DS_Store
