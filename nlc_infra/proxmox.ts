@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { Proxmox } from "../src/providers/proxmox/index.ts";
-import { CONFIG, KEYS, OS } from "../src/types/proxmox.ts";
+import { CONFIG, OS } from "../src/types/proxmox.ts";
 import { Stack } from "../src/core/stack.ts";
 import { Deploy, Destroy, Protected } from "../src/core/decorators.ts";
 

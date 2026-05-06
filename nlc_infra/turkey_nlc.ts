@@ -1,11 +1,14 @@
 import { AWS } from "../src/providers/aws/index.ts";
-import { BUCKET, DISTRO, REGION } from "../src/types/aws.ts";
+import { BUCKET, DISTRO, DOMAIN_REGISTER, REGION } from "../src/types/aws.ts";
 import { Stack } from "../src/core/stack.ts";
 import { Deploy } from "../src/core/decorators.ts";
 
 @Deploy({ region: REGION.US_EAST_1, dryRun: false })
 class NLCEnvironment extends Stack {
-  domain = AWS.Route53().withWildcardSSL().randomDomain().register();
+  domain = AWS.Route53()
+    .withWildcardSSL()
+    .randomDomain()
+    .register(DOMAIN_REGISTER);
 
   cdn = AWS.CloudFront(`OPSDSL-${this.domain.zoneName.slice(0, 12)}-CDN`)
     .copyFrom(DISTRO.TURKEY_CDN)
