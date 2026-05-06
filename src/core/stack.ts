@@ -108,6 +108,10 @@ export abstract class Stack {
     for (const prop of props) {
       const resource = (this as any)[prop];
       if (resource instanceof BaseBuilder) {
+        if (Reflect.getMetadata("protected", this, prop)) {
+          console.log(`   🔒 Skipping protected resource "${prop}"`);
+          continue;
+        }
         outputs[prop] = await resource.destroy();
       }
     }

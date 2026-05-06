@@ -31,4 +31,4 @@
           [main]
           certname = {{ ansible_facts['hostname'] }}
           environment = production
-          server = {{ ansible_facts['puppet_server'] }}
+          server = {{ puppet_server }}

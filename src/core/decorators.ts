@@ -20,9 +20,18 @@ type ProviderOpts = {
 
 function applyConfig(opts: ProviderOpts) {
   if (opts.dryRun !== undefined) Config.set({ dryRun: opts.dryRun });
-  if (opts.token) Config.set({ providers: { ...Config.get().providers, do: { token: opts.token } } });
-  if (opts.region) Config.set({ providers: { ...Config.get().providers, aws: { region: opts.region } } });
-  if (opts.proxmox) Config.set({ providers: { ...Config.get().providers, proxmox: opts.proxmox } });
+  if (opts.token)
+    Config.set({
+      providers: { ...Config.get().providers, do: { token: opts.token } },
+    });
+  if (opts.region)
+    Config.set({
+      providers: { ...Config.get().providers, aws: { region: opts.region } },
+    });
+  if (opts.proxmox)
+    Config.set({
+      providers: { ...Config.get().providers, proxmox: opts.proxmox },
+    });
 }
 
 export function Protected(target: any, propertyKey: string) {
