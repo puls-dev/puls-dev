@@ -9,10 +9,12 @@ export const REGION = {
 export const DISTRO = {
   TURKEY_CDN: "E1WU2O39ZREE9O",
   TURKEY_GAME: "E1KFYIGPYK8UVJ",
+  CHECKSUM: "E21JV19WAUU2D0",
 } as const;
 
 export const BUCKET = {
   NLC_GAMES_UREG: "nl-games-ureg",
+  CHECKSUM: "nl-games-us-mi",
 } as const;
 
 export interface RegistrantContact {

@@ -1,8 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { basename, extname } from 'node:path';
 import {
   HeadBucketCommand,
   CreateBucketCommand,
   GetBucketPolicyCommand,
   PutBucketPolicyCommand,
+  PutObjectCommand,
 } from '@aws-sdk/client-s3';
 import { BaseBuilder } from '../../core/resource.ts';
 import { CloudFrontBuilder } from './cloudfront.ts';
@@ -13,6 +16,7 @@ export class S3BucketBuilder extends BaseBuilder {
   private _versioning: boolean = false;
   private _allowedDistributions: CloudFrontBuilder[] = [];
   private _region?: string;
+  private _uploadPath?: string;
 
   constructor(public bucketName: string) {
     super(bucketName);
@@ -45,6 +49,11 @@ export class S3BucketBuilder extends BaseBuilder {
 
   allowFrom(...distributions: CloudFrontBuilder[]) {
     this._allowedDistributions.push(...distributions);
+    return this;
+  }
+
+  upload(filePath: string) {
+    this._uploadPath = filePath;
     return this;
   }
 
@@ -91,8 +100,40 @@ export class S3BucketBuilder extends BaseBuilder {
       }
     }
 
+    if (this._uploadPath) {
+      if (dryRun) {
+        console.log(`   📝 [PLAN] Upload ${basename(this._uploadPath)} → s3://${this.bucketName}/`);
+      } else {
+        await this.uploadFile(s3, this._uploadPath);
+      }
+    }
+
     await this.deploySidecars();
     return { name: this.bucketName };
+  }
+
+  private async uploadFile(s3: ReturnType<typeof getS3Client>, filePath: string) {
+    const key = basename(filePath);
+    const body = readFileSync(filePath);
+    const contentTypeMap: Record<string, string> = {
+      '.json': 'application/json',
+      '.js':   'application/javascript',
+      '.html': 'text/html',
+      '.css':  'text/css',
+      '.png':  'image/png',
+      '.jpg':  'image/jpeg',
+      '.svg':  'image/svg+xml',
+    };
+    const contentType = contentTypeMap[extname(filePath).toLowerCase()] ?? 'application/octet-stream';
+
+    await s3.send(new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+    }));
+
+    console.log(`   ✅ Uploaded ${key} → s3://${this.bucketName}/${key}`);
   }
 
   private async updateBucketPolicy(s3: ReturnType<typeof getS3Client>, newArns: string[]) {

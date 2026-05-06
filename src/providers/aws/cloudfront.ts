@@ -3,6 +3,7 @@ import {
   GetDistributionCommand,
   CreateDistributionCommand,
   GetDistributionConfigCommand,
+  CreateInvalidationCommand,
 } from '@aws-sdk/client-cloudfront';
 import { BaseBuilder } from '../../core/resource.ts';
 import { S3BucketBuilder } from './s3.ts';
@@ -20,6 +21,7 @@ export class CloudFrontBuilder extends BaseBuilder {
   private _referenceId?: string;
   private _kvsName?: string;
   private _certRef?: ACMCertificateBuilder;
+  private _invalidatePaths?: string[];
 
   constructor(name: string) {
     super(name);
@@ -31,7 +33,7 @@ export class CloudFrontBuilder extends BaseBuilder {
       const cf = getCFClient();
       const list = await cf.send(new ListDistributionsCommand({}));
       const items = list.DistributionList?.Items ?? [];
-      const match = items.find(d => d.Comment === name);
+      const match = items.find(d => d.Comment === name || d.Id === name);
       if (match) {
         this.resolvedId = match.Id!;
         this.resolvedArn = match.ARN!;
@@ -41,6 +43,11 @@ export class CloudFrontBuilder extends BaseBuilder {
       if (e.name === 'CredentialsProviderError') return null;
       throw e;
     }
+  }
+
+  invalidate(paths: string[]) {
+    this._invalidatePaths = paths;
+    return this;
   }
 
   withRedirector(opts: { kvs: string }) {
@@ -84,6 +91,22 @@ export class CloudFrontBuilder extends BaseBuilder {
       this.resolvedArn = existing.ARN;
       console.log(`   ✅ Distribution "${this.name}" exists (id=${this.resolvedId})`);
       if (this._aliases.length) console.log(`   ✅ Aliases: [${this._aliases.join(', ')}]`);
+
+      if (this._invalidatePaths?.length) {
+        if (dryRun) {
+          console.log(`   📝 [PLAN] Invalidate: ${this._invalidatePaths.join(', ')}`);
+        } else {
+          await cf.send(new CreateInvalidationCommand({
+            DistributionId: this.resolvedId!,
+            InvalidationBatch: {
+              Paths: { Quantity: this._invalidatePaths.length, Items: this._invalidatePaths },
+              CallerReference: `opsdsl-${Date.now()}`,
+            },
+          }));
+          console.log(`   ✅ Invalidated: ${this._invalidatePaths.join(', ')}`);
+        }
+      }
+
       return { id: this.resolvedId, arn: this.resolvedArn, name: this.name };
     }
 
