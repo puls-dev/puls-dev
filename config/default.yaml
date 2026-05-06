@@ -1,0 +1,34 @@
+---
+- name: Install Puppet 8
+  hosts: all
+  become: true
+  vars:
+    puppet_server: ix-sto1-puppet01
+  tasks:
+    - name: Copy Puppet Labs keyring
+      ansible.builtin.copy:
+        src: puppetlabs-keyring.gpg
+        dest: /etc/apt/keyrings/puppetlabs-keyring.gpg
+        mode: "0644"
+
+    - name: Add Puppet 8 apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/puppetlabs-keyring.gpg] http://apt.puppet.com noble puppet8"
+        state: present
+        filename: puppetlabs
+
+    - name: Install Puppet
+      ansible.builtin.apt:
+        name: puppet
+        state: present
+        update_cache: true
+
+    - name: Configure puppet.conf
+      ansible.builtin.copy:
+        dest: /etc/puppetlabs/puppet/puppet.conf
+        mode: "0644"
+        content: |
+          [main]
+          certname = {{ ansible_hostname }}
+          environment = production
+          server = {{ puppet_server }}

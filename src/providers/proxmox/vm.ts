@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { spawn } from "node:child_process";
+import { dirname } from "node:path";
+import { createConnection } from "node:net";
 import { BaseBuilder } from "../../core/resource.ts";
 import { Config } from "../../core/config.ts";
 import { getPMClient, ProxmoxApiClient } from "./api.ts";
@@ -263,7 +265,11 @@ export class VMBuilder extends BaseBuilder {
     }
 
     if (this._provision) {
-      await this.runAnsible(this.resolvedIp!, this._provision);
+      await this.waitFor(`SSH on ${this.resolvedIp} to be ready`, () => this.checkPort(this.resolvedIp!, 22),
+        { intervalMs: 10_000, timeoutMs: 300_000 });
+      await this.waitFor(`cloud-init to finish on ${this.resolvedIp}`, () => this.checkCloudInit(this.resolvedIp!),
+        { intervalMs: 15_000, timeoutMs: 300_000 });
+      await this.runProvisioner(this.resolvedIp!, this._provision);
     }
 
     if (this._replace) {
@@ -352,7 +358,9 @@ export class VMBuilder extends BaseBuilder {
     if (!input) {
       // Default: read ~/.ssh/id_rsa.pub if it exists
       try {
-        return [readFileSync(`${homedir()}/.ssh/id_rsa.pub`, "utf-8").trim()];
+        return [
+          readFileSync(`${homedir()}/.ssh/id_ed25519.pub`, "utf-8").trim(),
+        ];
       } catch {
         return [];
       }
@@ -379,21 +387,166 @@ export class VMBuilder extends BaseBuilder {
     }
   }
 
-  private runAnsible(ip: string, playbook: string): Promise<void> {
+  private checkCloudInit(ip: string): Promise<boolean> {
+    const keyPath = this.sshKeyPath();
+    return new Promise(resolve => {
+      const proc = spawn('ssh', [
+        '-i', keyPath,
+        '-o', 'StrictHostKeyChecking=no',
+        '-o', 'ConnectTimeout=10',
+        '-o', 'BatchMode=yes',
+        `root@${ip}`,
+        'cloud-init status',
+      ], { stdio: ['ignore', 'pipe', 'ignore'] });
+
+      let out = '';
+      proc.stdout.on('data', (d: Buffer) => out += d.toString());
+      proc.on('close', () => resolve(out.includes('done') || out.includes('error')));
+      proc.on('error', () => resolve(false));
+    });
+  }
+
+  private checkPort(ip: string, port: number): Promise<boolean> {
+    return new Promise(resolve => {
+      const socket = createConnection({ host: ip, port, timeout: 3_000 });
+      socket.on('connect', () => { socket.destroy(); resolve(true); });
+      socket.on('timeout', () => { socket.destroy(); resolve(false); });
+      socket.on('error', () => resolve(false));
+    });
+  }
+
+  private sshKeyPath(): string {
     const keyInput = Array.isArray(this._sshKeys)
       ? null
       : (this._sshKeys as string | undefined);
-    const keyPath = (
+    return (
       keyInput &&
       !keyInput.startsWith("ssh-") &&
       !keyInput.startsWith("ecdsa-") &&
       !keyInput.startsWith("sk-")
         ? keyInput.replace(/\.pub$/, "")
-        : `${homedir()}/.ssh/id_rsa`
+        : `${homedir()}/.ssh/id_ed25519`
     ).replace(/^~/, homedir());
+  }
 
+  private runProvisioner(ip: string, script: string): Promise<void> {
+    const ext = script.split(".").pop()?.toLowerCase();
+
+    if (ext === "sh") return this.runShellScript(ip, script);
+    if (ext === "pp") return this.runPuppet(ip, script);
+    return this.runAnsible(ip, script); // .yml / .yaml
+  }
+
+  private runShellScript(ip: string, script: string): Promise<void> {
+    console.log(`   🔧 Running shell script: ${script} → ${ip}`);
+    const keyPath = this.sshKeyPath();
+    const scriptDir = dirname(script); // e.g. 'config'
+    const sshArgs = [
+      "-i",
+      keyPath,
+      "-o",
+      "StrictHostKeyChecking=no",
+      "-o",
+      "ConnectTimeout=30",
+    ];
+
+    return new Promise((resolve, reject) => {
+      // Copy the script's directory to the same path on the remote (e.g. config/ → /config/)
+      console.log(`   📂 Copying ${scriptDir}/ → ${ip}:/${scriptDir}/`);
+      const scp = spawn(
+        "scp",
+        [
+          "-i",
+          keyPath,
+          "-o",
+          "StrictHostKeyChecking=no",
+          "-r",
+          scriptDir,
+          `root@${ip}:/`,
+        ],
+        { stdio: "inherit" },
+      );
+
+      scp.on("error", (err) => reject(new Error(`scp failed: ${err.message}`)));
+      scp.on("close", (scpCode) => {
+        if (scpCode !== 0) {
+          reject(new Error(`scp exited with code ${scpCode}`));
+          return;
+        }
+
+        const proc = spawn("ssh", [...sshArgs, `root@${ip}`, "bash -s"], {
+          stdio: ["pipe", "inherit", "inherit"],
+        });
+
+        proc.stdin.write(readFileSync(script));
+        proc.stdin.end();
+        proc.on("close", (code) => {
+          if (code === 0) {
+            console.log(`   ✅ Provisioning complete`);
+            resolve();
+          } else reject(new Error(`Shell script exited with code ${code}`));
+        });
+        proc.on("error", (err) =>
+          reject(new Error(`ssh failed: ${err.message}`)),
+        );
+      });
+    });
+  }
+
+  private runPuppet(ip: string, manifest: string): Promise<void> {
+    console.log(`   🔧 Applying Puppet manifest: ${manifest} → ${ip}`);
+    const keyPath = this.sshKeyPath();
+    // Copy manifest then apply it
+    return new Promise((resolve, reject) => {
+      const scp = spawn(
+        "scp",
+        [
+          "-i",
+          keyPath,
+          "-o",
+          "StrictHostKeyChecking=no",
+          manifest,
+          `root@${ip}:/tmp/manifest.pp`,
+        ],
+        { stdio: "inherit" },
+      );
+
+      scp.on("close", (code) => {
+        if (code !== 0) {
+          reject(new Error(`scp exited with code ${code}`));
+          return;
+        }
+        const puppet = spawn(
+          "ssh",
+          [
+            "-i",
+            keyPath,
+            "-o",
+            "StrictHostKeyChecking=no",
+            `root@${ip}`,
+            "puppet apply /tmp/manifest.pp",
+          ],
+          { stdio: "inherit" },
+        );
+        puppet.on("close", (c) => {
+          if (c === 0) {
+            console.log(`   ✅ Provisioning complete`);
+            resolve();
+          } else reject(new Error(`puppet apply exited with code ${c}`));
+        });
+        puppet.on("error", (err) =>
+          reject(new Error(`Failed to run puppet: ${err.message}`)),
+        );
+      });
+      scp.on("error", (err) =>
+        reject(new Error(`Failed to run scp: ${err.message}`)),
+      );
+    });
+  }
+
+  private runAnsible(ip: string, playbook: string): Promise<void> {
     console.log(`   🔧 Running Ansible: ${playbook} → ${ip}`);
-
+    const keyPath = this.sshKeyPath();
     return new Promise((resolve, reject) => {
       const proc = spawn(
         "ansible-playbook",
@@ -410,7 +563,6 @@ export class VMBuilder extends BaseBuilder {
         ],
         { stdio: "inherit" },
       );
-
       proc.on("close", (code) => {
         if (code === 0) {
           console.log(`   ✅ Provisioning complete`);
