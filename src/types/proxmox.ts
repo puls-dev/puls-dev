@@ -1,6 +1,7 @@
-import type { GlobalConfig } from '../core/config.ts';
+import { PartitionDateSource } from "@aws-sdk/client-s3";
+import type { GlobalConfig } from "../core/config.ts";
 
-type ProxmoxConfig = NonNullable<GlobalConfig['providers']['proxmox']>;
+type ProxmoxConfig = NonNullable<GlobalConfig["providers"]["proxmox"]>;
 
 export const CONFIG: Record<string, ProxmoxConfig> = {
   STAGING: {
@@ -8,9 +9,19 @@ export const CONFIG: Record<string, ProxmoxConfig> = {
     user: process.env.PROXMOX_USER!,
     tokenName: process.env.PROXMOX_TOKEN_NAME!,
     tokenSecret: process.env.PROXMOX_TOKEN_SECRET!,
-    nodes: process.env.PROXMOX_NODES?.split(','),
+    nodes: process.env.PROXMOX_NODES?.split(","),
     dnsDomain: process.env.PROXMOX_DNS_DOMAIN,
-    dnsServers: process.env.PROXMOX_DNS_SERVERS?.split(','),
+    dnsServers: process.env.PROXMOX_DNS_SERVERS?.split(","),
+    verifySsl: false,
+  },
+  PRODUCTION: {
+    url: process.env.PROD_PROXMOX_URL!,
+    user: process.env.PROD_PROXMOX_USER!,
+    tokenName: process.env.PROD_PROXMOX_TOKEN_NAME!,
+    tokenSecret: process.env.PROD_PROXMOX_TOKEN_SECRET!,
+    nodes: process.env.PROD_PROXMOX_NODES?.split(","),
+    dnsDomain: process.env.PROD_PROXMOX_DNS_DOMAIN,
+    dnsServers: process.env.PROD_PROXMOX_DNS_SERVERS?.split(","),
     verifySsl: false,
   },
 };

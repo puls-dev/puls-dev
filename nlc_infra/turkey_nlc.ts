@@ -3,7 +3,7 @@ import { BUCKET, DISTRO, REGION } from "../src/types/aws.ts";
 import { Stack } from "../src/core/stack.ts";
 import { Deploy } from "../src/core/decorators.ts";
 
-@Deploy({ region: REGION.US_EAST_1, dryRun: true })
+@Deploy({ region: REGION.US_EAST_1, dryRun: false })
 class NLCEnvironment extends Stack {
   domain = AWS.Route53().withWildcardSSL().randomDomain().register();
 

@@ -12,6 +12,5 @@ class StagingInfra extends Stack {
     .memory(8192)
     .ip("10.8.10.83")
     .vlan(2010)
-    .sshKey(KEYS)
-    .provision("config/default.yaml");
+    .provision("config/default.yaml"); // configures Puppet 8
 }
