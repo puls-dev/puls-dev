@@ -19,7 +19,8 @@ Internal tracking doc — improvements, new providers, and the path to a publish
 - [ ] `CONFIG.PRODUCTION` entry in `src/types/proxmox.ts`
 
 ### AWS
-- [ ] CloudFront cache invalidation — `.invalidate(paths[])` on a CloudFront builder
+- [x] CloudFront cache invalidation — `.invalidate(paths[])` on a CloudFront builder
+- [x] S3 file upload — `.upload(filePath)` uploads a single file to the bucket on deploy
 - [ ] Route53 A-record upsert — currently only CNAMEs are supported via `upsertCnames()`
 - [ ] S3 static site hosting config
 
@@ -30,14 +31,39 @@ Internal tracking doc — improvements, new providers, and the path to a publish
 
 ## New Providers
 
-### AWS Compute
-- [ ] **EC2** — instance, security group, key pair; the most-requested AWS resource
-- [ ] **ECS / Fargate** — container task definitions, services, clusters
-- [ ] **RDS** — managed database instances (Postgres, MySQL)
-- [ ] **Lambda** — deploy a function from a local zip or directory
+### AWS — Completion path (in order)
+- [x] **Lambda** — deploy a function from a local zip or directory; most DSL-friendly compute primitive
+- [x] **API Gateway** — route HTTP → Lambda; pairs naturally, minimal config surface
+- [x] **ECS / Fargate** — container services without instance management; no VPC required for Fargate
+- [x] **RDS** — managed database instances (Postgres, MySQL)
+- [x] **SQS** — queues as event-driven glue between the above
+- [ ] **EC2** — lower priority; Proxmox already covers the raw-VM use case, and EC2 needs VPC/SG/keypair support to be useful
 
-### Other
+### GCP / Firebase
+Firebase maps naturally to the DSL — each service is a one-liner with sane defaults, no cluster management.
+
+```typescript
+@Deploy({ region: GCP_REGION.EU_WEST1, token: process.env.FIREBASE_JSON })
+class Blog extends Stack {
+  app  = Firebase.App("myblog").config("./dist");
+  api  = Firebase.Functions("api").source("./functions");
+  db   = Firebase.Firestore("mydb").rules("./firestore.rules");
+}
+```
+
+- [ ] `src/types/gcp.ts` — `GCP_REGION` constants, `FIREBASE_PROJECT` pattern
+- [ ] **Firebase Hosting** — deploy a web app from a local build directory
+- [ ] **Firebase Functions** — deploy Cloud Functions from a local source directory
+- [ ] **Firebase Firestore** — database with rules deployment
+- [ ] **GCP Cloud Run** — containerized services, closer to ECS/Fargate parity
+- [ ] **GCP Cloud SQL** — managed Postgres / MySQL on GCP
+
+### Community-driven
+These are good-fit providers but maintained by the community, not core. The contributing guidelines enforce the DSL contract.
+
+- [ ] **CloudFlare** — zones, DNS, CDN; natural alternative to CloudFront for teams avoiding AWS lock-in
 - [ ] **Hetzner Cloud** — popular self-hosting alternative to DigitalOcean, similar API shape
+- [ ] **Akamai** — enterprise CDN / edge; complex enough that it warrants a dedicated maintainer
 
 ---
 

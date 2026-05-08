@@ -532,14 +532,14 @@
     "serverVersion": "1.0"
   },
   {
-    "checksum": "cae4524bcd01fd1f06efe345c52fa3672b753dc1",
+    "checksum": "596a3fd80fe3041625ba88c2b5f84a9384fb4cd6",
     "fileName": "thecrypt-1.0.jar",
     "gameId": "TheCrypt",
     "displayName": "The Crypt",
     "serverVersion": "1.0"
   },
   {
-    "checksum": "bb0e299ca279ded28f2b538587a6df59caa63516",
+    "checksum": "a519b18a23e1784faddac416e5dcc656f01538ee",
     "fileName": "thecryptdx1-1.0.jar",
     "gameId": "TheCryptDX1",
     "displayName": "The Crypt",
@@ -641,6 +641,20 @@
     "fileName": "gatorhuntersdx1-1.0.jar",
     "gameId": "gatorhuntersdx1",
     "displayName": "Gators hunters",
+    "serverVersion": "1.0"
+  },
+  {
+    "checksum": "6eb813b3e86a54ceb982c89097c470d4ad4e6a16",
+    "fileName": "immortalfruitsdk-1.0.jar",
+    "gameId": "immortalfruitsdk",
+    "displayName": "Immortal Fruits",
+    "serverVersion": "1.0"
+  },
+  {
+    "checksum": "1598f469396aa557e53efffb2b0231458d256f0d",
+    "fileName": "immortalfruitsdkdx1-1.0.jar",
+    "gameId": "immortalfruitsdkdx1",
+    "displayName": "Immortal Fruits",
     "serverVersion": "1.0"
   }
 ]
