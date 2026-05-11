@@ -7,3 +7,6 @@ dist/
 *.js
 plans/
 .DS_Store
+gcpkey.json
+.claude
+firebase/service-account.json

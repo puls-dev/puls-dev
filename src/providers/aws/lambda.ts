@@ -16,6 +16,7 @@ import {
 } from '@aws-sdk/client-iam';
 import { BaseBuilder } from '../../core/resource.ts';
 import { getLambdaClient, getIAMClient } from './api.ts';
+import { SecretsBuilder, resolveEnvVars } from './secrets.ts';
 
 const ASSUME_ROLE_POLICY = JSON.stringify({
   Version: '2012-10-17',
@@ -28,7 +29,7 @@ export class LambdaBuilder extends BaseBuilder {
   private _memory: number = 128;
   private _timeout: number = 30;
   private _codePath?: string;
-  private _env: Record<string, string> = {};
+  private _env: Record<string, string | SecretsBuilder> = {};
   private _roleArn?: string;
   resolvedArn: string | null = null;
 
@@ -55,7 +56,7 @@ export class LambdaBuilder extends BaseBuilder {
   memory(mb: number)       { this._memory = mb; return this; }
   timeout(seconds: number) { this._timeout = seconds; return this; }
   role(arn: string)        { this._roleArn = arn; return this; }
-  env(vars: Record<string, string>) { this._env = { ...this._env, ...vars }; return this; }
+  env(vars: Record<string, string | SecretsBuilder>) { this._env = { ...this._env, ...vars }; return this; }
 
   private async ensureRole(): Promise<string> {
     if (this._roleArn) return this._roleArn;
@@ -119,7 +120,10 @@ export class LambdaBuilder extends BaseBuilder {
       return { name: this.name, arn: this.resolvedArn };
     }
 
-    const roleArn = await this.ensureRole();
+    const [roleArn, resolvedEnv] = await Promise.all([
+      this.ensureRole(),
+      resolveEnvVars(this._env),
+    ]);
 
     const config = {
       FunctionName: this.name,
@@ -128,7 +132,7 @@ export class LambdaBuilder extends BaseBuilder {
       MemorySize: this._memory,
       Timeout: this._timeout,
       Role: roleArn,
-      Environment: Object.keys(this._env).length ? { Variables: this._env } : undefined,
+      Environment: Object.keys(resolvedEnv).length ? { Variables: resolvedEnv } : undefined,
     };
 
     if (existing) {

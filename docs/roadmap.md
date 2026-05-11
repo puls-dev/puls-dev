@@ -51,8 +51,8 @@ class Blog extends Stack {
 }
 ```
 
-- [ ] `src/types/gcp.ts` — `GCP_REGION` constants, `FIREBASE_PROJECT` pattern
-- [ ] **Firebase Hosting** — deploy a web app from a local build directory
+- [x] `src/types/gcp.ts` — `GCP_REGION` constants
+- [x] **Firebase Hosting** — deploy a web app from a local build directory
 - [ ] **Firebase Functions** — deploy Cloud Functions from a local source directory
 - [ ] **Firebase Firestore** — database with rules deployment
 - [ ] **GCP Cloud Run** — containerized services, closer to ECS/Fargate parity

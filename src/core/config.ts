@@ -19,6 +19,10 @@ export interface GlobalConfig {
       dnsServers?: string[]; // e.g. ['10.8.10.11', '10.8.10.12', '10.8.10.13']
       verifySsl?: boolean;   // default: true
     };
+    firebase?: {
+      projectId: string;
+      serviceAccountPath: string;
+    };
   };
 }
 

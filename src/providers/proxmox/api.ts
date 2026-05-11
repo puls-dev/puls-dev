@@ -1,8 +1,10 @@
+import { Agent } from "undici";
 import { Config } from "../../core/config.ts";
 
 export class ProxmoxApiClient {
   private baseUrl: string;
   private authToken: string;
+  private dispatcher?: Agent;
 
   constructor(
     url: string,
@@ -15,7 +17,7 @@ export class ProxmoxApiClient {
     // PVE token format: USER@REALM!TOKENNAME=SECRET
     this.authToken = `${user}!${tokenName}=${tokenSecret}`;
     if (!verifySsl) {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+      this.dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
     }
   }
 
@@ -29,8 +31,9 @@ export class ProxmoxApiClient {
     };
     if (body !== undefined) headers['Content-Type'] = 'application/json';
 
-    const opts: RequestInit = { method, headers };
+    const opts: any = { method, headers };
     if (body !== undefined) opts.body = JSON.stringify(body);
+    if (this.dispatcher) opts.dispatcher = this.dispatcher;
 
     const res = await fetch(`${this.baseUrl}${path}`, opts);
     if (!res.ok)

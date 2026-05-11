@@ -1,10 +1,12 @@
 import "reflect-metadata";
+import { readFileSync } from "node:fs";
 import { Config } from "./config.ts";
 
 type ProviderOpts = {
   token?: string;
   region?: string;
   dryRun?: boolean;
+  firebase?: string; // path to service account JSON file
   proxmox?: {
     url: string;
     user: string;
@@ -32,6 +34,12 @@ function applyConfig(opts: ProviderOpts) {
     Config.set({
       providers: { ...Config.get().providers, proxmox: opts.proxmox },
     });
+  if (opts.firebase) {
+    const sa = JSON.parse(readFileSync(opts.firebase, "utf8"));
+    Config.set({
+      providers: { ...Config.get().providers, firebase: { projectId: sa.project_id, serviceAccountPath: opts.firebase } },
+    });
+  }
 }
 
 export function Protected(target: any, propertyKey: string) {

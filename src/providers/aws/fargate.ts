@@ -29,6 +29,7 @@ import {
 } from '@aws-sdk/client-cloudwatch-logs';
 import { BaseBuilder } from '../../core/resource.ts';
 import { getECSClient, getEC2Client, getIAMClient, getCWLogsClient } from './api.ts';
+import { SecretsBuilder, resolveEnvVars } from './secrets.ts';
 import { Config } from '../../core/config.ts';
 
 const ECS_ASSUME_ROLE_POLICY = JSON.stringify({
@@ -42,7 +43,7 @@ export class FargateBuilder extends BaseBuilder {
   private _memory: number = 512;
   private _port?: number;
   private _replicas: number = 1;
-  private _env: Record<string, string> = {};
+  private _env: Record<string, string | SecretsBuilder> = {};
   private _clusterName: string = 'opsdsl';
   private _subnetIds?: string[];
   private _securityGroupIds?: string[];
@@ -61,7 +62,7 @@ export class FargateBuilder extends BaseBuilder {
   cluster(name: string)                    { this._clusterName = name; return this; }
   subnets(ids: string[])                   { this._subnetIds = ids; return this; }
   securityGroups(ids: string[])            { this._securityGroupIds = ids; return this; }
-  env(vars: Record<string, string>)        { this._env = { ...this._env, ...vars }; return this; }
+  env(vars: Record<string, string | SecretsBuilder>) { this._env = { ...this._env, ...vars }; return this; }
 
   private async discoverService(name: string): Promise<any> {
     try {
@@ -234,7 +235,8 @@ export class FargateBuilder extends BaseBuilder {
     };
     if (this._port) containerDef.portMappings = [{ containerPort: this._port, protocol: 'tcp' }];
     if (Object.keys(this._env).length) {
-      containerDef.environment = Object.entries(this._env).map(([name, value]) => ({ name, value }));
+      const resolvedEnv = await resolveEnvVars(this._env);
+      containerDef.environment = Object.entries(resolvedEnv).map(([name, value]) => ({ name, value }));
     }
 
     const taskDef = await getECSClient().send(new RegisterTaskDefinitionCommand({

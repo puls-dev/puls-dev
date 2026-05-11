@@ -2,9 +2,9 @@
 
 ## Setup
 
-Uses standard AWS SDK environment variables:
+Uses standard AWS SDK environment variables — no explicit `AWS.init()` needed:
 
-```
+```bash
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
 AWS_REGION=us-east-1
@@ -13,33 +13,158 @@ AWS_REGION=us-east-1
 Pass the region via decorator:
 
 ```typescript
-@Deploy({ region: REGION.US_EAST_1 })
+@Deploy({ region: REGION.EU_CENTRAL_1 })
 class MyStack extends Stack { ... }
 ```
 
-## Route53
-
-Hosted zone discovery and domain registration.
+**Constants**
 
 ```typescript
-// Use an existing domain
-AWS.Route53("example.com")
-
-// Generate a random .com domain and register it
-AWS.Route53().randomDomain().register(DOMAIN_REGISTER)
-
-// Attach a wildcard ACM certificate (sidecar)
-AWS.Route53("example.com").withWildcardSSL()
+import { REGION, RUNTIME, DB, DB_SIZE, DISTRO, BUCKET } from "./src/types/aws.ts";
 ```
 
-`register()` takes a `RegistrantContact`:
+---
+
+## Lambda
+
+Deploy a function from a local directory or pre-built zip.
 
 ```typescript
-import { DOMAIN_REGISTER } from "./src/types/aws.ts";
-
-// DOMAIN_REGISTER is the NLC default contact — edit src/types/aws.ts to change it
-AWS.Route53().randomDomain().register(DOMAIN_REGISTER).withWildcardSSL()
+AWS.Lambda("my-function")
+  .code("./dist")                 // directory → auto-zipped, or pass a .zip path
+  .runtime(RUNTIME.NODEJS_20)
+  .handler("index.handler")       // default
+  .memory(256)                    // MB, default 128
+  .timeout(30)                    // seconds, default 30
+  .env({ LOG_LEVEL: "info" })
 ```
+
+An IAM execution role (`opsdsl-lambda-{name}-role`) is created automatically if you don't supply one via `.role(arn)`.
+
+**Constants**
+
+```typescript
+RUNTIME.NODEJS_20   // nodejs20.x
+RUNTIME.NODEJS_18   // nodejs18.x
+RUNTIME.PYTHON_3_12 // python3.12
+RUNTIME.JAVA_21     // java21
+RUNTIME.DOTNET_8    // dotnet8
+```
+
+---
+
+## API Gateway
+
+HTTP API (v2) routing to Lambda functions.
+
+```typescript
+AWS.APIGateway("my-api")
+  .route("GET /users", this.listUsers)
+  .route("POST /users", this.createUser)
+
+// Single-function proxy — forwards all traffic to one Lambda
+AWS.APIGateway("my-api").proxy(this.handler)
+```
+
+Outputs the live endpoint URL on deploy. Uses `$default` stage with auto-deploy — no manual deployment step needed. Lambda invoke permissions are granted automatically and idempotently.
+
+---
+
+## ECS / Fargate
+
+Containerized services without instance management.
+
+```typescript
+AWS.Fargate("my-service")
+  .image("nginx:latest")         // required
+  .cpu(256)                      // vCPU units, default 256
+  .memory(512)                   // MB, default 512
+  .port(80)
+  .replicas(2)                   // default 1
+  .env({ NODE_ENV: "production" })
+  .cluster("my-cluster")         // default: "opsdsl"
+```
+
+**What it manages automatically:**
+
+- ECS cluster (`opsdsl` by default) — created if absent
+- IAM task execution role with `AmazonECSTaskExecutionRolePolicy`
+- CloudWatch log group `/opsdsl/{name}`
+- Default VPC + subnets (or override with `.subnets(ids[])`)
+- Security group with port open (or override with `.securityGroups(ids[])`)
+
+---
+
+## RDS
+
+Managed database instances.
+
+```typescript
+AWS.RDS("my-db")
+  .engine(DB.POSTGRES_16)
+  .size(DB_SIZE.SMALL)
+  .storage(20)                    // GB, default 20
+  .database("appdb")              // initial DB name
+  .credentials("admin", process.env.DB_PASSWORD!)
+```
+
+**What it manages automatically:**
+
+- DB subnet group across all default VPC subnets
+- Security group with DB port open to VPC CIDR only (use `.publicAccess()` to open to the internet)
+
+Waits for `available` status after creation (up to 20 minutes, polls every 30 seconds). Outputs the endpoint and port.
+
+**Constants**
+
+```typescript
+DB.POSTGRES_16  // { engine: 'postgres', version: '16' }
+DB.POSTGRES_15
+DB.MYSQL_8
+DB.MARIADB_11
+
+DB_SIZE.MICRO   // db.t3.micro — free tier eligible
+DB_SIZE.SMALL   // db.t3.small
+DB_SIZE.MEDIUM  // db.t3.medium
+DB_SIZE.LARGE   // db.r6g.large
+```
+
+---
+
+## SQS
+
+Standard and FIFO queues with optional dead-letter queue.
+
+```typescript
+// Standard queue
+AWS.SQS("job-queue")
+  .retention(7)          // days, default 4
+  .timeout(60)           // visibility timeout in seconds, default 30
+  .delay(0)              // delivery delay in seconds, default 0
+  .dlq("job-queue-dlq", 3)   // DLQ name + max receives before redirect
+
+// FIFO queue — .fifo suffix appended automatically
+AWS.SQS("order-events")
+  .fifo()
+  .deduplication()
+```
+
+`.dlq()` creates the dead-letter queue first and wires the redrive policy. `resolvedDlqUrl` and `resolvedDlqArn` are available on the builder after deploy.
+
+---
+
+## S3
+
+```typescript
+AWS.S3("my-bucket")
+  .allowFrom(this.cdn, this.game)   // adds CloudFront OAC policy for each distro
+  .region(REGION.EU_WEST_1)         // bucket in non-default region
+  .upload("./dist/checksums.json")  // upload a single file on deploy
+```
+
+`.allowFrom()` merges CloudFront ARNs into the bucket policy without overwriting other statements.
+
+---
 
 ## CloudFront
 
@@ -47,65 +172,71 @@ Clone an existing distribution and attach it to a domain.
 
 ```typescript
 AWS.CloudFront("my-distro-name")
-  .copyFrom(DISTRO.TURKEY_CDN)              // clone from existing distribution ID
-  .forDomain(this.domain, ["ec", "nc"])     // creates CNAMEs: ec.zoneName, nc.zoneName
+  .copyFrom(DISTRO.TURKEY_CDN)              // clone config from existing distribution ID
+  .forDomain(this.domain, ["ec", "nc"])     // CNAMEs: ec.zoneName, nc.zoneName
+  .invalidate(["/index.html", "/api/*"])    // invalidate paths after deploy
 ```
 
-`.forDomain()` wires up the cert from the Route53 sidecar automatically. CloudFront waits up to 5 minutes for cert propagation before creating the distribution.
+`.forDomain()` wires the ACM cert from the Route53 sidecar automatically. Retries cert propagation for up to 5 minutes.
 
-**Constants**
+---
+
+## Route53
+
+Hosted zone discovery and domain registration.
 
 ```typescript
-import { DISTRO } from "./src/types/aws.ts";
-
-DISTRO.TURKEY_CDN   // E1WU2O39ZREE9O
-DISTRO.TURKEY_GAME  // E1KFYIGPYK8UVJ
+AWS.Route53("example.com")                    // existing domain
+AWS.Route53().randomDomain().register(DOMAIN_REGISTER)  // register a new random .com
+AWS.Route53("example.com").withWildcardSSL()  // attach wildcard ACM cert (sidecar)
 ```
 
-## S3
-
-```typescript
-AWS.S3("my-bucket-name")
-  .allowFrom(this.cdn, this.game)   // adds CloudFront OAC policy for each distro
-  .region(REGION.EU_WEST_1)         // bucket is in a non-default region
-```
-
-`.allowFrom()` merges the CloudFront principal statement into the existing bucket policy without overwriting other statements. Uses principal-based lookup (not Sid) so it works regardless of existing policy structure.
+---
 
 ## ACM
 
-ACM certificates are managed automatically as Route53 sidecars — you don't use `AWS.ACM()` directly.
+Managed automatically as a Route53 sidecar — not used directly.
 
-`.withWildcardSSL()` on a Route53 builder:
-1. Requests a wildcard cert for `*.zoneName`
-2. Writes the DNS validation CNAME to the hosted zone
-3. Waits for the cert to reach `ISSUED` status (up to 10 minutes)
+`.withWildcardSSL()` on a Route53 builder requests a wildcard cert, writes the DNS validation CNAME, and waits for `ISSUED` (up to 10 minutes).
+
+---
 
 ## Full example
 
 ```typescript
+import "dotenv/config";
+import "reflect-metadata";
 import { AWS } from "./src/providers/aws/index.ts";
-import { BUCKET, DISTRO, DOMAIN_REGISTER, REGION } from "./src/types/aws.ts";
+import { REGION, RUNTIME, DB, DB_SIZE } from "./src/types/aws.ts";
 import { Stack } from "./src/core/stack.ts";
 import { Deploy } from "./src/core/decorators.ts";
+import { SECRETS } from "./src/types/secrets.ts";
 
-@Deploy({ region: REGION.US_EAST_1 })
-class TurkeyEnvironment extends Stack {
-  domain = AWS.Route53()
-    .withWildcardSSL()
-    .randomDomain()
-    .register(DOMAIN_REGISTER);
+@Deploy({ region: REGION.EU_CENTRAL_1, dryRun: false })
+class AppStack extends Stack {
+  secret = AWS.SecretsManager(SECRETS.DB_KEY);
+  
+  db = AWS.RDS("app-db")
+    .engine(DB.POSTGRES_16)
+    .size(DB_SIZE.SMALL)
+    .credentials(this.secret);
 
-  cdn = AWS.CloudFront(`OPSDSL-${this.domain.zoneName.slice(0, 12)}-CDN`)
-    .copyFrom(DISTRO.TURKEY_CDN)
-    .forDomain(this.domain, ["ec", "nc"]);
+  api = AWS.Fargate("app-api")
+    .image("my-org/app:latest")
+    .cpu(512).memory(1024)
+    .port(3000)
+    .replicas(2);
 
-  game = AWS.CloudFront(`OPSDSL-${this.domain.zoneName.slice(0, 12)}-GAME`)
-    .copyFrom(DISTRO.TURKEY_GAME)
-    .forDomain(this.domain, ["eg", "ng"]);
+  resizer = AWS.Lambda("image-resizer")
+    .code("./functions/resizer")
+    .runtime(RUNTIME.NODEJS_20)
+    .memory(512);
 
-  bucket = AWS.S3(BUCKET.NLC_GAMES_UREG)
-    .allowFrom(this.cdn, this.game)
-    .region(REGION.EU_WEST_1);
+  gateway = AWS.APIGateway("app-gateway")
+    .route("GET /resize", this.resizer);
+
+  jobs = AWS.SQS("resize-jobs")
+    .retention(7)
+    .dlq("resize-jobs-dlq", 3);
 }
 ```

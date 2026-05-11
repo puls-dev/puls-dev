@@ -11,6 +11,7 @@ import { EC2Client } from '@aws-sdk/client-ec2';
 import { CloudWatchLogsClient } from '@aws-sdk/client-cloudwatch-logs';
 import { RDSClient } from '@aws-sdk/client-rds';
 import { SQSClient } from '@aws-sdk/client-sqs';
+import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { Config } from '../../core/config.ts';
 
 function getRegion(): string {
@@ -34,3 +35,4 @@ export const getEC2Client = (region?: string) => new EC2Client({ region: region 
 export const getCWLogsClient = (region?: string) => new CloudWatchLogsClient({ region: region ?? getRegion() });
 export const getRDSClient = (region?: string) => new RDSClient({ region: region ?? getRegion() });
 export const getSQSClient = (region?: string) => new SQSClient({ region: region ?? getRegion() });
+export const getSecretsClient = (region?: string) => new SecretsManagerClient({ region: region ?? getRegion() });

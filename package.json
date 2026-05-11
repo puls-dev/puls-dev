@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^25.6.0",
+    "@types/node": "^25.6.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3"
@@ -30,8 +30,11 @@
     "@aws-sdk/client-route-53": "^3.1040.0",
     "@aws-sdk/client-route-53-domains": "^3.1041.0",
     "@aws-sdk/client-s3": "^3.1040.0",
+    "@aws-sdk/client-secrets-manager": "^3.1045.0",
     "@aws-sdk/client-sqs": "^3.1045.0",
     "dotenv": "^17.4.2",
-    "reflect-metadata": "^0.2.2"
+    "google-auth-library": "^10.6.2",
+    "reflect-metadata": "^0.2.2",
+    "undici": "^8.2.0"
   }
 }
