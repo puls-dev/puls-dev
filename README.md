@@ -1,6 +1,6 @@
-# OpsDSL
+# Puls
 
-Intent-driven infrastructure-as-code. Describe what you want — OpsDSL figures out create, update, or skip.
+Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.
 
 ```typescript
 @Deploy({ proxmox: CONFIG.STAGING })
@@ -20,7 +20,7 @@ No state files. No plan step. Runs against real APIs — idempotent by default.
 
 ## How it works
 
-OpsDSL uses **eager discovery**: the moment you declare a resource, it checks the real API in the background. By the time `deploy()` runs, it already knows the current state.
+Puls uses **eager discovery**: the moment you declare a resource, it checks the real API in the background. By the time `deploy()` runs, it already knows the current state.
 
 ```
 Declare resource  →  Discovery fires immediately (async)
@@ -146,7 +146,7 @@ AWS_REGION=us-east-1
 # Proxmox
 PROXMOX_URL=https://pve.example.com:8006
 PROXMOX_USER=root@pam
-PROXMOX_TOKEN_NAME=opsdsl
+PROXMOX_TOKEN_NAME=puls
 PROXMOX_TOKEN_SECRET=
 PROXMOX_NODES=pve1,pve2
 PROXMOX_DNS_DOMAIN=nolimit.int

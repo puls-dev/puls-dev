@@ -5,7 +5,7 @@
 ```
 PROXMOX_URL=https://pve.example.com:8006
 PROXMOX_USER=root@pam
-PROXMOX_TOKEN_NAME=opsdsl
+PROXMOX_TOKEN_NAME=puls
 PROXMOX_TOKEN_SECRET=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 PROXMOX_NODES=pve1,pve2
 PROXMOX_DNS_DOMAIN=nolimit.int
@@ -74,7 +74,7 @@ Pass via `.sshKey(KEYS)` — injected into cloud-init so every VM has your team'
 
 Static IP via `.ip("10.8.10.83")` — sets cloud-init `ipconfig0` with gateway derived from the first three octets (`10.8.10.1`).
 
-If no `.ip()` is set, OpsDSL tries DNS first:
+If no `.ip()` is set, Puls tries DNS first:
 
 ```
 dns.resolve4("vm-name.nolimit.int")  →  uses resolved IP as static
@@ -85,7 +85,7 @@ Configure `dnsDomain` in `CONFIG` to enable this.
 
 ## Provisioning pipeline
 
-After a VM starts, OpsDSL runs these steps before calling the provisioner:
+After a VM starts, Puls runs these steps before calling the provisioner:
 
 1. **TCP probe** — polls port 22 until SSH is accepting connections
 2. **cloud-init wait** — runs `cloud-init status` via SSH until it returns `done` or `error` (Ubuntu runs `apt` in the background on first boot — skipping this causes package conflicts)

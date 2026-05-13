@@ -1,6 +1,6 @@
 # Decorators
 
-Decorators are the entry point for every OpsDSL stack. They wire up credentials, trigger execution, and control lifecycle.
+Decorators are the entry point for every Puls stack. They wire up credentials, trigger execution, and control lifecycle.
 
 ## @Deploy
 

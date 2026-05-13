@@ -100,7 +100,7 @@ export class CloudFrontBuilder extends BaseBuilder {
             DistributionId: this.resolvedId!,
             InvalidationBatch: {
               Paths: { Quantity: this._invalidatePaths.length, Items: this._invalidatePaths },
-              CallerReference: `opsdsl-${Date.now()}`,
+              CallerReference: `puls-${Date.now()}`,
             },
           }));
           console.log(`   ✅ Invalidated: ${this._invalidatePaths.join(', ')}`);
@@ -160,7 +160,7 @@ export class CloudFrontBuilder extends BaseBuilder {
     // Remove CallerReference from cloned config — AWS will reject it
     delete distroConfig.CallerReference;
 
-    const distroInput = { ...distroConfig, CallerReference: `opsdsl-${this.name}-${Date.now()}` };
+    const distroInput = { ...distroConfig, CallerReference: `puls-${this.name}-${Date.now()}` };
 
     // ACM ISSUED → CloudFront cert index replication can take up to ~5 min
     const MAX_ATTEMPTS = 10;
@@ -199,7 +199,7 @@ export class CloudFrontBuilder extends BaseBuilder {
   }
 
   private buildBaseConfig() {
-    const originId = `opsdsl-origin-${this.name}`;
+    const originId = `puls-origin-${this.name}`;
     const originDomain =
       this._origin instanceof S3BucketBuilder
         ? `${this._origin.bucketName}.s3.amazonaws.com`

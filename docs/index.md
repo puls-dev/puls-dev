@@ -1,6 +1,6 @@
-# OpsDSL
+# Puls
 
-**Intent-driven infrastructure-as-code. Describe what you want — OpsDSL figures out create, update, or skip.**
+**Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.**
 
 No state files. No plan step. No YAML. Just TypeScript against real APIs, idempotent by default.
 
@@ -20,7 +20,7 @@ class GameInfra extends Stack {
 
 ## How it works
 
-The moment you declare a resource, OpsDSL starts an API lookup in the background — **eager discovery**. By the time `deploy()` runs, it already knows the current state. It diffs, acts, and moves on.
+The moment you declare a resource, Puls starts an API lookup in the background — **eager discovery**. By the time `deploy()` runs, it already knows the current state. It diffs, acts, and moves on.
 
 ```
 Declare resource  →  Discovery fires immediately
@@ -87,7 +87,7 @@ class AppStack extends Stack {
 ## Install
 
 ```bash
-npm install   # or: npm install opsdsl (coming soon)
+npm install   # or: npm install puls (coming soon)
 cp .env.example .env  # fill in your credentials
 npx tsx your-stack.ts
 ```

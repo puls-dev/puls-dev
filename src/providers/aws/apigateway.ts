@@ -147,7 +147,7 @@ export class APIGatewayBuilder extends BaseBuilder {
 
   private async grantInvokePermission(fnArn: string, region: string) {
     const accountId = fnArn.split(':')[4];
-    const statementId = `opsdsl-apigw-${this.resolvedId}`;
+    const statementId = `puls-apigw-${this.resolvedId}`;
     try {
       await getLambdaClient().send(new AddPermissionCommand({
         FunctionName: fnArn,

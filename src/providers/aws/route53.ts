@@ -101,7 +101,7 @@ export class Route53Builder extends BaseBuilder {
         if (!recheck) {
           const result = await r53.send(new CreateHostedZoneCommand({
             Name: this.zoneName,
-            CallerReference: `opsdsl-${Date.now()}`,
+            CallerReference: `puls-${Date.now()}`,
           }));
           this.zoneId = result.HostedZone!.Id!.replace('/hostedzone/', '');
           console.log(`🚀 Created hosted zone ${this.zoneName} (id=${this.zoneId})`);

@@ -58,7 +58,7 @@ import { Deploy } from "./src/core/decorators.ts";
 
 @Deploy({ dryRun: false })
 class DocsSite extends Stack {
-  site = Firebase.Hosting("opsdsl-docs").source("./site");
+  site = Firebase.Hosting("puls-docs").source("./site");
 }
 ```
 

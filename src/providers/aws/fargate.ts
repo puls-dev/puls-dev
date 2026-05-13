@@ -44,7 +44,7 @@ export class FargateBuilder extends BaseBuilder {
   private _port?: number;
   private _replicas: number = 1;
   private _env: Record<string, string | SecretsBuilder> = {};
-  private _clusterName: string = 'opsdsl';
+  private _clusterName: string = 'puls';
   private _subnetIds?: string[];
   private _securityGroupIds?: string[];
   resolvedArn: string | null = null;
@@ -96,7 +96,7 @@ export class FargateBuilder extends BaseBuilder {
   }
 
   private async ensureExecutionRole(): Promise<string> {
-    const roleName = `opsdsl-fargate-${this.name}-exec-role`;
+    const roleName = `puls-fargate-${this.name}-exec-role`;
     const iam = getIAMClient();
     try {
       const existing = await iam.send(new GetRoleCommand({ RoleName: roleName }));
@@ -119,7 +119,7 @@ export class FargateBuilder extends BaseBuilder {
   }
 
   private async ensureLogGroup(): Promise<string> {
-    const logGroupName = `/opsdsl/${this.name}`;
+    const logGroupName = `/puls/${this.name}`;
     const cw = getCWLogsClient();
     const existing = await cw.send(new DescribeLogGroupsCommand({ logGroupNamePrefix: logGroupName }));
     if (existing.logGroups?.some(g => g.logGroupName === logGroupName)) return logGroupName;
@@ -146,7 +146,7 @@ export class FargateBuilder extends BaseBuilder {
 
   private async ensureSecurityGroup(vpcId: string): Promise<string> {
     const ec2 = getEC2Client();
-    const sgName = `opsdsl-${this.name}-sg`;
+    const sgName = `puls-${this.name}-sg`;
 
     const existing = await ec2.send(new DescribeSecurityGroupsCommand({
       Filters: [

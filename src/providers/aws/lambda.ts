@@ -61,7 +61,7 @@ export class LambdaBuilder extends BaseBuilder {
   private async ensureRole(): Promise<string> {
     if (this._roleArn) return this._roleArn;
 
-    const roleName = `opsdsl-lambda-${this.name}-role`;
+    const roleName = `puls-lambda-${this.name}-role`;
     const iam = getIAMClient();
 
     try {
@@ -96,7 +96,7 @@ export class LambdaBuilder extends BaseBuilder {
       return readFileSync(this._codePath);
     }
 
-    const outPath = join(tmpdir(), `opsdsl-lambda-${this.name}-${Date.now()}.zip`);
+    const outPath = join(tmpdir(), `puls-lambda-${this.name}-${Date.now()}.zip`);
     execSync(`cd "${this._codePath}" && zip -r "${outPath}" .`, { stdio: 'pipe' });
     const buf = readFileSync(outPath);
     unlinkSync(outPath);

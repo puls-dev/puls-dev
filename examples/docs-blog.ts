@@ -6,5 +6,5 @@ import { Firebase } from "../src/providers/firebase/index.ts";
 
 @Deploy({ dryRun: true })
 class DocsBlog extends Stack {
-  site = Firebase.Hosting("opsdsl-docs").source("./site");
+  site = Firebase.Hosting("puls-docs").source("./site");
 }

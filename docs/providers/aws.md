@@ -39,7 +39,7 @@ AWS.Lambda("my-function")
   .env({ LOG_LEVEL: "info" })
 ```
 
-An IAM execution role (`opsdsl-lambda-{name}-role`) is created automatically if you don't supply one via `.role(arn)`.
+An IAM execution role (`puls-lambda-{name}-role`) is created automatically if you don't supply one via `.role(arn)`.
 
 **Constants**
 
@@ -82,14 +82,14 @@ AWS.Fargate("my-service")
   .port(80)
   .replicas(2)                   // default 1
   .env({ NODE_ENV: "production" })
-  .cluster("my-cluster")         // default: "opsdsl"
+  .cluster("my-cluster")         // default: "puls"
 ```
 
 **What it manages automatically:**
 
-- ECS cluster (`opsdsl` by default) — created if absent
+- ECS cluster (`puls` by default) — created if absent
 - IAM task execution role with `AmazonECSTaskExecutionRolePolicy`
-- CloudWatch log group `/opsdsl/{name}`
+- CloudWatch log group `/puls/{name}`
 - Default VPC + subnets (or override with `.subnets(ids[])`)
 - Security group with port open (or override with `.securityGroups(ids[])`)
 

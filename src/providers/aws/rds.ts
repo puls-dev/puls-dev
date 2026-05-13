@@ -97,7 +97,7 @@ export class RDSBuilder extends BaseBuilder {
 
   private async ensureSubnetGroup(subnetIds: string[]): Promise<string> {
     const rds = getRDSClient();
-    const groupName = `opsdsl-${this.name}-subnet-group`;
+    const groupName = `puls-${this.name}-subnet-group`;
 
     try {
       await rds.send(new DescribeDBSubnetGroupsCommand({ DBSubnetGroupName: groupName }));
@@ -117,7 +117,7 @@ export class RDSBuilder extends BaseBuilder {
 
   private async ensureSecurityGroup(vpcId: string, vpcCidr: string): Promise<string> {
     const ec2 = getEC2Client();
-    const sgName = `opsdsl-${this.name}-db-sg`;
+    const sgName = `puls-${this.name}-db-sg`;
     const port = DB_PORT[this._engine] ?? 5432;
 
     const existing = await ec2.send(new DescribeSecurityGroupsCommand({

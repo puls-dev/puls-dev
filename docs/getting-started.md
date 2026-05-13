@@ -9,8 +9,8 @@
 ## Install
 
 ```bash
-git clone https://github.com/nolimitcity/opsdsl
-cd opsdsl
+git clone https://github.com/nolimitcity/puls
+cd puls
 npm install
 ```
 
@@ -46,7 +46,7 @@ Run it:
 npx tsx my-first-stack.ts
 ```
 
-With `dryRun: true`, OpsDSL prints what it *would* do without touching any API. When you're ready to apply, flip it to `false`.
+With `dryRun: true`, Puls prints what it *would* do without touching any API. When you're ready to apply, flip it to `false`.
 
 ## Dry run
 
@@ -84,7 +84,7 @@ AWS_REGION=us-east-1
 # Proxmox
 PROXMOX_URL=https://pve.example.com:8006
 PROXMOX_USER=root@pam
-PROXMOX_TOKEN_NAME=opsdsl
+PROXMOX_TOKEN_NAME=puls
 PROXMOX_TOKEN_SECRET=
 PROXMOX_NODES=pve1,pve2
 PROXMOX_DNS_DOMAIN=internal.example.com
@@ -98,7 +98,7 @@ All stack files start with `import "dotenv/config"` to load this file.
 
 ## Idempotency
 
-Running the same stack twice is always safe. OpsDSL discovers existing state before every deploy and skips resources that already match. You'll see:
+Running the same stack twice is always safe. Puls discovers existing state before every deploy and skips resources that already match. You'll see:
 
 ```
 ✅ Function "hello-world" already exists

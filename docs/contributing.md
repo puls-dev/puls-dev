@@ -1,13 +1,13 @@
-# Contributing to OpsDSL
+# Contributing to Puls
 
 ## The one rule
 
 **If you can't describe it in one line, it doesn't belong in the DSL.**
 
-Infrastructure is "give me X" — not "give me X with A, I, O, and P." OpsDSL exists to make that true. A VM, a bucket, a distribution. One expression. The complexity lives in the implementation, not the interface.
+Infrastructure is "give me X" — not "give me X with A, I, O, and P." Puls exists to make that true. A VM, a bucket, a distribution. One expression. The complexity lives in the implementation, not the interface.
 
 ```typescript
-// This is OpsDSL
+// This is Puls
 Proxmox.VM("game-server").image(OS.UBUNTU_24_04).cores(4).memory(8192).provision("config/default.yaml")
 
 // This is not
@@ -16,7 +16,7 @@ new VM({ image: "ubuntu", cores: 4, memory: 8192, network: { bridge: "vmbr1", vl
 
 The DSL is TypeScript. You can write whatever you want around it. But anything that ships *inside* it has to pass the one-liner test.
 
-## The idea that powers OpsDSL
+## The idea that powers Puls
 
 The idea is to make infrastructure easy to describe and deploy, with sane defaults hiding the complexity underneath. You don't need to know how the DSL works — you just need to know what you want. It has no limitations and is designed to be extensible, without ever feeling like you have to reach for custom resources just because the abstraction broke down.
 

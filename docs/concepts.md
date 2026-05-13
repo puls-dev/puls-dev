@@ -11,7 +11,7 @@ class MyStack extends Stack {
 }
 ```
 
-By the time the decorator triggers `deploy()`, the discovery promise is already in flight (or done). OpsDSL awaits it, checks the result, and either creates, skips, or updates the resource.
+By the time the decorator triggers `deploy()`, the discovery promise is already in flight (or done). Puls awaits it, checks the result, and either creates, skips, or updates the resource.
 
 ## Idempotency
 

@@ -29,6 +29,7 @@ export async function getFirebaseToken(scopes: string[]): Promise<string> {
 }
 
 const HOSTING_SCOPE = 'https://www.googleapis.com/auth/firebase.hosting';
+const CLOUD_SCOPE   = 'https://www.googleapis.com/auth/cloud-platform';
 
 export async function hostingFetch(path: string, opts: RequestInit = {}): Promise<any> {
   const token = await getFirebaseToken([HOSTING_SCOPE]);
@@ -44,6 +45,24 @@ export async function hostingFetch(path: string, opts: RequestInit = {}): Promis
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`Firebase Hosting API ${opts.method ?? 'GET'} ${path} → ${res.status}: ${body}`);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+export async function cloudFetch(base: string, path: string, opts: RequestInit = {}): Promise<any> {
+  const token = await getFirebaseToken([CLOUD_SCOPE]);
+  const res = await fetch(`${base}${path}`, {
+    ...opts,
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      ...(opts.headers ?? {}),
+    },
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`GCP API ${opts.method ?? 'GET'} ${path} → ${res.status}: ${body}`);
   }
   const text = await res.text();
   return text ? JSON.parse(text) : null;
