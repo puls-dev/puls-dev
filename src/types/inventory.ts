@@ -5,7 +5,7 @@ export interface ProxmoxVm {
   vmid: number;
   node: string;
   status: string;
-  maxmem: number;  // bytes
+  maxmem: number; // bytes
   maxdisk: number; // bytes
 }
 
@@ -97,7 +97,7 @@ export interface AwsInventory {
 // ─── Combined ─────────────────────────────────────────────────────────────────
 
 export interface InventoryError {
-  provider: 'proxmox' | 'do' | 'aws';
+  provider: "proxmox" | "do" | "aws";
   message: string;
 }
 

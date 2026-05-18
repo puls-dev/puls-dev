@@ -5,10 +5,10 @@ Intent-driven infrastructure-as-code. Describe what you want — Puls figures ou
 ```typescript
 @Deploy({ proxmox: CONFIG.STAGING })
 class GameInfra extends Stack {
-  server = Proxmox.VM("ix-sto1-game01")
+  server = Proxmox.VM("example-vm")
     .image(OS.UBUNTU_24_04)
     .cores(4).memory(8192)
-    .ip("10.8.10.83").vlan(2010)
+    .ip("1.1.1.1").vlan(2010)
     .sshKey(KEYS)
     .provision("config/default.yaml");
 }
@@ -89,13 +89,13 @@ class StagingInfra extends Stack {
   db = Proxmox.VM("ix-sto1-db01")
     .image(OS.UBUNTU_24_04)
     .cores(2).memory(4096)
-    .ip("10.8.10.50").vlan(2010)
+    .ip("1.1.1.1").vlan(2010)
     .sshKey(KEYS);
 
   app = Proxmox.VM("ix-sto1-app01")
     .image(OS.UBUNTU_24_04)
     .cores(4).memory(8192)
-    .ip("10.8.10.51").vlan(2010)
+    .ip("1.1.1.1").vlan(2010)
     .sshKey(KEYS)
     .provision("config/default.yaml");
 }
@@ -141,8 +141,8 @@ AWS_REGION=us-east-1
 PROXMOX_URL=https://pve.example.com:8006
 PROXMOX_USER=root@pam
 PROXMOX_TOKEN_NAME=puls
-PROXMOX_TOKEN_SECRET=
+PROXMOX_TOKEN_SECRET=some-super-secret
 PROXMOX_NODES=pve1,pve2
 PROXMOX_DNS_DOMAIN=nolimit.int
-PROXMOX_DNS_SERVERS=10.8.10.11,10.8.10.12
+PROXMOX_DNS_SERVERS=1.1.1.1,2.2.2.2
 ```
