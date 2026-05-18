@@ -1,4 +1,4 @@
-# Puls
+# Puls-dev
 
 **Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.**
 

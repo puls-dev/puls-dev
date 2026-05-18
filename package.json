@@ -1,5 +1,5 @@
 {
-  "name": "puls",
+  "name": "puls-dev",
   "version": "0.1.0",
   "description": "Intent-driven infrastructure-as-code with eager discovery and no state files.",
   "type": "module",

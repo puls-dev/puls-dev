@@ -22,7 +22,7 @@ export class VMBuilder extends BaseBuilder {
   private _image?: OSImage;
   private _cores: number = 2;
   private _memory: number = 2048;
-  private _provision?: string;
+  private _provision?: string | string[];
   private _replace?: string;
   private _node?: string;
   private _storage?: string;
@@ -60,7 +60,7 @@ export class VMBuilder extends BaseBuilder {
     this._memory = mb;
     return this;
   }
-  provision(playbookPath: string) {
+  provision(playbookPath: string | string[]) {
     this._provision = playbookPath;
     return this;
   }
@@ -116,8 +116,12 @@ export class VMBuilder extends BaseBuilder {
       if (this._image) console.log(`      └─ Image: ${this._image}`);
       console.log(`      └─ Cores: ${this._cores}  Memory: ${this._memory} MB`);
       if (this._vlan) console.log(`      └─ VLAN: ${this._vlan}`);
-      if (this._provision)
-        console.log(`      └─ Provision: ${this._provision}`);
+      if (this._provision) {
+        const p = Array.isArray(this._provision)
+          ? this._provision.join(", ")
+          : this._provision;
+        console.log(`      └─ Provision: ${p}`);
+      }
       if (this._replace)
         console.log(`      └─ Replace: "${this._replace}" after creation`);
       this.out.vmid.resolve(-1);
@@ -282,7 +286,11 @@ export class VMBuilder extends BaseBuilder {
         { intervalMs: 10_000, timeoutMs: 300_000 });
       await this.waitFor(`cloud-init to finish on ${this.resolvedIp}`, () => this.checkCloudInit(this.resolvedIp!),
         { intervalMs: 15_000, timeoutMs: 300_000 });
-      await this.runProvisioner(this.resolvedIp!, this._provision);
+      
+      const scripts = Array.isArray(this._provision) ? this._provision : [this._provision];
+      for (const script of scripts) {
+        await this.runProvisioner(this.resolvedIp!, script);
+      }
     }
 
     if (this._replace) {

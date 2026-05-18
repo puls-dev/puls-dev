@@ -10,3 +10,4 @@ plans/
 gcpkey.json
 .claude
 firebase/service-account.json
+.npmrc
