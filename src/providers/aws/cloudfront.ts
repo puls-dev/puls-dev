@@ -5,11 +5,11 @@ import {
   GetDistributionConfigCommand,
   CreateInvalidationCommand,
 } from '@aws-sdk/client-cloudfront';
-import { BaseBuilder } from '../../core/resource.ts';
-import { S3BucketBuilder } from './s3.ts';
-import { ACMCertificateBuilder } from './acm.ts';
-import { Route53Builder } from './route53.ts';
-import { getCFClient } from './api.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { S3BucketBuilder } from './s3.js';
+import { ACMCertificateBuilder } from './acm.js';
+import { Route53Builder } from './route53.js';
+import { getCFClient } from './api.js';
 
 export class CloudFrontBuilder extends BaseBuilder {
   resolvedArn: string | null = null;

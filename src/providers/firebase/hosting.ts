@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import { createReadStream, readdirSync, statSync, readFileSync } from 'node:fs';
 import { join, relative, extname } from 'node:path';
-import { BaseBuilder } from '../../core/resource.ts';
-import { getProjectId, hostingFetch, getFirebaseToken } from './api.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { getProjectId, hostingFetch, getFirebaseToken } from './api.js';
 
 const CONTENT_TYPES: Record<string, string> = {
   '.html': 'text/html',

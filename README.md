@@ -47,10 +47,8 @@ Running the same stack twice is always safe — existing resources are detected 
 ### DigitalOcean
 
 ```typescript
-import { DO } from "./src/providers/do/droplet.ts";
-import { SIZE, REGION } from "./src/types/do.ts";
-import { Stack } from "./src/core/stack.ts";
-import { Deploy } from "./src/core/decorators.ts";
+import { DO, DO_TYPES, Stack, Deploy } from "puls";
+const { SIZE, REGION } = DO_TYPES;
 
 @Deploy({ token: process.env.DO_TOKEN! })
 class Production extends Stack {
@@ -62,10 +60,8 @@ class Production extends Stack {
 ### AWS
 
 ```typescript
-import { AWS } from "./src/providers/aws/index.ts";
-import { DISTRO, BUCKET, DOMAIN_REGISTER, REGION } from "./src/types/aws.ts";
-import { Stack } from "./src/core/stack.ts";
-import { Deploy } from "./src/core/decorators.ts";
+import { AWS, AWS_TYPES, Stack, Deploy } from "puls";
+const { DISTRO, BUCKET, DOMAIN_REGISTER, REGION } = AWS_TYPES;
 
 @Deploy({ region: REGION.US_EAST_1 })
 class CDNStack extends Stack {
@@ -84,10 +80,8 @@ class CDNStack extends Stack {
 ### Proxmox
 
 ```typescript
-import { Proxmox } from "./src/providers/proxmox/index.ts";
-import { CONFIG, OS, KEYS } from "./src/types/proxmox.ts";
-import { Stack } from "./src/core/stack.ts";
-import { Deploy, Destroy, Protected } from "./src/core/decorators.ts";
+import { Proxmox, PROXMOX_TYPES, Stack, Deploy, Protected } from "puls";
+const { CONFIG, OS, KEYS } = PROXMOX_TYPES;
 
 @Deploy({ proxmox: CONFIG.STAGING })
 class StagingInfra extends Stack {

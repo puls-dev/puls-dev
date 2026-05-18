@@ -14,9 +14,9 @@ import {
   CreateRoleCommand,
   AttachRolePolicyCommand,
 } from '@aws-sdk/client-iam';
-import { BaseBuilder } from '../../core/resource.ts';
-import { getLambdaClient, getIAMClient } from './api.ts';
-import { SecretsBuilder, resolveEnvVars } from './secrets.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { getLambdaClient, getIAMClient } from './api.js';
+import { SecretsBuilder, resolveEnvVars } from './secrets.js';
 
 const ASSUME_ROLE_POLICY = JSON.stringify({
   Version: '2012-10-17',

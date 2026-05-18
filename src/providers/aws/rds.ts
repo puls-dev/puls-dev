@@ -13,9 +13,9 @@ import {
   CreateSecurityGroupCommand,
   AuthorizeSecurityGroupIngressCommand,
 } from '@aws-sdk/client-ec2';
-import { BaseBuilder } from '../../core/resource.ts';
-import { getRDSClient, getEC2Client } from './api.ts';
-import { Config } from '../../core/config.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { getRDSClient, getEC2Client } from './api.js';
+import { Config } from '../../core/config.js';
 
 const DB_PORT: Record<string, number> = {
   postgres: 5432,

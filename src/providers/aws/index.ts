@@ -1,13 +1,13 @@
-import { Config } from "../../core/config.ts";
-import { S3BucketBuilder } from "./s3.ts";
-import { Route53Builder } from "./route53.ts";
-import { CloudFrontBuilder } from "./cloudfront.ts";
-import { LambdaBuilder } from "./lambda.ts";
-import { APIGatewayBuilder } from "./apigateway.ts";
-import { FargateBuilder } from "./fargate.ts";
-import { RDSBuilder } from "./rds.ts";
-import { SQSBuilder } from "./sqs.ts";
-import { SecretsBuilder } from "./secrets.ts";
+import { Config } from "../../core/config.js";
+import { S3BucketBuilder } from "./s3.js";
+import { Route53Builder } from "./route53.js";
+import { CloudFrontBuilder } from "./cloudfront.js";
+import { LambdaBuilder } from "./lambda.js";
+import { APIGatewayBuilder } from "./apigateway.js";
+import { FargateBuilder } from "./fargate.js";
+import { RDSBuilder } from "./rds.js";
+import { SQSBuilder } from "./sqs.js";
+import { SecretsBuilder } from "./secrets.js";
 
 export const AWS = {
   init: (opts: { region: string }) => {

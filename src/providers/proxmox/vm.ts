@@ -3,12 +3,18 @@ import { homedir } from "node:os";
 import { spawn } from "node:child_process";
 import { dirname } from "node:path";
 import { createConnection } from "node:net";
-import { BaseBuilder } from "../../core/resource.ts";
-import { Config } from "../../core/config.ts";
-import { getPMClient, ProxmoxApiClient } from "./api.ts";
-import type { OSImage } from "../../types/proxmox.ts";
+import { BaseBuilder } from "../../core/resource.js";
+import { Config } from "../../core/config.js";
+import { Output } from "../../core/output.js";
+import { getPMClient, ProxmoxApiClient } from "./api.js";
+import type { OSImage } from "../../types/proxmox.js";
 
 export class VMBuilder extends BaseBuilder {
+  readonly out = {
+    ip:   new Output<string>(),
+    vmid: new Output<number>(),
+  };
+
   resolvedVmid: number | null = null;
   resolvedNode: string | null = null;
   resolvedIp: string | null = null;
@@ -93,6 +99,8 @@ export class VMBuilder extends BaseBuilder {
     if (existing) {
       this.resolvedVmid = existing.vmid;
       this.resolvedNode = existing.node;
+      this.out.vmid.resolve(existing.vmid);
+      if (this._ip) this.out.ip.resolve(this._ip.split("/")[0]);
       console.log(
         `   ✅ VM "${this.name}" already exists (vmid=${existing.vmid}, node=${existing.node}, status=${existing.status})`,
       );
@@ -112,6 +120,8 @@ export class VMBuilder extends BaseBuilder {
         console.log(`      └─ Provision: ${this._provision}`);
       if (this._replace)
         console.log(`      └─ Replace: "${this._replace}" after creation`);
+      this.out.vmid.resolve(-1);
+      this.out.ip.resolve(this._ip?.split("/")[0] ?? "0.0.0.0");
       return { name: this.name, vmid: "PENDING" };
     }
 
@@ -183,6 +193,7 @@ export class VMBuilder extends BaseBuilder {
 
     this.resolvedVmid = newVmid;
     this.resolvedNode = node;
+    this.out.vmid.resolve(newVmid);
 
     // Auto-resolve static IP from internal DNS if no explicit IP set
     if (!this._ip) {
@@ -235,6 +246,7 @@ export class VMBuilder extends BaseBuilder {
     if (this._ip) {
       const [addr] = this._ip.split("/");
       this.resolvedIp = addr;
+      this.out.ip.resolve(addr);
       console.log(`   🌐 IP: ${this.resolvedIp} (static)`);
     } else {
       // Wait for qemu-agent to report an IP
@@ -261,6 +273,7 @@ export class VMBuilder extends BaseBuilder {
         { intervalMs: 10_000, timeoutMs: 300_000 },
       );
 
+      if (this.resolvedIp) this.out.ip.resolve(this.resolvedIp);
       console.log(`   🌐 IP: ${this.resolvedIp}`);
     }
 

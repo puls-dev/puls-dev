@@ -1,5 +1,5 @@
 import { Agent } from "undici";
-import { Config } from "../../core/config.ts";
+import { Config } from "../../core/config.js";
 
 export class ProxmoxApiClient {
   private baseUrl: string;

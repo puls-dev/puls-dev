@@ -6,8 +6,8 @@ import {
   DeleteQueueCommand,
   QueueAttributeName,
 } from '@aws-sdk/client-sqs';
-import { BaseBuilder } from '../../core/resource.ts';
-import { getSQSClient } from './api.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { getSQSClient } from './api.js';
 
 export class SQSBuilder extends BaseBuilder {
   private _fifo: boolean = false;

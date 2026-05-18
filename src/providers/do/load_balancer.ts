@@ -1,6 +1,6 @@
-import { Config } from '../../core/config.ts';
-import { DropletBuilder } from './droplet.ts';
-import { getDoApi } from './api.ts';
+import { Config } from '../../core/config.js';
+import { DropletBuilder } from './droplet.js';
+import { getDoApi } from './api.js';
 
 export class LoadBalancerBuilder {
   private config: any = {

@@ -1,5 +1,5 @@
-import { Config } from "../../core/config.ts";
-import { VMBuilder } from "./vm.ts";
+import { Config } from "../../core/config.js";
+import { VMBuilder } from "./vm.js";
 
 export const Proxmox = {
   init: (opts: {

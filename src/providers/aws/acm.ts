@@ -4,8 +4,8 @@ import {
   DescribeCertificateCommand,
 } from '@aws-sdk/client-acm';
 import { ChangeResourceRecordSetsCommand } from '@aws-sdk/client-route-53';
-import { BaseBuilder } from '../../core/resource.ts';
-import { getACMClient, getR53Client } from './api.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { getACMClient, getR53Client } from './api.js';
 
 interface ZoneRef {
   zoneId?: string;

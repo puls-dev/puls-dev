@@ -85,7 +85,8 @@ These are good-fit providers but maintained by the community, not core. The cont
 
 ## Framework Features
 
-- [ ] **Stack outputs** — pass values between stacks (e.g. VM IP from one stack feeds a DNS record in another)
+- [x] **Stack outputs** — pass values between stacks (e.g. VM IP from one stack feeds a DNS record in another)
+- [x] **Inventory / `@Check`** — read-only discovery across all configured providers; prints counts, status, and DO cost estimates
 - [ ] **Secrets integration** — pull credentials from Vault or AWS SSM at deploy time instead of env vars
 - [ ] **Hooks** — `beforeDeploy` / `afterDeploy` callbacks on Stack for custom side effects
 - [ ] **Multi-region** — run the same stack across N regions in parallel

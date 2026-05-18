@@ -1,5 +1,5 @@
 import { PartitionDateSource } from "@aws-sdk/client-s3";
-import type { GlobalConfig } from "../core/config.ts";
+import type { GlobalConfig } from "../core/config.js";
 
 type ProxmoxConfig = NonNullable<GlobalConfig["providers"]["proxmox"]>;
 

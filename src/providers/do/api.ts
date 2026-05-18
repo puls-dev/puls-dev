@@ -1,4 +1,4 @@
-import { Config } from '../../core/config.ts';
+import { Config } from '../../core/config.js';
 
 export class DoApiClient {
   private static readonly BASE = 'https://api.digitalocean.com/v2';

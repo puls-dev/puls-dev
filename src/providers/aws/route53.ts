@@ -10,12 +10,17 @@ import {
   ContactType,
   CountryCode,
 } from '@aws-sdk/client-route-53-domains';
-import { BaseBuilder } from '../../core/resource.ts';
-import { ACMCertificateBuilder } from './acm.ts';
-import { getR53Client, getR53DomainsClient } from './api.ts';
-import type { RegistrantContact } from '../../types/aws.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { Output } from '../../core/output.js';
+import { ACMCertificateBuilder } from './acm.js';
+import { getR53Client, getR53DomainsClient } from './api.js';
+import type { RegistrantContact } from '../../types/aws.js';
 
 export class Route53Builder extends BaseBuilder {
+  readonly out = {
+    zone: new Output<{ name: string; id: string }>(),
+  };
+
   public zoneName: string;
   public zoneId?: string;
   private records: any[] = [];
@@ -95,6 +100,7 @@ export class Route53Builder extends BaseBuilder {
     if (!existing) {
       if (dryRun) {
         console.log(`   📝 [PLAN] Create hosted zone ${this.zoneName}`);
+        this.out.zone.resolve({ name: this.zoneName, id: 'PENDING' });
       } else {
         // Route53 Domains auto-creates the hosted zone on registration — check again before creating
         const recheck = await this.discoverZone(this.zoneName);
@@ -112,6 +118,8 @@ export class Route53Builder extends BaseBuilder {
     } else {
       console.log(`   ✅ Hosted zone ${this.zoneName} exists (id=${this.zoneId})`);
     }
+
+    if (this.zoneId) this.out.zone.resolve({ name: this.zoneName, id: this.zoneId });
 
     if (this._wantsWildcardSSL && !this.cert()) {
       this.sidecars.push(new ACMCertificateBuilder(this.zoneName, true));

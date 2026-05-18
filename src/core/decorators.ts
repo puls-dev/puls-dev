@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import { readFileSync } from "node:fs";
-import { Config } from "./config.ts";
+import { Config } from "./config.js";
+import { Stack } from "./stack.js";
+import { Checker } from "./checker.js";
 
 type ProviderOpts = {
   token?: string;
@@ -58,16 +60,18 @@ export function Destroy(optsOrTarget: any, propertyKey?: string): any {
     return;
   }
   if (typeof optsOrTarget === "function") {
+    const instance = new optsOrTarget();
+    Stack._register(optsOrTarget, instance);
     Promise.resolve().then(async () => {
-      const instance = new optsOrTarget();
       if (typeof instance.destroy === "function") await instance.destroy();
     });
     return;
   }
   return function (constructor: any) {
     applyConfig(optsOrTarget);
+    const instance = new constructor();
+    Stack._register(constructor, instance);
     Promise.resolve().then(async () => {
-      const instance = new constructor();
       if (typeof instance.destroy === "function") await instance.destroy();
     });
   };
@@ -77,9 +81,22 @@ export function Destroy(optsOrTarget: any, propertyKey?: string): any {
 export function Deploy(opts: ProviderOpts = {}) {
   return function (constructor: any) {
     applyConfig(opts);
+    // Instantiate synchronously so resource discovery kicks off immediately and
+    // other stacks can call Stack.from(ThisClass) to reference its Output fields.
+    const instance = new constructor();
+    Stack._register(constructor, instance);
     Promise.resolve().then(async () => {
-      const instance = new constructor();
       if (typeof instance.deploy === "function") await instance.deploy();
+    });
+  };
+}
+
+export function Check(opts: ProviderOpts = {}) {
+  return function (constructor: any) {
+    applyConfig(opts);
+    const instance = new constructor();
+    Promise.resolve().then(async () => {
+      if (typeof instance.check === "function") await instance.check();
     });
   };
 }

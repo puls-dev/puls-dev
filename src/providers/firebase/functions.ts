@@ -2,8 +2,8 @@ import { execSync } from 'node:child_process';
 import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { BaseBuilder } from '../../core/resource.ts';
-import { cloudFetch, getProjectId } from './api.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { cloudFetch, getProjectId } from './api.js';
 
 const CF_BASE = 'https://cloudfunctions.googleapis.com/v2';
 

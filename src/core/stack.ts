@@ -1,5 +1,7 @@
 import "reflect-metadata";
-import { BaseBuilder } from "./resource.ts";
+import { BaseBuilder } from "./resource.js";
+
+const _registry = new Map<Function, Stack>();
 
 type OutputEntry = {
   primary: string;
@@ -73,6 +75,31 @@ function printOutputs(stackName: string, outputs: Record<string, any>) {
 }
 
 export abstract class Stack {
+  /** @internal — called by @Deploy to register the instance for cross-stack references. */
+  static _register(cls: Function, instance: Stack): void {
+    _registry.set(cls, instance);
+  }
+
+  /**
+   * Returns the already-constructed instance of another Stack so you can reference
+   * its resource Output fields before deployment completes.
+   *
+   * The target stack must be decorated with @Deploy and imported before this call.
+   *
+   * @example
+   * class DNSStack extends Stack {
+   *   private infra = Stack.from(InfraStack);
+   *   dns = DO.Domain("example.com").pointer("app", this.infra.app.ip);
+   * }
+   */
+  static from<T extends Stack>(cls: new (...args: any[]) => T): T {
+    const instance = _registry.get(cls);
+    if (!instance) throw new Error(
+      `Stack "${cls.name}" is not registered. Make sure it is decorated with @Deploy and its module is imported before referencing it.`
+    );
+    return instance as T;
+  }
+
   async deploy(): Promise<Record<string, any>> {
     console.log(`\n🏗️  Deploying Stack: ${this.constructor.name}`);
 

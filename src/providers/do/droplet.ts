@@ -1,14 +1,20 @@
 import { readFileSync } from 'fs';
 import { homedir } from 'os';
-import { OS, REGION, SIZE, NETWORK } from '../../types/do.ts';
-import { Config } from '../../core/config.ts';
-import { BaseBuilder } from '../../core/resource.ts';
-import { FirewallBuilder } from './firewall.ts';
-import { DomainBuilder } from './domain.ts';
-import { LoadBalancerBuilder } from './load_balancer.ts';
-import { getDoApi, DoApiClient } from './api.ts';
+import { OS, REGION, SIZE, NETWORK } from '../../types/do.js';
+import { Config } from '../../core/config.js';
+import { BaseBuilder } from '../../core/resource.js';
+import { Output } from '../../core/output.js';
+import { FirewallBuilder } from './firewall.js';
+import { DomainBuilder } from './domain.js';
+import { LoadBalancerBuilder } from './load_balancer.js';
+import { getDoApi, DoApiClient } from './api.js';
 
 export class DropletBuilder extends BaseBuilder {
+  readonly out = {
+    ip: new Output<string>(),
+    id: new Output<number>(),
+  };
+
   public config: any = {
     image: OS.UBUNTU_22_04,
     region: Config.get().providers.do?.defaultRegion || REGION.NYC,
@@ -32,6 +38,8 @@ export class DropletBuilder extends BaseBuilder {
       this.dropletId = match.id;
       const pub = (match.networks?.v4 ?? []).find((n: any) => n.type === 'public');
       this.resolvedIp = pub?.ip_address;
+      if (this.dropletId) this.out.id.resolve(this.dropletId);
+      if (this.resolvedIp) this.out.ip.resolve(this.resolvedIp);
     }
     return match;
   }
@@ -101,6 +109,8 @@ export class DropletBuilder extends BaseBuilder {
       if (!existing) {
         const keyHint = this.sshKeyPath ? ` + key ${this.sshKeyPath.split('/').pop()}` : '';
         console.log(`   📝 Plan: Create droplet ${this.name} (${this.config.size} in ${this.config.region}${keyHint})`);
+        this.out.id.resolve(-1);
+        this.out.ip.resolve('0.0.0.0');
       } else if (hasChanges) {
         console.log(`   📝 Plan: Resize ${this.name} → ${this.config.size}`);
       } else {
@@ -122,6 +132,7 @@ export class DropletBuilder extends BaseBuilder {
         ...(sshKeyIds.length && { ssh_keys: sshKeyIds }),
       });
       this.dropletId = result.droplet.id;
+      this.out.id.resolve(this.dropletId!);
       console.log(`🚀 Created droplet ${this.name} (id=${this.dropletId})`);
 
       await this.waitFor('droplet to become active', async () => {
@@ -134,7 +145,10 @@ export class DropletBuilder extends BaseBuilder {
         return false;
       });
 
-      if (this.resolvedIp) console.log(`   🌐 Public IP: ${this.resolvedIp}`);
+      if (this.resolvedIp) {
+        this.out.ip.resolve(this.resolvedIp);
+        console.log(`   🌐 Public IP: ${this.resolvedIp}`);
+      }
     } else if (hasChanges) {
       console.log(`✨ Resizing ${this.name} → ${this.config.size}...`);
       await api.post(`/droplets/${this.dropletId}/actions`, { type: 'resize', size: this.config.size });

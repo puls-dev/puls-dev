@@ -1,9 +1,9 @@
-import { FirebaseHostingBuilder } from './hosting.ts';
-import { FirebaseFunctionsBuilder, FUNCTIONS_RUNTIME } from './functions.ts';
-import { FirebaseFirestoreBuilder } from './firestore.ts';
-import { FirebaseStorageBuilder } from './storage.ts';
-import { FirebaseAuthBuilder } from './auth.ts';
-import { FirebaseRemoteConfigBuilder } from './remoteconfig.ts';
+import { FirebaseHostingBuilder } from './hosting.js';
+import { FirebaseFunctionsBuilder, FUNCTIONS_RUNTIME } from './functions.js';
+import { FirebaseFirestoreBuilder } from './firestore.js';
+import { FirebaseStorageBuilder } from './storage.js';
+import { FirebaseAuthBuilder } from './auth.js';
+import { FirebaseRemoteConfigBuilder } from './remoteconfig.js';
 
 export { FUNCTIONS_RUNTIME };
 

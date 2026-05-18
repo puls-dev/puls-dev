@@ -7,10 +7,10 @@ import {
   PutBucketPolicyCommand,
   PutObjectCommand,
 } from '@aws-sdk/client-s3';
-import { BaseBuilder } from '../../core/resource.ts';
-import { CloudFrontBuilder } from './cloudfront.ts';
-import { getS3Client } from './api.ts';
-import { Config } from '../../core/config.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { CloudFrontBuilder } from './cloudfront.js';
+import { getS3Client } from './api.js';
+import { Config } from '../../core/config.js';
 
 export class S3BucketBuilder extends BaseBuilder {
   private _versioning: boolean = false;

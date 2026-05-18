@@ -5,8 +5,8 @@ import {
   DeleteSecretCommand,
   DescribeSecretCommand,
 } from "@aws-sdk/client-secrets-manager";
-import { BaseBuilder } from "../../core/resource.ts";
-import { getSecretsClient } from "./api.ts";
+import { BaseBuilder } from "../../core/resource.js";
+import { getSecretsClient } from "./api.js";
 
 export class SecretsBuilder extends BaseBuilder {
   private _value?: string;

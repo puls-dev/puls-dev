@@ -1,5 +1,5 @@
-import { BaseBuilder } from '../../core/resource.ts';
-import { getDoApi } from './api.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { getDoApi } from './api.js';
 
 export class CertificateBuilder extends BaseBuilder {
   constructor(public domainName: string) {

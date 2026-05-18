@@ -27,10 +27,10 @@ import {
   DescribeLogGroupsCommand,
   CreateLogGroupCommand,
 } from '@aws-sdk/client-cloudwatch-logs';
-import { BaseBuilder } from '../../core/resource.ts';
-import { getECSClient, getEC2Client, getIAMClient, getCWLogsClient } from './api.ts';
-import { SecretsBuilder, resolveEnvVars } from './secrets.ts';
-import { Config } from '../../core/config.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { getECSClient, getEC2Client, getIAMClient, getCWLogsClient } from './api.js';
+import { SecretsBuilder, resolveEnvVars } from './secrets.js';
+import { Config } from '../../core/config.js';
 
 const ECS_ASSUME_ROLE_POLICY = JSON.stringify({
   Version: '2012-10-17',

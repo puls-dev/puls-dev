@@ -1,12 +1,13 @@
-import { BaseBuilder } from '../../core/resource.ts';
-import { DropletBuilder } from './droplet.ts';
-import { CertificateBuilder } from './certificate.ts';
-import { getDoApi } from './api.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { Output } from '../../core/output.js';
+import { DropletBuilder } from './droplet.js';
+import { CertificateBuilder } from './certificate.js';
+import { getDoApi } from './api.js';
 
 export interface DNSRecord {
   type: 'A' | 'CNAME' | 'TXT' | 'MX';
   name: string;
-  value: string | DropletBuilder;
+  value: string | DropletBuilder | Output<string>;
 }
 
 export class DomainBuilder extends BaseBuilder {
@@ -32,7 +33,7 @@ export class DomainBuilder extends BaseBuilder {
     return this;
   }
 
-  pointer(name: string, target: DropletBuilder | string) {
+  pointer(name: string, target: DropletBuilder | Output<string> | string) {
     this.records.push({ type: 'A', name, value: target });
     return this;
   }
@@ -61,7 +62,9 @@ export class DomainBuilder extends BaseBuilder {
     for (const record of this.records) {
       let data: string;
 
-      if (record.value instanceof DropletBuilder) {
+      if (record.value instanceof Output) {
+        data = await record.value.get();
+      } else if (record.value instanceof DropletBuilder) {
         data = (await record.value.getPublicIp()) ?? `[IP of ${record.value.name} — not found]`;
       } else {
         data = record.value;

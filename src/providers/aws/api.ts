@@ -12,7 +12,7 @@ import { CloudWatchLogsClient } from '@aws-sdk/client-cloudwatch-logs';
 import { RDSClient } from '@aws-sdk/client-rds';
 import { SQSClient } from '@aws-sdk/client-sqs';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
-import { Config } from '../../core/config.ts';
+import { Config } from '../../core/config.js';
 
 function getRegion(): string {
   const region = Config.get().providers.aws?.region;

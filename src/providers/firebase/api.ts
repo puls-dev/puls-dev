@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { GoogleAuth } from 'google-auth-library';
-import { Config } from '../../core/config.ts';
+import { Config } from '../../core/config.js';
 
 function resolveFirebaseConfig() {
   const cfg = Config.get().providers.firebase;

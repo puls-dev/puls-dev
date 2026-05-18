@@ -1,0 +1,1 @@
+Your service-account.json can go here for Firebase authentication. Should be added to .gitignore to avoid committing it to the repository.

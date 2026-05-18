@@ -8,10 +8,10 @@ import {
   DeleteApiCommand,
 } from '@aws-sdk/client-apigatewayv2';
 import { AddPermissionCommand } from '@aws-sdk/client-lambda';
-import { BaseBuilder } from '../../core/resource.ts';
-import { LambdaBuilder } from './lambda.ts';
-import { getAPIGWClient, getLambdaClient } from './api.ts';
-import { Config } from '../../core/config.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { LambdaBuilder } from './lambda.js';
+import { getAPIGWClient, getLambdaClient } from './api.js';
+import { Config } from '../../core/config.js';
 
 type RouteEntry = { method: string; path: string; fn: LambdaBuilder };
 

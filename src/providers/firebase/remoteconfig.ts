@@ -1,5 +1,5 @@
-import { BaseBuilder } from '../../core/resource.ts';
-import { getFirebaseToken, getProjectId } from './api.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { getFirebaseToken, getProjectId } from './api.js';
 
 const RC_BASE  = 'https://firebaseremoteconfig.googleapis.com/v1';
 const RC_SCOPE = 'https://www.googleapis.com/auth/firebase.remoteconfig';

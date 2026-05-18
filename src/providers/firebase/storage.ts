@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
-import { BaseBuilder } from '../../core/resource.ts';
-import { cloudFetch, getProjectId } from './api.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { cloudFetch, getProjectId } from './api.js';
 
 const RULES_BASE = 'https://firebaserules.googleapis.com/v1';
 const GCS_BASE   = 'https://storage.googleapis.com/storage/v1';

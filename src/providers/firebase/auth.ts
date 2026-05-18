@@ -1,5 +1,5 @@
-import { BaseBuilder } from '../../core/resource.ts';
-import { cloudFetch, getProjectId } from './api.ts';
+import { BaseBuilder } from '../../core/resource.js';
+import { cloudFetch, getProjectId } from './api.js';
 
 const AUTH_BASE = 'https://identitytoolkit.googleapis.com/admin/v2';
 
