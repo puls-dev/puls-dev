@@ -1,47 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://puls-docs.web.app/</loc>
+         <loc>https://pulsdev.io/</loc>
          <lastmod>2026-05-19</lastmod>
     </url>
     <url>
-         <loc>https://puls-docs.web.app/concepts/</loc>
+         <loc>https://pulsdev.io/concepts/</loc>
          <lastmod>2026-05-19</lastmod>
     </url>
     <url>
-         <loc>https://puls-docs.web.app/contributing/</loc>
+         <loc>https://pulsdev.io/contributing/</loc>
          <lastmod>2026-05-19</lastmod>
     </url>
     <url>
-         <loc>https://puls-docs.web.app/decorators/</loc>
+         <loc>https://pulsdev.io/decorators/</loc>
          <lastmod>2026-05-19</lastmod>
     </url>
     <url>
-         <loc>https://puls-docs.web.app/getting-started/</loc>
+         <loc>https://pulsdev.io/getting-started/</loc>
          <lastmod>2026-05-19</lastmod>
     </url>
     <url>
-         <loc>https://puls-docs.web.app/roadmap/</loc>
+         <loc>https://pulsdev.io/roadmap/</loc>
          <lastmod>2026-05-19</lastmod>
     </url>
     <url>
-         <loc>https://puls-docs.web.app/stack-outputs/</loc>
+         <loc>https://pulsdev.io/stack-outputs/</loc>
          <lastmod>2026-05-19</lastmod>
     </url>
     <url>
-         <loc>https://puls-docs.web.app/providers/aws/</loc>
+         <loc>https://pulsdev.io/why/</loc>
          <lastmod>2026-05-19</lastmod>
     </url>
     <url>
-         <loc>https://puls-docs.web.app/providers/digitalocean/</loc>
+         <loc>https://pulsdev.io/providers/aws/</loc>
          <lastmod>2026-05-19</lastmod>
     </url>
     <url>
-         <loc>https://puls-docs.web.app/providers/firebase/</loc>
+         <loc>https://pulsdev.io/providers/digitalocean/</loc>
          <lastmod>2026-05-19</lastmod>
     </url>
     <url>
-         <loc>https://puls-docs.web.app/providers/proxmox/</loc>
+         <loc>https://pulsdev.io/providers/firebase/</loc>
+         <lastmod>2026-05-19</lastmod>
+    </url>
+    <url>
+         <loc>https://pulsdev.io/providers/proxmox/</loc>
          <lastmod>2026-05-19</lastmod>
     </url>
 </urlset>

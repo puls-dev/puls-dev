@@ -31,9 +31,10 @@ Deploy a static site from a local build directory.
 ```typescript
 Firebase.Hosting("your-site-id")
   .source("./dist")   // path to your built static files
+  .domain("example.com") // optional custom domain
 ```
 
-The site ID is the Firebase Hosting site name - by default it matches your project ID (e.g. `my-project` → `https://my-project.web.app`).
+The site ID is the Firebase Hosting site name - by default it matches your project ID (e.g. `my-project` → `https://my-project.web.app`). You can override the displayed URL using `.domain("yourdomain.com")`.
 
 **Deploy flow:**
 
@@ -56,7 +57,9 @@ import { Firebase, Stack, Deploy } from "puls-dev";
 
 @Deploy({ dryRun: false })
 class DocsSite extends Stack {
-  site = Firebase.Hosting("puls-docs").source("./site");
+  site = Firebase.Hosting("puls-docs")
+    .source("./site")
+    .domain("pulsdev.io");
 }
 ```
 

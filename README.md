@@ -2,7 +2,7 @@
 
 **Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.**
 
-[Live Documentation](https://puls-docs.web.app/) | Discord: **pulsdev.io** ([Join](https://discord.gg/CjgRayuH))
+[Live Documentation](https://pulsdev.io/) | Discord: **pulsdev.io** ([Join](https://discord.gg/CjgRayuH))
 
 ```typescript
 @Deploy({ proxmox: CONFIG.STAGING })

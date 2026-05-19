@@ -41,15 +41,21 @@ function sha256(filePath: string): string {
 
 export class FirebaseHostingBuilder extends BaseBuilder {
   private _sourcePath?: string;
+  private _domain?: string;
 
   constructor(siteId: string) {
     super(siteId);
-    // Discovery: check if the site has any releases (confirms it exists and is active)
+    // Discovery: check if the site exists
     this.discoveryPromise = this.discoverSite(siteId);
   }
 
   source(path: string) {
     this._sourcePath = path;
+    return this;
+  }
+
+  domain(name: string) {
+    this._domain = name;
     return this;
   }
 
@@ -88,8 +94,9 @@ export class FirebaseHostingBuilder extends BaseBuilder {
     const existing = await this.discoveryPromise;
 
     if (dryRun) {
+      const displayUrl = this._domain ? `https://${this._domain}` : `https://${siteId}.web.app`;
       console.log(
-        `   📝 [PLAN] Deploy ${files.length} file(s) to https://${siteId}.web.app`,
+        `   📝 [PLAN] Deploy ${files.length} file(s) to ${displayUrl}`,
       );
       if (!existing) console.log(`      └─ Will create secondary site "${siteId}"`);
       for (const f of files.slice(0, 5)) {
@@ -97,7 +104,7 @@ export class FirebaseHostingBuilder extends BaseBuilder {
       }
       if (files.length > 5)
         console.log(`      └─ ... and ${files.length - 5} more`);
-      return { siteId, url: `https://${siteId}.web.app` };
+      return { siteId, url: displayUrl };
     }
 
     // 0. Ensure site exists (for secondary sites)
@@ -174,7 +181,7 @@ export class FirebaseHostingBuilder extends BaseBuilder {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/octet-stream",
         },
-        body: compressed,
+        body: compressed as any,
       });
       if (!res.ok) {
         const errorBody = await res.text();
@@ -197,7 +204,7 @@ export class FirebaseHostingBuilder extends BaseBuilder {
       },
     );
 
-    const url = `https://${siteId}.web.app`;
+    const url = this._domain ? `https://${this._domain}` : `https://${siteId}.web.app`;
     console.log(`🚀 Deployed ${files.length} file(s) → ${url}`);
     return { siteId, url };
   }

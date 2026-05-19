@@ -1,8 +1,8 @@
-site_name: Puls
+site_name: Pulsdev.io
 site_description: Intent-driven infrastructure-as-code. Describe what you want - Puls figures out create, update, or skip.
-site_url: https://puls-docs.web.app
-repo_url: https://github.com/nolimitcity/puls
-repo_name: puls
+site_url: https://pulsdev.io
+repo_url: https://github.com/puls-dev/puls-dev
+repo_name: puls-dev
 
 theme:
   name: material
@@ -36,6 +36,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Why Puls?: why.md
   - Getting Started: getting-started.md
   - Concepts: concepts.md
   - Decorators: decorators.md

@@ -88,3 +88,8 @@ Before opening a pull request, ask:
 > *Can a user express this in one line with obvious method names and no required knowledge of the underlying API?*
 
 If yes - it probably belongs here. If not - simplify the interface until it does, or ship it as a standalone package that wraps the DSL.
+
+---
+
+**Questions?** Join us on Discord: **pulsdev.io**
+
