@@ -40,7 +40,7 @@ export class SecretsBuilder extends BaseBuilder {
     }
   }
 
-  // Awaits eager discovery — used by resolveEnvVars so callers don't need discoveryPromise directly
+  // Awaits eager discovery - used by resolveEnvVars so callers don't need discoveryPromise directly
   async awaitValue(): Promise<string | null> {
     await this.discoveryPromise;
     return this.resolvedValue;
@@ -81,12 +81,18 @@ export class SecretsBuilder extends BaseBuilder {
         if (this._description)
           console.log(`      └─ Description: ${this._description}`);
       }
-      return { name: this.name, arn: this.resolvedArn, value: this.resolvedValue };
+      return {
+        name: this.name,
+        arn: this.resolvedArn,
+        value: this.resolvedValue,
+      };
     }
 
     if (!existing) {
       if (!this._value) {
-        console.log(`   ⚠️  Secret "${this.name}" does not exist — add .plainText() or .keyValue() to create it`);
+        console.log(
+          `   ⚠️  Secret "${this.name}" does not exist - add .plainText() or .keyValue() to create it`,
+        );
         return { name: this.name, arn: null, value: null };
       }
       const result = await client.send(
@@ -116,7 +122,11 @@ export class SecretsBuilder extends BaseBuilder {
     }
 
     await this.deploySidecars();
-    return { name: this.name, arn: this.resolvedArn, value: this.resolvedValue };
+    return {
+      name: this.name,
+      arn: this.resolvedArn,
+      value: this.resolvedValue,
+    };
   }
 
   async destroy() {
@@ -127,9 +137,13 @@ export class SecretsBuilder extends BaseBuilder {
 
     if (!existing) {
       if (this._pendingDeletion)
-        console.log(`   ⏳ Secret "${this.name}" is already scheduled for deletion`);
+        console.log(
+          `   ⏳ Secret "${this.name}" is already scheduled for deletion`,
+        );
       else
-        console.log(`   ✅ Secret "${this.name}" does not exist — nothing to do`);
+        console.log(
+          `   ✅ Secret "${this.name}" does not exist - nothing to do`,
+        );
       return { destroyed: this.name };
     }
 
@@ -137,7 +151,7 @@ export class SecretsBuilder extends BaseBuilder {
       const mode = this._forceDelete
         ? "immediate"
         : "scheduled (30-day recovery window)";
-      console.log(`   📝 [PLAN] Delete secret "${this.name}" — ${mode}`);
+      console.log(`   📝 [PLAN] Delete secret "${this.name}" - ${mode}`);
       return { destroyed: this.name };
     }
 
@@ -168,7 +182,7 @@ export async function resolveEnvVars(
       await v.awaitValue();
       if (v.resolvedValue === null)
         throw new Error(
-          `Secret "${v.name}" has no value — create it first or call .plainText()/.keyValue() in the stack`,
+          `Secret "${v.name}" has no value - create it first or call .plainText()/.keyValue() in the stack`,
         );
       resolved[k] = v.resolvedValue;
     } else {

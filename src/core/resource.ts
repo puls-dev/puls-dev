@@ -37,7 +37,7 @@ export abstract class BaseBuilder {
   }
 
   // Waits for a long-running cloud operation to complete.
-  // In dry-run mode: skips entirely — no waiting.
+  // In dry-run mode: skips entirely - no waiting.
   // In real mode: polls via the provided condition fn until it returns true.
   // The mock fallback simulates a realistic delay with progress output.
   protected async waitFor(
@@ -86,7 +86,9 @@ export abstract class BaseBuilder {
   async destroy(): Promise<any> {
     const dryRun = this.isDryRunActive();
     console.log(`\n🗑️  Destroying "${this.name}"...`);
-    console.log(`   ✅ [${dryRun ? 'PLAN' : 'OK'}] Resource "${this.name}" marked for destruction.`);
+    console.log(
+      `   ✅ [${dryRun ? "PLAN" : "OK"}] Resource "${this.name}" marked for destruction.`,
+    );
     await this.destroySidecars();
     return { destroyed: this.name };
   }

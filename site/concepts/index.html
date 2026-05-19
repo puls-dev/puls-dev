@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.">
+        <meta name="description" content="Intent-driven infrastructure-as-code. Describe what you want - Puls figures out create, update, or skip.">
       
       
       
@@ -558,6 +558,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#extensibility-custom-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extensibility &amp; Custom Types
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -910,6 +921,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#extensibility-custom-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extensibility &amp; Custom Types
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -932,7 +954,7 @@
 
 <h1 id="core-concepts">Core Concepts</h1>
 <h2 id="eager-discovery">Eager discovery</h2>
-<p>Every resource starts an API lookup the moment it is declared — before <code>deploy()</code> is called.</p>
+<p>Every resource starts an API lookup the moment it is declared - before <code>deploy()</code> is called.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">class</span><span class="w"> </span><span class="nx">MyStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="c1">// discoverVm(&quot;ix-sto1-app01&quot;) fires here, in the constructor</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nx">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01&quot;</span><span class="p">).</span><span class="nx">cores</span><span class="p">(</span><span class="mf">4</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">8192</span><span class="p">);</span>
@@ -988,6 +1010,25 @@
 <a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.STAGING</span><span class="w"> </span><span class="p">})</span>
 <a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="kd">@Destroy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.STAGING</span><span class="w"> </span><span class="p">})</span>
 </code></pre></div>
+<h2 id="extensibility-custom-types">Extensibility &amp; Custom Types</h2>
+<p>Puls is designed to be completely extendable. While it ships with built-in constants (like <code>AWS_TYPES</code> or <code>PROXMOX_TYPES</code>), you are <strong>not</strong> required to use them.</p>
+<p>If the built-in types don't match your environment (e.g., a custom VM image, a private AWS region, or specific instance sizes), you can simply create your own constants in your project and pass them to the builder methods.</p>
+<p><strong>Example: Custom VM Images</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1">// your-project/types/my-images.ts</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">MY_OS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nx">GOLDEN_IMAGE</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;1234&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Your custom template ID</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nx">LEGACY_APP</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;9999&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">}</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">;</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="c1">// your-project/stack.ts</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">MY_OS</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;./types/my-images.js&quot;</span><span class="p">;</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.PROD</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="kd">class</span><span class="w"> </span><span class="nx">MyStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">  </span><span class="nx">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;app-01&quot;</span><span class="p">).</span><span class="nx">image</span><span class="p">(</span><span class="nx">MY_OS</span><span class="p">.</span><span class="nx">GOLDEN_IMAGE</span><span class="p">)...;</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="p">}</span>
+</code></pre></div></p>
+<p>Since the DSL methods typically accept strings or numbers, any constant you define will work as long as the underlying provider API understands it.</p>
 
 
 

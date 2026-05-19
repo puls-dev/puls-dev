@@ -12,7 +12,8 @@ function formatEntry(val: any): OutputEntry {
   if (!val || typeof val !== "object") return { primary: String(val) };
 
   // Known shapes
-  if ("destroyed" in val) return { primary: val.destroyed ? "🗑️  destroyed" : "─  not found" };
+  if ("destroyed" in val)
+    return { primary: val.destroyed ? "🗑️  destroyed" : "─  not found" };
   if (val.zone) return { primary: val.zone };
   if (val.name && val.id) return { primary: `${val.name}  [${val.id}]` };
   if (val.name) return { primary: val.name };
@@ -29,7 +30,7 @@ function formatEntry(val: any): OutputEntry {
   const inline = pairs.map(([, v]) => v).join("  ·  ");
   if (inline.length <= 52) return { primary: inline };
 
-  // Too long — first value as primary, rest as sub-lines
+  // Too long - first value as primary, rest as sub-lines
   const [[, first], ...rest] = pairs;
   return {
     primary: first,
@@ -75,7 +76,7 @@ function printOutputs(stackName: string, outputs: Record<string, any>) {
 }
 
 export abstract class Stack {
-  /** @internal — called by @Deploy to register the instance for cross-stack references. */
+  /** @internal - called by @Deploy to register the instance for cross-stack references. */
   static _register(cls: Function, instance: Stack): void {
     _registry.set(cls, instance);
   }
@@ -94,9 +95,10 @@ export abstract class Stack {
    */
   static from<T extends Stack>(cls: new (...args: any[]) => T): T {
     const instance = _registry.get(cls);
-    if (!instance) throw new Error(
-      `Stack "${cls.name}" is not registered. Make sure it is decorated with @Deploy and its module is imported before referencing it.`
-    );
+    if (!instance)
+      throw new Error(
+        `Stack "${cls.name}" is not registered. Make sure it is decorated with @Deploy and its module is imported before referencing it.`,
+      );
     return instance as T;
   }
 

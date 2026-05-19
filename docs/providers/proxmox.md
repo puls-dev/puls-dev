@@ -40,10 +40,11 @@ Proxmox.VM("ix-sto1-app01")
   .image(OS.UBUNTU_24_04)     // template VMID or name substring
   .cores(4)
   .memory(8192)               // MB
-  .ip("10.8.10.83")           // static IP — omit for DHCP or DNS auto-resolve
+  .ip("10.8.10.83")           // static IP - omit for DHCP or DNS auto-resolve
   .vlan(2010)                 // VLAN tag on vmbr1
   .sshKey(KEYS)               // array of public key strings
-  .provision("config/default.yaml")   // run after first boot
+  .provision("config/default.yaml")   // single script or playbook
+  .provision(["common.sh", "app.yml"]) // or multiple files run in order
   .replace("ix-sto1-app01-old")       // destroy old VM after new one is up
 ```
 
@@ -54,7 +55,7 @@ Templates are matched by VMID (numeric string) or name substring:
 ```typescript
 export const OS = {
   UBUNTU_22_04: "ubuntu-22.04",   // name substring match
-  UBUNTU_24_04: "9017",           // VMID match — use when name is ambiguous
+  UBUNTU_24_04: "9017",           // VMID match - use when name is ambiguous
   DEBIAN_11:    "debian-11",
   DEBIAN_12:    "debian-12",
 } as const;
@@ -68,11 +69,11 @@ export const KEYS = [
 ] as const;
 ```
 
-Pass via `.sshKey(KEYS)` — injected into cloud-init so every VM has your team's keys from first boot.
+Pass via `.sshKey(KEYS)` - injected into cloud-init so every VM has your team's keys from first boot.
 
 ## IP resolution
 
-Static IP via `.ip("10.8.10.83")` — sets cloud-init `ipconfig0` with gateway derived from the first three octets (`10.8.10.1`).
+Static IP via `.ip("10.8.10.83")` - sets cloud-init `ipconfig0` with gateway derived from the first three octets (`10.8.10.1`).
 
 If no `.ip()` is set, Puls tries DNS first:
 
@@ -85,11 +86,11 @@ Configure `dnsDomain` in `CONFIG` to enable this.
 
 ## Provisioning pipeline
 
-After a VM starts, Puls runs these steps before calling the provisioner:
+After a VM starts, Puls runs these steps for each provisioner provided to `.provision()`:
 
-1. **TCP probe** — polls port 22 until SSH is accepting connections
-2. **cloud-init wait** — runs `cloud-init status` via SSH until it returns `done` or `error` (Ubuntu runs `apt` in the background on first boot — skipping this causes package conflicts)
-3. **Provisioner** — dispatched by file extension
+1. **TCP probe** (first provisioner only) - polls port 22 until SSH is accepting connections
+2. **cloud-init wait** (first provisioner only) - runs `cloud-init status` via SSH until it returns `done` or `error`
+3. **Provisioner** - dispatched by file extension
 
 | Extension | Action |
 |-----------|--------|
@@ -97,7 +98,7 @@ After a VM starts, Puls runs these steps before calling the provisioner:
 | `.sh` | `scp -r scriptDir/ root@IP:/` then `ssh 'bash -s' < script` |
 | `.pp` | `scp manifest.pp /tmp/` then `ssh 'puppet apply /tmp/manifest.pp'` |
 
-For shell scripts, the entire directory containing the script is scp'd first — companion files (GPG keys, configs) are available on the remote at the same relative path.
+For shell scripts, the entire directory containing the script is scp'd first - companion files (GPG keys, configs) are available on the remote at the same relative path.
 
 ### Ansible example (`config/default.yaml`)
 
@@ -155,7 +156,7 @@ class StagingInfra extends Stack {
 }
 ```
 
-Or use `.replace()` for an atomic swap — new VM is fully provisioned before the old one is removed:
+Or use `.replace()` for an atomic swap - new VM is fully provisioned before the old one is removed:
 
 ```typescript
 Proxmox.VM("ix-sto1-app02")
@@ -165,15 +166,13 @@ Proxmox.VM("ix-sto1-app02")
 
 Destroy stops the VM gracefully, then deletes it with `purge=1&destroy-unreferenced-disks=1`.
 
-Provisioning is **skipped** during destroy — only discovery and deletion run.
+Provisioning is **skipped** during destroy - only discovery and deletion run.
 
 ## Full example
 
 ```typescript
-import { Proxmox } from "./src/providers/proxmox/index.ts";
-import { CONFIG, OS, KEYS } from "./src/types/proxmox.ts";
-import { Stack } from "./src/core/stack.ts";
-import { Deploy, Destroy, Protected } from "./src/core/decorators.ts";
+import { Proxmox, PROXMOX_TYPES, Stack, Deploy, Destroy, Protected } from "puls-dev";
+const { CONFIG, OS, KEYS } = PROXMOX_TYPES;
 
 @Deploy({ proxmox: CONFIG.STAGING })
 class StagingInfra extends Stack {

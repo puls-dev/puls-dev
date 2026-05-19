@@ -1,11 +1,11 @@
-import { BaseBuilder } from '../../core/resource.js';
-import { Output } from '../../core/output.js';
-import { DropletBuilder } from './droplet.js';
-import { CertificateBuilder } from './certificate.js';
-import { getDoApi } from './api.js';
+import { BaseBuilder } from "../../core/resource.js";
+import { Output } from "../../core/output.js";
+import { DropletBuilder } from "./droplet.js";
+import { CertificateBuilder } from "./certificate.js";
+import { getDoApi } from "./api.js";
 
 export interface DNSRecord {
-  type: 'A' | 'CNAME' | 'TXT' | 'MX';
+  type: "A" | "CNAME" | "TXT" | "MX";
   name: string;
   value: string | DropletBuilder | Output<string>;
 }
@@ -21,7 +21,9 @@ export class DomainBuilder extends BaseBuilder {
   private async discoverDomain(name: string): Promise<any> {
     const api = getDoApi();
     try {
-      return await api.get<{ domain: any }>(`/domains/${name}`).then(d => d.domain);
+      return await api
+        .get<{ domain: any }>(`/domains/${name}`)
+        .then((d) => d.domain);
     } catch {
       return null;
     }
@@ -34,12 +36,12 @@ export class DomainBuilder extends BaseBuilder {
   }
 
   pointer(name: string, target: DropletBuilder | Output<string> | string) {
-    this.records.push({ type: 'A', name, value: target });
+    this.records.push({ type: "A", name, value: target });
     return this;
   }
 
   cname(name: string, target: string) {
-    this.records.push({ type: 'CNAME', name, value: target });
+    this.records.push({ type: "CNAME", name, value: target });
     return this;
   }
 
@@ -54,7 +56,7 @@ export class DomainBuilder extends BaseBuilder {
       if (dryRun) {
         console.log(`   📝 [PLAN] Create domain ${this.domainName}`);
       } else {
-        await api.post('/domains', { name: this.domainName });
+        await api.post("/domains", { name: this.domainName });
         console.log(`🚀 Created domain ${this.domainName}`);
       }
     }
@@ -65,13 +67,17 @@ export class DomainBuilder extends BaseBuilder {
       if (record.value instanceof Output) {
         data = await record.value.get();
       } else if (record.value instanceof DropletBuilder) {
-        data = (await record.value.getPublicIp()) ?? `[IP of ${record.value.name} — not found]`;
+        data =
+          (await record.value.getPublicIp()) ??
+          `[IP of ${record.value.name} - not found]`;
       } else {
         data = record.value;
       }
 
       if (dryRun) {
-        console.log(`   📝 [PLAN] ${record.type} ${record.name}.${this.domainName} → ${data}`);
+        console.log(
+          `   📝 [PLAN] ${record.type} ${record.name}.${this.domainName} → ${data}`,
+        );
         continue;
       }
 
@@ -80,9 +86,10 @@ export class DomainBuilder extends BaseBuilder {
         `/domains/${this.domainName}/records?per_page=200`,
       );
       const dupe = existing_records.domain_records.find(
-        r => r.type === record.type && r.name === record.name,
+        (r) => r.type === record.type && r.name === record.name,
       );
-      if (dupe) await api.delete(`/domains/${this.domainName}/records/${dupe.id}`);
+      if (dupe)
+        await api.delete(`/domains/${this.domainName}/records/${dupe.id}`);
 
       await api.post(`/domains/${this.domainName}/records`, {
         type: record.type,
@@ -91,7 +98,9 @@ export class DomainBuilder extends BaseBuilder {
         ttl: 3600,
       });
 
-      console.log(`   ✅ ${record.type} ${record.name}.${this.domainName} → ${data}`);
+      console.log(
+        `   ✅ ${record.type} ${record.name}.${this.domainName} → ${data}`,
+      );
     }
 
     await this.deploySidecars();

@@ -1,31 +1,37 @@
-import { readFileSync, unlinkSync } from 'node:fs';
-import { execSync } from 'node:child_process';
-import { tmpdir } from 'node:os';
-import { join, extname } from 'node:path';
+import { readFileSync, unlinkSync } from "node:fs";
+import { execSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { join, extname } from "node:path";
 import {
   GetFunctionCommand,
   CreateFunctionCommand,
   UpdateFunctionCodeCommand,
   UpdateFunctionConfigurationCommand,
   DeleteFunctionCommand,
-} from '@aws-sdk/client-lambda';
+} from "@aws-sdk/client-lambda";
 import {
   GetRoleCommand,
   CreateRoleCommand,
   AttachRolePolicyCommand,
-} from '@aws-sdk/client-iam';
-import { BaseBuilder } from '../../core/resource.js';
-import { getLambdaClient, getIAMClient } from './api.js';
-import { SecretsBuilder, resolveEnvVars } from './secrets.js';
+} from "@aws-sdk/client-iam";
+import { BaseBuilder } from "../../core/resource.js";
+import { getLambdaClient, getIAMClient } from "./api.js";
+import { SecretsBuilder, resolveEnvVars } from "./secrets.js";
 
 const ASSUME_ROLE_POLICY = JSON.stringify({
-  Version: '2012-10-17',
-  Statement: [{ Effect: 'Allow', Principal: { Service: 'lambda.amazonaws.com' }, Action: 'sts:AssumeRole' }],
+  Version: "2012-10-17",
+  Statement: [
+    {
+      Effect: "Allow",
+      Principal: { Service: "lambda.amazonaws.com" },
+      Action: "sts:AssumeRole",
+    },
+  ],
 });
 
 export class LambdaBuilder extends BaseBuilder {
-  private _runtime: string = 'nodejs20.x';
-  private _handler: string = 'index.handler';
+  private _runtime: string = "nodejs20.x";
+  private _handler: string = "index.handler";
   private _memory: number = 128;
   private _timeout: number = 30;
   private _codePath?: string;
@@ -40,23 +46,46 @@ export class LambdaBuilder extends BaseBuilder {
 
   private async discoverFunction(name: string): Promise<any> {
     try {
-      const result = await getLambdaClient().send(new GetFunctionCommand({ FunctionName: name }));
+      const result = await getLambdaClient().send(
+        new GetFunctionCommand({ FunctionName: name }),
+      );
       this.resolvedArn = result.Configuration?.FunctionArn ?? null;
       return result.Configuration ?? null;
     } catch (e: any) {
-      if (e.name === 'ResourceNotFoundException') return null;
-      if (e.name === 'CredentialsProviderError') return null;
+      if (e.name === "ResourceNotFoundException") return null;
+      if (e.name === "CredentialsProviderError") return null;
       throw e;
     }
   }
 
-  code(pathOrZip: string) { this._codePath = pathOrZip; return this; }
-  runtime(r: string)       { this._runtime = r; return this; }
-  handler(h: string)       { this._handler = h; return this; }
-  memory(mb: number)       { this._memory = mb; return this; }
-  timeout(seconds: number) { this._timeout = seconds; return this; }
-  role(arn: string)        { this._roleArn = arn; return this; }
-  env(vars: Record<string, string | SecretsBuilder>) { this._env = { ...this._env, ...vars }; return this; }
+  code(pathOrZip: string) {
+    this._codePath = pathOrZip;
+    return this;
+  }
+  runtime(r: string) {
+    this._runtime = r;
+    return this;
+  }
+  handler(h: string) {
+    this._handler = h;
+    return this;
+  }
+  memory(mb: number) {
+    this._memory = mb;
+    return this;
+  }
+  timeout(seconds: number) {
+    this._timeout = seconds;
+    return this;
+  }
+  role(arn: string) {
+    this._roleArn = arn;
+    return this;
+  }
+  env(vars: Record<string, string | SecretsBuilder>) {
+    this._env = { ...this._env, ...vars };
+    return this;
+  }
 
   private async ensureRole(): Promise<string> {
     if (this._roleArn) return this._roleArn;
@@ -65,39 +94,52 @@ export class LambdaBuilder extends BaseBuilder {
     const iam = getIAMClient();
 
     try {
-      const existing = await iam.send(new GetRoleCommand({ RoleName: roleName }));
+      const existing = await iam.send(
+        new GetRoleCommand({ RoleName: roleName }),
+      );
       return existing.Role!.Arn!;
     } catch (e: any) {
-      if (e.name !== 'NoSuchEntityException') throw e;
+      if (e.name !== "NoSuchEntityException") throw e;
     }
 
-    const created = await iam.send(new CreateRoleCommand({
-      RoleName: roleName,
-      AssumeRolePolicyDocument: ASSUME_ROLE_POLICY,
-      Description: `Execution role for OpsDSL Lambda "${this.name}"`,
-    }));
+    const created = await iam.send(
+      new CreateRoleCommand({
+        RoleName: roleName,
+        AssumeRolePolicyDocument: ASSUME_ROLE_POLICY,
+        Description: `Execution role for OpsDSL Lambda "${this.name}"`,
+      }),
+    );
 
-    await iam.send(new AttachRolePolicyCommand({
-      RoleName: roleName,
-      PolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
-    }));
+    await iam.send(
+      new AttachRolePolicyCommand({
+        RoleName: roleName,
+        PolicyArn:
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+      }),
+    );
 
     console.log(`   ✅ Created execution role: ${roleName}`);
-    // IAM propagation — Lambda rejects a brand-new role for ~10s
-    await new Promise(r => setTimeout(r, 10_000));
+    // IAM propagation - Lambda rejects a brand-new role for ~10s
+    await new Promise((r) => setTimeout(r, 10_000));
 
     return created.Role!.Arn!;
   }
 
   private buildZip(): Buffer {
-    if (!this._codePath) throw new Error(`[Lambda:${this.name}] .code(path) is required`);
+    if (!this._codePath)
+      throw new Error(`[Lambda:${this.name}] .code(path) is required`);
 
-    if (extname(this._codePath) === '.zip') {
+    if (extname(this._codePath) === ".zip") {
       return readFileSync(this._codePath);
     }
 
-    const outPath = join(tmpdir(), `puls-lambda-${this.name}-${Date.now()}.zip`);
-    execSync(`cd "${this._codePath}" && zip -r "${outPath}" .`, { stdio: 'pipe' });
+    const outPath = join(
+      tmpdir(),
+      `puls-lambda-${this.name}-${Date.now()}.zip`,
+    );
+    execSync(`cd "${this._codePath}" && zip -r "${outPath}" .`, {
+      stdio: "pipe",
+    });
     const buf = readFileSync(outPath);
     unlinkSync(outPath);
     return buf;
@@ -111,11 +153,18 @@ export class LambdaBuilder extends BaseBuilder {
     console.log(`\n⚡ Finalizing Lambda Function "${this.name}"...`);
 
     if (dryRun) {
-      console.log(`   📝 [PLAN] ${existing ? 'Update' : 'Create'} function "${this.name}"`);
-      console.log(`      └─ Runtime: ${this._runtime} | Handler: ${this._handler}`);
-      console.log(`      └─ Memory: ${this._memory}MB | Timeout: ${this._timeout}s`);
+      console.log(
+        `   📝 [PLAN] ${existing ? "Update" : "Create"} function "${this.name}"`,
+      );
+      console.log(
+        `      └─ Runtime: ${this._runtime} | Handler: ${this._handler}`,
+      );
+      console.log(
+        `      └─ Memory: ${this._memory}MB | Timeout: ${this._timeout}s`,
+      );
       if (this._codePath) console.log(`      └─ Code: ${this._codePath}`);
-      if (Object.keys(this._env).length) console.log(`      └─ Env vars: ${Object.keys(this._env).join(', ')}`);
+      if (Object.keys(this._env).length)
+        console.log(`      └─ Env vars: ${Object.keys(this._env).join(", ")}`);
       this.resolvedArn = `arn:aws:lambda:DRYRUN:000000000000:function:${this.name}`;
       return { name: this.name, arn: this.resolvedArn };
     }
@@ -132,31 +181,42 @@ export class LambdaBuilder extends BaseBuilder {
       MemorySize: this._memory,
       Timeout: this._timeout,
       Role: roleArn,
-      Environment: Object.keys(resolvedEnv).length ? { Variables: resolvedEnv } : undefined,
+      Environment: Object.keys(resolvedEnv).length
+        ? { Variables: resolvedEnv }
+        : undefined,
     };
 
     if (existing) {
       this.resolvedArn = existing.FunctionArn;
       await lambda.send(new UpdateFunctionConfigurationCommand(config));
       if (this._codePath) {
-        await lambda.send(new UpdateFunctionCodeCommand({
-          FunctionName: this.name,
-          ZipFile: this.buildZip(),
-        }));
+        await lambda.send(
+          new UpdateFunctionCodeCommand({
+            FunctionName: this.name,
+            ZipFile: this.buildZip(),
+          }),
+        );
         console.log(`   ✅ Updated function "${this.name}" (code + config)`);
       } else {
         console.log(`   ✅ Updated function "${this.name}" (config only)`);
       }
     } else {
-      if (!this._codePath) throw new Error(`[Lambda:${this.name}] .code(path) is required to create a function`);
+      if (!this._codePath)
+        throw new Error(
+          `[Lambda:${this.name}] .code(path) is required to create a function`,
+        );
 
-      const result = await lambda.send(new CreateFunctionCommand({
-        ...config,
-        Code: { ZipFile: this.buildZip() },
-      }));
+      const result = await lambda.send(
+        new CreateFunctionCommand({
+          ...config,
+          Code: { ZipFile: this.buildZip() },
+        }),
+      );
 
       this.resolvedArn = result.FunctionArn!;
-      console.log(`🚀 Created function "${this.name}" (arn=${this.resolvedArn})`);
+      console.log(
+        `🚀 Created function "${this.name}" (arn=${this.resolvedArn})`,
+      );
     }
 
     await this.deploySidecars();
@@ -170,7 +230,9 @@ export class LambdaBuilder extends BaseBuilder {
     console.log(`\n🗑️  Destroying Lambda Function "${this.name}"...`);
 
     if (!existing) {
-      console.log(`   ✅ Function "${this.name}" does not exist — nothing to do`);
+      console.log(
+        `   ✅ Function "${this.name}" does not exist - nothing to do`,
+      );
       return { destroyed: this.name };
     }
 
@@ -179,7 +241,9 @@ export class LambdaBuilder extends BaseBuilder {
       return { destroyed: this.name };
     }
 
-    await getLambdaClient().send(new DeleteFunctionCommand({ FunctionName: this.name }));
+    await getLambdaClient().send(
+      new DeleteFunctionCommand({ FunctionName: this.name }),
+    );
     console.log(`   ✅ Deleted function "${this.name}"`);
     return { destroyed: this.name };
   }

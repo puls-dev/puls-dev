@@ -11,7 +11,7 @@ import type { OSImage } from "../../types/proxmox.js";
 
 export class VMBuilder extends BaseBuilder {
   readonly out = {
-    ip:   new Output<string>(),
+    ip: new Output<string>(),
     vmid: new Output<number>(),
   };
 
@@ -129,7 +129,7 @@ export class VMBuilder extends BaseBuilder {
       return { name: this.name, vmid: "PENDING" };
     }
 
-    // Find the template — match by VMID (numeric string) or name substring
+    // Find the template - match by VMID (numeric string) or name substring
     const resources = await pm.get<any[]>("/cluster/resources?type=vm");
     const isVmid = this._image && /^\d+$/.test(this._image);
     const template = this._image
@@ -181,7 +181,7 @@ export class VMBuilder extends BaseBuilder {
         },
       );
 
-      // Clone is async — wait for the Proxmox task to finish before configuring
+      // Clone is async - wait for the Proxmox task to finish before configuring
       await this.waitForTask(node, taskId, pm);
     } else {
       console.log(`   🆕 Creating blank VM "${this.name}" (vmid=${newVmid})`);
@@ -209,12 +209,12 @@ export class VMBuilder extends BaseBuilder {
           this._ip = addr;
           console.log(`   🔍 DNS: ${this.name}.${domain} → ${addr}`);
         } catch {
-          // Not in DNS — will fall through to DHCP
+          // Not in DNS - will fall through to DHCP
         }
       }
     }
 
-    // Build net0 string — VirtIO on vmbr1, optional VLAN tag
+    // Build net0 string - VirtIO on vmbr1, optional VLAN tag
     const net0 = `virtio,bridge=vmbr1${this._vlan ? `,tag=${this._vlan}` : ""}`;
 
     const configPatch: any = {
@@ -282,12 +282,20 @@ export class VMBuilder extends BaseBuilder {
     }
 
     if (this._provision) {
-      await this.waitFor(`SSH on ${this.resolvedIp} to be ready`, () => this.checkPort(this.resolvedIp!, 22),
-        { intervalMs: 10_000, timeoutMs: 300_000 });
-      await this.waitFor(`cloud-init to finish on ${this.resolvedIp}`, () => this.checkCloudInit(this.resolvedIp!),
-        { intervalMs: 15_000, timeoutMs: 300_000 });
-      
-      const scripts = Array.isArray(this._provision) ? this._provision : [this._provision];
+      await this.waitFor(
+        `SSH on ${this.resolvedIp} to be ready`,
+        () => this.checkPort(this.resolvedIp!, 22),
+        { intervalMs: 10_000, timeoutMs: 300_000 },
+      );
+      await this.waitFor(
+        `cloud-init to finish on ${this.resolvedIp}`,
+        () => this.checkCloudInit(this.resolvedIp!),
+        { intervalMs: 15_000, timeoutMs: 300_000 },
+      );
+
+      const scripts = Array.isArray(this._provision)
+        ? this._provision
+        : [this._provision];
       for (const script of scripts) {
         await this.runProvisioner(this.resolvedIp!, script);
       }
@@ -350,7 +358,7 @@ export class VMBuilder extends BaseBuilder {
     const resources = await pm.get<any[]>("/cluster/resources?type=vm");
     const vm = (resources ?? []).find((r) => r.name === name && !r.template);
     if (!vm) {
-      console.log(`   ℹ️  VM "${name}" not found — already gone`);
+      console.log(`   ℹ️  VM "${name}" not found - already gone`);
       return;
     }
 
@@ -410,29 +418,45 @@ export class VMBuilder extends BaseBuilder {
 
   private checkCloudInit(ip: string): Promise<boolean> {
     const keyPath = this.sshKeyPath();
-    return new Promise(resolve => {
-      const proc = spawn('ssh', [
-        '-i', keyPath,
-        '-o', 'StrictHostKeyChecking=no',
-        '-o', 'ConnectTimeout=10',
-        '-o', 'BatchMode=yes',
-        `root@${ip}`,
-        'cloud-init status',
-      ], { stdio: ['ignore', 'pipe', 'ignore'] });
+    return new Promise((resolve) => {
+      const proc = spawn(
+        "ssh",
+        [
+          "-i",
+          keyPath,
+          "-o",
+          "StrictHostKeyChecking=no",
+          "-o",
+          "ConnectTimeout=10",
+          "-o",
+          "BatchMode=yes",
+          `root@${ip}`,
+          "cloud-init status",
+        ],
+        { stdio: ["ignore", "pipe", "ignore"] },
+      );
 
-      let out = '';
-      proc.stdout.on('data', (d: Buffer) => out += d.toString());
-      proc.on('close', () => resolve(out.includes('done') || out.includes('error')));
-      proc.on('error', () => resolve(false));
+      let out = "";
+      proc.stdout.on("data", (d: Buffer) => (out += d.toString()));
+      proc.on("close", () =>
+        resolve(out.includes("done") || out.includes("error")),
+      );
+      proc.on("error", () => resolve(false));
     });
   }
 
   private checkPort(ip: string, port: number): Promise<boolean> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const socket = createConnection({ host: ip, port, timeout: 3_000 });
-      socket.on('connect', () => { socket.destroy(); resolve(true); });
-      socket.on('timeout', () => { socket.destroy(); resolve(false); });
-      socket.on('error', () => resolve(false));
+      socket.on("connect", () => {
+        socket.destroy();
+        resolve(true);
+      });
+      socket.on("timeout", () => {
+        socket.destroy();
+        resolve(false);
+      });
+      socket.on("error", () => resolve(false));
     });
   }
 

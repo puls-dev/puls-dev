@@ -39,7 +39,13 @@ function applyConfig(opts: ProviderOpts) {
   if (opts.firebase) {
     const sa = JSON.parse(readFileSync(opts.firebase, "utf8"));
     Config.set({
-      providers: { ...Config.get().providers, firebase: { projectId: sa.project_id, serviceAccountPath: opts.firebase } },
+      providers: {
+        ...Config.get().providers,
+        firebase: {
+          projectId: sa.project_id,
+          serviceAccountPath: opts.firebase,
+        },
+      },
     });
   }
 }
@@ -101,7 +107,7 @@ export function Check(opts: ProviderOpts = {}) {
   };
 }
 
-// Shortcut for Dry Run — accepts the same options as @Deploy
+// Shortcut for Dry Run - accepts the same options as @Deploy
 export function DryRun(opts: ProviderOpts | any = {}) {
   if (typeof opts === "function") {
     Deploy({ dryRun: true })(opts);

@@ -1,143 +1,193 @@
 import "reflect-metadata";
-import { Config }          from './config.js';
-import { listProxmoxVMs }  from '../providers/proxmox/list.js';
-import { listDoResources } from '../providers/do/list.js';
-import { listAwsResources} from '../providers/aws/list.js';
+import { Config } from "./config.js";
+import { listProxmoxVMs } from "../providers/proxmox/list.js";
+import { listDoResources } from "../providers/do/list.js";
+import { listAwsResources } from "../providers/aws/list.js";
 import type {
   InventoryResult,
   InventoryError,
   ProxmoxInventory,
   DoInventory,
   AwsInventory,
-} from '../types/inventory.ts';
+} from "../types/inventory.ts";
 
 // ─── Box-drawing ──────────────────────────────────────────────────────────────
 
 type Col<T> = { header: string; width: number; render: (row: T) => string };
 
 function clip(text: string, width: number): string {
-  return text.length > width ? text.slice(0, width - 1) + '…' : text.padEnd(width);
+  return text.length > width
+    ? text.slice(0, width - 1) + "…"
+    : text.padEnd(width);
 }
 
 function printSection<T>(title: string, rows: T[], cols: Col<T>[]): void {
-  const colsWidth = cols.reduce((s, c) => s + c.width, 0) + (cols.length - 1) * 2;
+  const colsWidth =
+    cols.reduce((s, c) => s + c.width, 0) + (cols.length - 1) * 2;
   const innerWidth = Math.max(colsWidth + 4, title.length + 4);
-  const bar = (l: string, r: string) => `  ${l}${'─'.repeat(innerWidth)}${r}`;
+  const bar = (l: string, r: string) => `  ${l}${"─".repeat(innerWidth)}${r}`;
   const row = (content: string) => `  │  ${content.padEnd(innerWidth - 4)}  │`;
 
-  console.log('');
-  console.log(bar('┌', '┐'));
+  console.log("");
+  console.log(bar("┌", "┐"));
   console.log(row(title));
-  console.log(bar('├', '┤'));
+  console.log(bar("├", "┤"));
 
   if (rows.length === 0) {
-    console.log(row('(none)'));
+    console.log(row("(none)"));
   } else {
-    const headerLine = cols.map((c) => clip(c.header.toUpperCase(), c.width)).join('  ');
+    const headerLine = cols
+      .map((c) => clip(c.header.toUpperCase(), c.width))
+      .join("  ");
     console.log(row(headerLine));
-    console.log(bar('├', '┤'));
+    console.log(bar("├", "┤"));
     for (const r of rows) {
-      console.log(row(cols.map((c) => clip(c.render(r), c.width)).join('  ')));
+      console.log(row(cols.map((c) => clip(c.render(r), c.width)).join("  ")));
     }
   }
 
-  console.log(bar('└', '┘'));
+  console.log(bar("└", "┘"));
 }
 
 // ─── Per-provider renderers ───────────────────────────────────────────────────
 
 function renderProxmox(inv: ProxmoxInventory): void {
-  const running = inv.vms.filter((v) => v.status === 'running').length;
+  const running = inv.vms.filter((v) => v.status === "running").length;
   printSection(
-    `Proxmox  ·  ${inv.vms.length} VM${inv.vms.length !== 1 ? 's' : ''}  (${running} running)`,
+    `Proxmox  ·  ${inv.vms.length} VM${inv.vms.length !== 1 ? "s" : ""}  (${running} running)`,
     inv.vms,
     [
-      { header: 'Name',   width: 26, render: (v) => v.name },
-      { header: 'VMID',   width: 6,  render: (v) => String(v.vmid) },
-      { header: 'Node',   width: 12, render: (v) => v.node },
-      { header: 'Status', width: 8,  render: (v) => v.status },
-      { header: 'Mem',    width: 6,  render: (v) => `${Math.round(v.maxmem / 1024 ** 3)}GB` },
-      { header: 'Disk',   width: 6,  render: (v) => `${Math.round(v.maxdisk / 1024 ** 3)}GB` },
+      { header: "Name", width: 26, render: (v) => v.name },
+      { header: "VMID", width: 6, render: (v) => String(v.vmid) },
+      { header: "Node", width: 12, render: (v) => v.node },
+      { header: "Status", width: 8, render: (v) => v.status },
+      {
+        header: "Mem",
+        width: 6,
+        render: (v) => `${Math.round(v.maxmem / 1024 ** 3)}GB`,
+      },
+      {
+        header: "Disk",
+        width: 6,
+        render: (v) => `${Math.round(v.maxdisk / 1024 ** 3)}GB`,
+      },
     ],
   );
 }
 
 function renderDo(inv: DoInventory): void {
-  const costStr = inv.totalMonthlyCost > 0 ? `  ·  $${inv.totalMonthlyCost}/mo` : '';
+  const costStr =
+    inv.totalMonthlyCost > 0 ? `  ·  $${inv.totalMonthlyCost}/mo` : "";
   printSection(
     `DigitalOcean Droplets  ·  ${inv.droplets.length}${costStr}`,
     inv.droplets,
     [
-      { header: 'Name',   width: 24, render: (d) => d.name },
-      { header: 'Region', width: 6,  render: (d) => d.region },
-      { header: 'Size',   width: 18, render: (d) => d.size },
-      { header: 'Status', width: 8,  render: (d) => d.status },
-      { header: 'IP',     width: 15, render: (d) => d.ip ?? '—' },
-      { header: '$/mo',   width: 5,  render: (d) => d.monthlyCost > 0 ? `$${d.monthlyCost}` : '?' },
+      { header: "Name", width: 24, render: (d) => d.name },
+      { header: "Region", width: 6, render: (d) => d.region },
+      { header: "Size", width: 18, render: (d) => d.size },
+      { header: "Status", width: 8, render: (d) => d.status },
+      { header: "IP", width: 15, render: (d) => d.ip ?? "-" },
+      {
+        header: "$/mo",
+        width: 5,
+        render: (d) => (d.monthlyCost > 0 ? `$${d.monthlyCost}` : "?"),
+      },
     ],
   );
 
   if (inv.firewalls.length > 0) {
-    printSection(`DigitalOcean Firewalls  ·  ${inv.firewalls.length}`, inv.firewalls, [
-      { header: 'Name',     width: 32, render: (f) => f.name },
-      { header: 'Droplets', width: 8,  render: (f) => String(f.dropletCount) },
-    ]);
+    printSection(
+      `DigitalOcean Firewalls  ·  ${inv.firewalls.length}`,
+      inv.firewalls,
+      [
+        { header: "Name", width: 32, render: (f) => f.name },
+        { header: "Droplets", width: 8, render: (f) => String(f.dropletCount) },
+      ],
+    );
   }
 
   if (inv.loadBalancers.length > 0) {
-    printSection(`DigitalOcean Load Balancers  ·  ${inv.loadBalancers.length}`, inv.loadBalancers, [
-      { header: 'Name',   width: 24, render: (lb) => lb.name },
-      { header: 'Region', width: 6,  render: (lb) => lb.region },
-      { header: 'IP',     width: 15, render: (lb) => lb.ip },
-      { header: 'Status', width: 8,  render: (lb) => lb.status },
-    ]);
+    printSection(
+      `DigitalOcean Load Balancers  ·  ${inv.loadBalancers.length}`,
+      inv.loadBalancers,
+      [
+        { header: "Name", width: 24, render: (lb) => lb.name },
+        { header: "Region", width: 6, render: (lb) => lb.region },
+        { header: "IP", width: 15, render: (lb) => lb.ip },
+        { header: "Status", width: 8, render: (lb) => lb.status },
+      ],
+    );
   }
 
   if (inv.domains.length > 0) {
-    printSection(`DigitalOcean Domains  ·  ${inv.domains.length}`, inv.domains, [
-      { header: 'Domain', width: 42, render: (d) => d.name },
-      { header: 'TTL',    width: 6,  render: (d) => String(d.ttl) },
-    ]);
+    printSection(
+      `DigitalOcean Domains  ·  ${inv.domains.length}`,
+      inv.domains,
+      [
+        { header: "Domain", width: 42, render: (d) => d.name },
+        { header: "TTL", width: 6, render: (d) => String(d.ttl) },
+      ],
+    );
   }
 }
 
 function renderAws(inv: AwsInventory): void {
   if (inv.distributions.length > 0) {
-    printSection(`AWS CloudFront  ·  ${inv.distributions.length}  ·  ${inv.region}`, inv.distributions, [
-      { header: 'ID',     width: 14, render: (d) => d.id },
-      { header: 'Domain', width: 34, render: (d) => d.aliases[0] ?? d.domain },
-      { header: 'Status', width: 10, render: (d) => d.status },
-    ]);
+    printSection(
+      `AWS CloudFront  ·  ${inv.distributions.length}  ·  ${inv.region}`,
+      inv.distributions,
+      [
+        { header: "ID", width: 14, render: (d) => d.id },
+        {
+          header: "Domain",
+          width: 34,
+          render: (d) => d.aliases[0] ?? d.domain,
+        },
+        { header: "Status", width: 10, render: (d) => d.status },
+      ],
+    );
   }
 
   if (inv.buckets.length > 0) {
     printSection(`AWS S3  ·  ${inv.buckets.length} buckets`, inv.buckets, [
-      { header: 'Bucket', width: 52, render: (b) => b.name },
+      { header: "Bucket", width: 52, render: (b) => b.name },
     ]);
   }
 
   if (inv.lambdas.length > 0) {
-    printSection(`AWS Lambda  ·  ${inv.lambdas.length} functions`, inv.lambdas, [
-      { header: 'Function', width: 32, render: (f) => f.name },
-      { header: 'Runtime',  width: 12, render: (f) => f.runtime },
-      { header: 'Memory',   width: 8,  render: (f) => `${f.memorySizeMb}MB` },
-    ]);
+    printSection(
+      `AWS Lambda  ·  ${inv.lambdas.length} functions`,
+      inv.lambdas,
+      [
+        { header: "Function", width: 32, render: (f) => f.name },
+        { header: "Runtime", width: 12, render: (f) => f.runtime },
+        { header: "Memory", width: 8, render: (f) => `${f.memorySizeMb}MB` },
+      ],
+    );
   }
 
   if (inv.rdsInstances.length > 0) {
-    printSection(`AWS RDS  ·  ${inv.rdsInstances.length} instances`, inv.rdsInstances, [
-      { header: 'Identifier', width: 26, render: (i) => i.identifier },
-      { header: 'Engine',     width: 18, render: (i) => i.engine },
-      { header: 'Class',      width: 14, render: (i) => i.instanceClass },
-      { header: 'Status',     width: 10, render: (i) => i.status },
-    ]);
+    printSection(
+      `AWS RDS  ·  ${inv.rdsInstances.length} instances`,
+      inv.rdsInstances,
+      [
+        { header: "Identifier", width: 26, render: (i) => i.identifier },
+        { header: "Engine", width: 18, render: (i) => i.engine },
+        { header: "Class", width: 14, render: (i) => i.instanceClass },
+        { header: "Status", width: 10, render: (i) => i.status },
+      ],
+    );
   }
 
   if (inv.hostedZones.length > 0) {
-    printSection(`AWS Route53  ·  ${inv.hostedZones.length} zones`, inv.hostedZones, [
-      { header: 'Zone',    width: 38, render: (z) => z.name },
-      { header: 'Records', width: 7,  render: (z) => String(z.recordCount) },
-    ]);
+    printSection(
+      `AWS Route53  ·  ${inv.hostedZones.length} zones`,
+      inv.hostedZones,
+      [
+        { header: "Zone", width: 38, render: (z) => z.name },
+        { header: "Records", width: 7, render: (z) => String(z.recordCount) },
+      ],
+    );
   }
 }
 
@@ -145,42 +195,54 @@ function renderAws(inv: AwsInventory): void {
 
 export abstract class Checker {
   async check(): Promise<InventoryResult> {
-    const cfg    = Config.get();
+    const cfg = Config.get();
     const errors: InventoryError[] = [];
-    const result: InventoryResult  = { errors };
-    const tasks:  Promise<void>[]  = [];
+    const result: InventoryResult = { errors };
+    const tasks: Promise<void>[] = [];
 
     console.log(`\n🔍 Checking infrastructure...`);
 
     if (cfg.providers.proxmox?.url && cfg.providers.proxmox?.tokenSecret) {
       tasks.push(
         listProxmoxVMs()
-          .then((inv) => { result.proxmox = inv; })
-          .catch((err: Error) => { errors.push({ provider: 'proxmox', message: err.message }); }),
+          .then((inv) => {
+            result.proxmox = inv;
+          })
+          .catch((err: Error) => {
+            errors.push({ provider: "proxmox", message: err.message });
+          }),
       );
     }
 
     if (cfg.providers.do?.token) {
       tasks.push(
         listDoResources()
-          .then((inv) => { result.do = inv; })
-          .catch((err: Error) => { errors.push({ provider: 'do', message: err.message }); }),
+          .then((inv) => {
+            result.do = inv;
+          })
+          .catch((err: Error) => {
+            errors.push({ provider: "do", message: err.message });
+          }),
       );
     }
 
     if (cfg.providers.aws?.region) {
       tasks.push(
         listAwsResources()
-          .then((inv) => { result.aws = inv; })
-          .catch((err: Error) => { errors.push({ provider: 'aws', message: err.message }); }),
+          .then((inv) => {
+            result.aws = inv;
+          })
+          .catch((err: Error) => {
+            errors.push({ provider: "aws", message: err.message });
+          }),
       );
     }
 
     await Promise.all(tasks);
 
     if (result.proxmox) renderProxmox(result.proxmox);
-    if (result.do)      renderDo(result.do);
-    if (result.aws)     renderAws(result.aws);
+    if (result.do) renderDo(result.do);
+    if (result.aws) renderAws(result.aws);
 
     for (const e of errors) {
       console.warn(`\n  [!] ${e.provider}: ${e.message}`);
@@ -188,7 +250,9 @@ export abstract class Checker {
 
     const totalCost = result.do?.totalMonthlyCost ?? 0;
     if (totalCost > 0) {
-      console.log(`\n  Total estimated monthly cost (DigitalOcean): $${totalCost}`);
+      console.log(
+        `\n  Total estimated monthly cost (DigitalOcean): $${totalCost}`,
+      );
     }
 
     return result;

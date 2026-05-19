@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.">
+        <meta name="description" content="Intent-driven infrastructure-as-code. Describe what you want - Puls figures out create, update, or skip.">
       
       
       
@@ -933,7 +933,7 @@
 <h1 id="contributing-to-puls">Contributing to Puls</h1>
 <h2 id="the-one-rule">The one rule</h2>
 <p><strong>If you can't describe it in one line, it doesn't belong in the DSL.</strong></p>
-<p>Infrastructure is "give me X" — not "give me X with A, I, O, and P." Puls exists to make that true. A VM, a bucket, a distribution. One expression. The complexity lives in the implementation, not the interface.</p>
+<p>Infrastructure is "give me X" - not "give me X with A, I, O, and P." Puls exists to make that true. A VM, a bucket, a distribution. One expression. The complexity lives in the implementation, not the interface.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// This is Puls</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;game-server&quot;</span><span class="p">).</span><span class="nx">image</span><span class="p">(</span><span class="nx">OS</span><span class="p">.</span><span class="nx">UBUNTU_24_04</span><span class="p">).</span><span class="nx">cores</span><span class="p">(</span><span class="mf">4</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">8192</span><span class="p">).</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/default.yaml&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
@@ -942,8 +942,8 @@
 </code></pre></div>
 <p>The DSL is TypeScript. You can write whatever you want around it. But anything that ships <em>inside</em> it has to pass the one-liner test.</p>
 <h2 id="the-idea-that-powers-puls">The idea that powers Puls</h2>
-<p>The idea is to make infrastructure easy to describe and deploy, with sane defaults hiding the complexity underneath. You don't need to know how the DSL works — you just need to know what you want. It has no limitations and is designed to be extensible, without ever feeling like you have to reach for custom resources just because the abstraction broke down.</p>
-<p>A junior engineer unfamiliar with the underlying platform can spin up a domain with a wildcard certificate, link it to two CloudFront distributions, and wire those to an S3 bucket — all correctly configured and idempotent — without understanding any of the plumbing. Because it's plain TypeScript with typed constants, they get autocomplete, type checking, and a readable stack that a senior engineer would be comfortable owning.</p>
+<p>The idea is to make infrastructure easy to describe and deploy, with sane defaults hiding the complexity underneath. You don't need to know how the DSL works - you just need to know what you want. It has no limitations and is designed to be extensible, without ever feeling like you have to reach for custom resources just because the abstraction broke down.</p>
+<p>A junior engineer unfamiliar with the underlying platform can spin up a domain with a wildcard certificate, link it to two CloudFront distributions, and wire those to an S3 bucket - all correctly configured and idempotent - without understanding any of the plumbing. Because it's plain TypeScript with typed constants, they get autocomplete, type checking, and a readable stack that a senior engineer would be comfortable owning.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="kt">REGION.US_EAST_1</span><span class="p">,</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">class</span><span class="w"> </span><span class="nx">Example</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nx">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">()</span>
@@ -968,10 +968,10 @@
 <h2 id="what-belongs-in-the-dsl">What belongs in the DSL</h2>
 <p>A contribution belongs here if it:</p>
 <ul>
-<li><strong>Hides real complexity behind a sane default.</strong> The user says what they want. The DSL figures out how. <code>allowPublicWeb()</code> opens ports 80 and 443 — the user doesn't think about firewall rules.</li>
+<li><strong>Hides real complexity behind a sane default.</strong> The user says what they want. The DSL figures out how. <code>allowPublicWeb()</code> opens ports 80 and 443 - the user doesn't think about firewall rules.</li>
 <li><strong>Is idempotent by default.</strong> Running the same stack twice must always be safe. Every resource checks current state before acting.</li>
 <li><strong>Follows eager discovery.</strong> The moment a resource is declared, it starts checking the real API in the background. No separate plan step, no local state files.</li>
-<li><strong>Uses the constants pattern.</strong> IDs, sizes, regions, and credentials live in typed constants — not inline strings.</li>
+<li><strong>Uses the constants pattern.</strong> IDs, sizes, regions, and credentials live in typed constants - not inline strings.</li>
 </ul>
 <h2 id="what-doesnt-belong">What doesn't belong</h2>
 <ul>
@@ -980,17 +980,17 @@
 <li>Escape hatches that let users pass raw provider config through the DSL surface</li>
 <li>Anything that breaks the one-expression-per-resource model</li>
 </ul>
-<p>If the use case is genuinely too complex to fit — that's fine. It belongs in userland TypeScript, not in the DSL.</p>
+<p>If the use case is genuinely too complex to fit - that's fine. It belongs in userland TypeScript, not in the DSL.</p>
 <hr />
 <h2 id="adding-a-provider">Adding a provider</h2>
 <p>A new provider must implement:</p>
 <ol>
-<li><strong>Eager discovery</strong> in the constructor — <code>this.discoveryPromise = this.discover(name)</code></li>
-<li><strong>Idempotent <code>deploy()</code></strong> — check discovery result, skip if already correct</li>
-<li><strong><code>destroy()</code></strong> — stop and remove the resource cleanly</li>
-<li><strong>Dry-run support</strong> — <code>this.isDryRunActive()</code> gates every API write</li>
-<li><strong>Constants</strong> — a types file with named environments (<code>CONFIG</code>), images (<code>OS</code>), sizes, etc.</li>
-<li><strong>Sane defaults</strong> — a resource declared with only a name should be deployable</li>
+<li><strong>Eager discovery</strong> in the constructor - <code>this.discoveryPromise = this.discover(name)</code></li>
+<li><strong>Idempotent <code>deploy()</code></strong> - check discovery result, skip if already correct</li>
+<li><strong><code>destroy()</code></strong> - stop and remove the resource cleanly</li>
+<li><strong>Dry-run support</strong> - <code>this.isDryRunActive()</code> gates every API write</li>
+<li><strong>Constants</strong> - a types file with named environments (<code>CONFIG</code>), images (<code>OS</code>), sizes, etc.</li>
+<li><strong>Sane defaults</strong> - a resource declared with only a name should be deployable</li>
 </ol>
 <p>The existing providers (DigitalOcean, AWS, Proxmox) are the reference implementation. When in doubt, look at how they do it.</p>
 <hr />
@@ -999,7 +999,7 @@
 <blockquote>
 <p><em>Can a user express this in one line with obvious method names and no required knowledge of the underlying API?</em></p>
 </blockquote>
-<p>If yes — it probably belongs here. If not — simplify the interface until it does, or ship it as a standalone package that wraps the DSL.</p>
+<p>If yes - it probably belongs here. If not - simplify the interface until it does, or ship it as a standalone package that wraps the DSL.</p>
 
 
 

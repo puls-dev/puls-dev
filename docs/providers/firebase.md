@@ -12,7 +12,7 @@ Auth uses a **service account JSON file** from the Firebase console.
 FIREBASE_SA=./firebase/service-account.json
 ```
 
-The `firebase` option in `@Deploy` is optional — if `FIREBASE_SA` is set in your environment, it's picked up automatically.
+The `firebase` option in `@Deploy` is optional - if `FIREBASE_SA` is set in your environment, it's picked up automatically.
 
 ```typescript
 // Explicit
@@ -33,13 +33,13 @@ Firebase.Hosting("your-site-id")
   .source("./dist")   // path to your built static files
 ```
 
-The site ID is the Firebase Hosting site name — by default it matches your project ID (e.g. `my-project` → `https://my-project.web.app`).
+The site ID is the Firebase Hosting site name - by default it matches your project ID (e.g. `my-project` → `https://my-project.web.app`).
 
 **Deploy flow:**
 
 1. Creates a new Hosting version
 2. SHA256-hashes all files in the source directory
-3. Sends the hash map to Firebase — only files that changed are uploaded
+3. Sends the hash map to Firebase - only files that changed are uploaded
 4. Finalizes the version and creates a release
 5. Outputs the live URL
 
@@ -52,9 +52,7 @@ The site ID is the Firebase Hosting site name — by default it matches your pro
 ```typescript
 import "dotenv/config";
 import "reflect-metadata";
-import { Firebase } from "./src/providers/firebase/index.ts";
-import { Stack } from "./src/core/stack.ts";
-import { Deploy } from "./src/core/decorators.ts";
+import { Firebase, Stack, Deploy } from "puls-dev";
 
 @Deploy({ dryRun: false })
 class DocsSite extends Stack {

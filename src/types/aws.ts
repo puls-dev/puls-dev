@@ -1,4 +1,4 @@
-// Define your secret IDs here — reference them everywhere instead of raw strings.
+// Define your secret IDs here - reference them everywhere instead of raw strings.
 // Example:
 // export const SECRETS = {
 //   API_KEY:     "myapp/api-key",

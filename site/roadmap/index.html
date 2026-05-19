@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.">
+        <meta name="description" content="Intent-driven infrastructure-as-code. Describe what you want - Puls figures out create, update, or skip.">
       
       
       
@@ -819,7 +819,7 @@
   <a href="#aws-completion-path-in-order" class="md-nav__link">
     <span class="md-ellipsis">
       
-        AWS — Completion path (in order)
+        AWS - Completion path (in order)
       
     </span>
   </a>
@@ -986,7 +986,7 @@
   <a href="#aws-completion-path-in-order" class="md-nav__link">
     <span class="md-ellipsis">
       
-        AWS — Completion path (in order)
+        AWS - Completion path (in order)
       
     </span>
   </a>
@@ -1063,26 +1063,25 @@
 
 
 <h1 id="roadmap">Roadmap</h1>
-<p>Internal tracking doc — improvements, new providers, and the path to a publishable NPM package.</p>
+<p>Internal tracking doc - improvements, new providers, and the path to a publishable NPM package.</p>
 <hr />
 <h2 id="tech-debt">Tech Debt</h2>
 <ul>
-<li>[ ] <code>package.json</code> has <code>"type": "commonjs"</code> and <code>"main": "index.js"</code> — no real entry point exists, needs rethinking before any npm publish</li>
-<li>[ ] <code>config/default.sh</code> is superseded by <code>config/default.yaml</code> — can be removed once Ansible is confirmed as the standard</li>
+<li>[ ] <code>config/default.sh</code> is superseded by <code>config/default.yaml</code> - can be removed once Ansible is confirmed as the standard</li>
 </ul>
 <hr />
 <h2 id="provider-improvements">Provider Improvements</h2>
 <h3 id="proxmox">Proxmox</h3>
 <ul>
-<li>[ ] Cluster-aware node selection — pick the node with the most free RAM via <code>/nodes</code> API instead of always using the first configured node</li>
-<li>[ ] <code>.machine()</code> builder method — let users override machine type (i440fx vs q35) per VM rather than the hardcoded default</li>
-<li>[ ] <code>CONFIG.PRODUCTION</code> entry in <code>src/types/proxmox.ts</code></li>
+<li>[ ] Cluster-aware node selection - pick the node with the most free RAM via <code>/nodes</code> API instead of always using the first configured node</li>
+<li>[ ] <code>.machine()</code> builder method - let users override machine type (i440fx vs q35) per VM rather than the hardcoded default</li>
+<li>[ ] CONFIG.PRODUCTION entry in src/types/proxmox.ts</li>
 </ul>
 <h3 id="aws">AWS</h3>
 <ul>
-<li>[x] CloudFront cache invalidation — <code>.invalidate(paths[])</code> on a CloudFront builder</li>
-<li>[x] S3 file upload — <code>.upload(filePath)</code> uploads a single file to the bucket on deploy</li>
-<li>[ ] Route53 A-record upsert — currently only CNAMEs are supported via <code>upsertCnames()</code></li>
+<li>[x] CloudFront cache invalidation - <code>.invalidate(paths[])</code> on a CloudFront builder</li>
+<li>[x] S3 file upload - <code>.upload(filePath)</code> uploads a single file to the bucket on deploy</li>
+<li>[ ] Route53 A-record upsert - currently only CNAMEs are supported via <code>upsertCnames()</code></li>
 <li>[ ] S3 static site hosting config</li>
 </ul>
 <h3 id="digitalocean">DigitalOcean</h3>
@@ -1091,17 +1090,17 @@
 </ul>
 <hr />
 <h2 id="new-providers">New Providers</h2>
-<h3 id="aws-completion-path-in-order">AWS — Completion path (in order)</h3>
+<h3 id="aws-completion-path-in-order">AWS - Completion path (in order)</h3>
 <ul>
-<li>[x] <strong>Lambda</strong> — deploy a function from a local zip or directory; most DSL-friendly compute primitive</li>
-<li>[x] <strong>API Gateway</strong> — route HTTP → Lambda; pairs naturally, minimal config surface</li>
-<li>[x] <strong>ECS / Fargate</strong> — container services without instance management; no VPC required for Fargate</li>
-<li>[x] <strong>RDS</strong> — managed database instances (Postgres, MySQL)</li>
-<li>[x] <strong>SQS</strong> — queues as event-driven glue between the above</li>
-<li>[ ] <strong>EC2</strong> — lower priority; Proxmox already covers the raw-VM use case, and EC2 needs VPC/SG/keypair support to be useful</li>
+<li>[x] <strong>Lambda</strong> - deploy a function from a local zip or directory; most DSL-friendly compute primitive</li>
+<li>[x] <strong>API Gateway</strong> - route HTTP → Lambda; pairs naturally, minimal config surface</li>
+<li>[x] <strong>ECS / Fargate</strong> - container services without instance management; no VPC required for Fargate</li>
+<li>[x] <strong>RDS</strong> - managed database instances (Postgres, MySQL)</li>
+<li>[x] <strong>SQS</strong> - queues as event-driven glue between the above</li>
+<li>[ ] <strong>EC2</strong> - lower priority; Proxmox already covers the raw-VM use case, and EC2 needs VPC/SG/keypair support to be useful</li>
 </ul>
 <h3 id="gcp-firebase">GCP / Firebase</h3>
-<p>Firebase maps naturally to the DSL — each service is a one-liner with sane defaults, no cluster management.</p>
+<p>Firebase maps naturally to the DSL - each service is a one-liner with sane defaults, no cluster management.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="kt">GCP_REGION.EU_WEST1</span><span class="p">,</span><span class="w"> </span><span class="nx">token</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.FIREBASE_JSON</span><span class="w"> </span><span class="p">})</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">class</span><span class="w"> </span><span class="nx">Blog</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nx">app</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="nx">Firebase</span><span class="p">.</span><span class="nx">App</span><span class="p">(</span><span class="s2">&quot;myblog&quot;</span><span class="p">).</span><span class="nx">config</span><span class="p">(</span><span class="s2">&quot;./dist&quot;</span><span class="p">);</span>
@@ -1110,24 +1109,25 @@
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">}</span>
 </code></pre></div>
 <ul>
-<li>[x] <code>src/types/gcp.ts</code> — <code>GCP_REGION</code> constants</li>
-<li>[x] <strong>Firebase Hosting</strong> — deploy a web app from a local build directory</li>
-<li>[ ] <strong>Firebase Functions</strong> — deploy Cloud Functions from a local source directory</li>
-<li>[ ] <strong>Firebase Firestore</strong> — database with rules deployment</li>
-<li>[ ] <strong>GCP Cloud Run</strong> — containerized services, closer to ECS/Fargate parity</li>
-<li>[ ] <strong>GCP Cloud SQL</strong> — managed Postgres / MySQL on GCP</li>
+<li>[x] <code>src/types/gcp.ts</code> - <code>GCP_REGION</code> constants</li>
+<li>[x] <strong>Firebase Hosting</strong> - deploy a web app from a local build directory</li>
+<li>[ ] <strong>Firebase Functions</strong> - deploy Cloud Functions from a local source directory</li>
+<li>[ ] <strong>Firebase Firestore</strong> - database with rules deployment</li>
+<li>[ ] <strong>GCP Cloud Run</strong> - containerized services, closer to ECS/Fargate parity</li>
+<li>[ ] <strong>GCP Cloud SQL</strong> - managed Postgres / MySQL on GCP</li>
 </ul>
 <h3 id="community-driven">Community-driven</h3>
 <p>These are good-fit providers but maintained by the community, not core. The contributing guidelines enforce the DSL contract.</p>
 <ul>
-<li>[ ] <strong>CloudFlare</strong> — zones, DNS, CDN; natural alternative to CloudFront for teams avoiding AWS lock-in</li>
-<li>[ ] <strong>Hetzner Cloud</strong> — popular self-hosting alternative to DigitalOcean, similar API shape</li>
-<li>[ ] <strong>Akamai</strong> — enterprise CDN / edge; complex enough that it warrants a dedicated maintainer</li>
+<li>[ ] <strong>CloudFlare</strong> - zones, DNS, CDN; natural alternative to CloudFront for teams avoiding AWS lock-in</li>
+<li>[ ] <strong>Hetzner Cloud</strong> - popular self-hosting alternative to DigitalOcean, similar API shape</li>
+<li>[ ] <strong>Akamai</strong> - enterprise CDN / edge; complex enough that it warrants a dedicated maintainer</li>
 </ul>
 <hr />
 <h2 id="npm-package">NPM Package</h2>
 <ul>
-<li>[ ] Switch <code>package.json</code> to <code>"type": "module"</code> (ESM)</li>
+<li>[x] Switch <code>package.json</code> to <code>"type": "module"</code> (ESM)</li>
+<li>[x] Add basic test suite to satisfy release process</li>
 <li>[ ] Add <code>"exports"</code> map with per-provider sub-paths so consumers can import only what they need:
   <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">&quot;exports&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;./proxmox&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;./dist/providers/proxmox/index.js&quot;</span><span class="p">,</span>
@@ -1136,15 +1136,16 @@
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">}</span>
 </code></pre></div></li>
 <li>[ ] Ship compiled JS + <code>.d.ts</code> declarations; mark provider SDK packages as peer dependencies</li>
-<li>[ ] Semver versioning — provider additions = minor, breaking DSL changes = major</li>
+<li>[ ] Semver versioning - provider additions = minor, breaking DSL changes = major</li>
 </ul>
 <hr />
 <h2 id="framework-features">Framework Features</h2>
 <ul>
-<li>[ ] <strong>Stack outputs</strong> — pass values between stacks (e.g. VM IP from one stack feeds a DNS record in another)</li>
-<li>[ ] <strong>Secrets integration</strong> — pull credentials from Vault or AWS SSM at deploy time instead of env vars</li>
-<li>[ ] <strong>Hooks</strong> — <code>beforeDeploy</code> / <code>afterDeploy</code> callbacks on Stack for custom side effects</li>
-<li>[ ] <strong>Multi-region</strong> — run the same stack across N regions in parallel</li>
+<li>[x] <strong>Stack outputs</strong> - pass values between stacks (e.g. VM IP from one stack feeds a DNS record in another)</li>
+<li>[x] <strong>Inventory / <code>@Check</code></strong> - read-only discovery across all configured providers; prints counts, status, and DO cost estimates</li>
+<li>[ ] <strong>Secrets integration</strong> - pull credentials from Vault or AWS SSM at deploy time instead of env vars</li>
+<li>[ ] <strong>Hooks</strong> - <code>beforeDeploy</code> / <code>afterDeploy</code> callbacks on Stack for custom side effects</li>
+<li>[ ] <strong>Multi-region</strong> - run the same stack across N regions in parallel</li>
 </ul>
 
 

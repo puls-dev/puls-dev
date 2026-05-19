@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.">
+        <meta name="description" content="Intent-driven infrastructure-as-code. Describe what you want - Puls figures out create, update, or skip.">
       
       
       
@@ -1044,17 +1044,18 @@
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="nx">OS</span><span class="p">.</span><span class="nx">UBUNTU_24_04</span><span class="p">)</span><span class="w">     </span><span class="c1">// template VMID or name substring</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">cores</span><span class="p">(</span><span class="mf">4</span><span class="p">)</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">memory</span><span class="p">(</span><span class="mf">8192</span><span class="p">)</span><span class="w">               </span><span class="c1">// MB</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">ip</span><span class="p">(</span><span class="s2">&quot;10.8.10.83&quot;</span><span class="p">)</span><span class="w">           </span><span class="c1">// static IP — omit for DHCP or DNS auto-resolve</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">ip</span><span class="p">(</span><span class="s2">&quot;10.8.10.83&quot;</span><span class="p">)</span><span class="w">           </span><span class="c1">// static IP - omit for DHCP or DNS auto-resolve</span>
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">vlan</span><span class="p">(</span><span class="mf">2010</span><span class="p">)</span><span class="w">                 </span><span class="c1">// VLAN tag on vmbr1</span>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">)</span><span class="w">               </span><span class="c1">// array of public key strings</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/default.yaml&quot;</span><span class="p">)</span><span class="w">   </span><span class="c1">// run after first boot</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01-old&quot;</span><span class="p">)</span><span class="w">       </span><span class="c1">// destroy old VM after new one is up</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/default.yaml&quot;</span><span class="p">)</span><span class="w">   </span><span class="c1">// single script or playbook</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">([</span><span class="s2">&quot;common.sh&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app.yml&quot;</span><span class="p">])</span><span class="w"> </span><span class="c1">// or multiple files run in order</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01-old&quot;</span><span class="p">)</span><span class="w">       </span><span class="c1">// destroy old VM after new one is up</span>
 </code></pre></div>
 <h2 id="templates-os-constants">Templates (OS constants)</h2>
 <p>Templates are matched by VMID (numeric string) or name substring:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">OS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nx">UBUNTU_22_04</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ubuntu-22.04&quot;</span><span class="p">,</span><span class="w">   </span><span class="c1">// name substring match</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nx">UBUNTU_24_04</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;9017&quot;</span><span class="p">,</span><span class="w">           </span><span class="c1">// VMID match — use when name is ambiguous</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nx">UBUNTU_24_04</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;9017&quot;</span><span class="p">,</span><span class="w">           </span><span class="c1">// VMID match - use when name is ambiguous</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nx">DEBIAN_11</span><span class="o">:</span><span class="w">    </span><span class="s2">&quot;debian-11&quot;</span><span class="p">,</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nx">DEBIAN_12</span><span class="o">:</span><span class="w">    </span><span class="s2">&quot;debian-12&quot;</span><span class="p">,</span>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="p">}</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">;</span>
@@ -1064,20 +1065,20 @@
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="s2">&quot;ssh-ed25519 AAAA... bia@nolimitcity.com&quot;</span><span class="p">,</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">]</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">;</span>
 </code></pre></div>
-<p>Pass via <code>.sshKey(KEYS)</code> — injected into cloud-init so every VM has your team's keys from first boot.</p>
+<p>Pass via <code>.sshKey(KEYS)</code> - injected into cloud-init so every VM has your team's keys from first boot.</p>
 <h2 id="ip-resolution">IP resolution</h2>
-<p>Static IP via <code>.ip("10.8.10.83")</code> — sets cloud-init <code>ipconfig0</code> with gateway derived from the first three octets (<code>10.8.10.1</code>).</p>
+<p>Static IP via <code>.ip("10.8.10.83")</code> - sets cloud-init <code>ipconfig0</code> with gateway derived from the first three octets (<code>10.8.10.1</code>).</p>
 <p>If no <code>.ip()</code> is set, Puls tries DNS first:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>dns.resolve4(&quot;vm-name.nolimit.int&quot;)  →  uses resolved IP as static
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                                     →  falls back to DHCP if not in DNS
 </code></pre></div>
 <p>Configure <code>dnsDomain</code> in <code>CONFIG</code> to enable this.</p>
 <h2 id="provisioning-pipeline">Provisioning pipeline</h2>
-<p>After a VM starts, Puls runs these steps before calling the provisioner:</p>
+<p>After a VM starts, Puls runs these steps for each provisioner provided to <code>.provision()</code>:</p>
 <ol>
-<li><strong>TCP probe</strong> — polls port 22 until SSH is accepting connections</li>
-<li><strong>cloud-init wait</strong> — runs <code>cloud-init status</code> via SSH until it returns <code>done</code> or <code>error</code> (Ubuntu runs <code>apt</code> in the background on first boot — skipping this causes package conflicts)</li>
-<li><strong>Provisioner</strong> — dispatched by file extension</li>
+<li><strong>TCP probe</strong> (first provisioner only) - polls port 22 until SSH is accepting connections</li>
+<li><strong>cloud-init wait</strong> (first provisioner only) - runs <code>cloud-init status</code> via SSH until it returns <code>done</code> or <code>error</code></li>
+<li><strong>Provisioner</strong> - dispatched by file extension</li>
 </ol>
 <table>
 <thead>
@@ -1101,7 +1102,7 @@
 </tr>
 </tbody>
 </table>
-<p>For shell scripts, the entire directory containing the script is scp'd first — companion files (GPG keys, configs) are available on the remote at the same relative path.</p>
+<p>For shell scripts, the entire directory containing the script is scp'd first - companion files (GPG keys, configs) are available on the remote at the same relative path.</p>
 <h3 id="ansible-example-configdefaultyaml">Ansible example (<code>config/default.yaml</code>)</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nn">---</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install Puppet 8</span>
@@ -1152,35 +1153,33 @@
 <a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span><span class="nx">old</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01&quot;</span><span class="p">);</span>
 <a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="p">}</span>
 </code></pre></div>
-<p>Or use <code>.replace()</code> for an atomic swap — new VM is fully provisioned before the old one is removed:</p>
+<p>Or use <code>.replace()</code> for an atomic swap - new VM is fully provisioned before the old one is removed:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app02&quot;</span><span class="p">)</span>
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="p">...</span>
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>Destroy stops the VM gracefully, then deletes it with <code>purge=1&amp;destroy-unreferenced-disks=1</code>.</p>
-<p>Provisioning is <strong>skipped</strong> during destroy — only discovery and deletion run.</p>
+<p>Provisioning is <strong>skipped</strong> during destroy - only discovery and deletion run.</p>
 <h2 id="full-example">Full example</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Proxmox</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;./src/providers/proxmox/index.ts&quot;</span><span class="p">;</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">CONFIG</span><span class="p">,</span><span class="w"> </span><span class="nx">OS</span><span class="p">,</span><span class="w"> </span><span class="nx">KEYS</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;./src/types/proxmox.ts&quot;</span><span class="p">;</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;./src/core/stack.ts&quot;</span><span class="p">;</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Deploy</span><span class="p">,</span><span class="w"> </span><span class="nx">Destroy</span><span class="p">,</span><span class="w"> </span><span class="nx">Protected</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;./src/core/decorators.ts&quot;</span><span class="p">;</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.STAGING</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="kd">class</span><span class="w"> </span><span class="nx">StagingInfra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span><span class="kd">@Protected</span>
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-db01&quot;</span><span class="p">)</span>
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="nx">OS</span><span class="p">.</span><span class="nx">UBUNTU_24_04</span><span class="p">)</span>
-<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">    </span><span class="p">.</span><span class="nx">cores</span><span class="p">(</span><span class="mf">2</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">4096</span><span class="p">)</span>
-<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">    </span><span class="p">.</span><span class="nx">ip</span><span class="p">(</span><span class="s2">&quot;10.8.10.50&quot;</span><span class="p">).</span><span class="nx">vlan</span><span class="p">(</span><span class="mf">2010</span><span class="p">)</span>
-<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">    </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">);</span>
-<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>
-<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">  </span><span class="nx">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01&quot;</span><span class="p">)</span>
-<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="nx">OS</span><span class="p">.</span><span class="nx">UBUNTU_24_04</span><span class="p">)</span>
-<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">    </span><span class="p">.</span><span class="nx">cores</span><span class="p">(</span><span class="mf">4</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">8192</span><span class="p">)</span>
-<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">ip</span><span class="p">(</span><span class="s2">&quot;10.8.10.51&quot;</span><span class="p">).</span><span class="nx">vlan</span><span class="p">(</span><span class="mf">2010</span><span class="p">)</span>
-<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="w">    </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">)</span>
-<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="w">    </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/default.yaml&quot;</span><span class="p">);</span>
-<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">,</span><span class="w"> </span><span class="nx">PROXMOX_TYPES</span><span class="p">,</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="p">,</span><span class="w"> </span><span class="nx">Destroy</span><span class="p">,</span><span class="w"> </span><span class="nx">Protected</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">CONFIG</span><span class="p">,</span><span class="w"> </span><span class="nx">OS</span><span class="p">,</span><span class="w"> </span><span class="nx">KEYS</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">PROXMOX_TYPES</span><span class="p">;</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.STAGING</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="kd">class</span><span class="w"> </span><span class="nx">StagingInfra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span><span class="kd">@Protected</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-db01&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="nx">OS</span><span class="p">.</span><span class="nx">UBUNTU_24_04</span><span class="p">)</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">    </span><span class="p">.</span><span class="nx">cores</span><span class="p">(</span><span class="mf">2</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">4096</span><span class="p">)</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">    </span><span class="p">.</span><span class="nx">ip</span><span class="p">(</span><span class="s2">&quot;10.8.10.50&quot;</span><span class="p">).</span><span class="nx">vlan</span><span class="p">(</span><span class="mf">2010</span><span class="p">)</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">    </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">);</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">  </span><span class="nx">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="nx">OS</span><span class="p">.</span><span class="nx">UBUNTU_24_04</span><span class="p">)</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">    </span><span class="p">.</span><span class="nx">cores</span><span class="p">(</span><span class="mf">4</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">8192</span><span class="p">)</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">    </span><span class="p">.</span><span class="nx">ip</span><span class="p">(</span><span class="s2">&quot;10.8.10.51&quot;</span><span class="p">).</span><span class="nx">vlan</span><span class="p">(</span><span class="mf">2010</span><span class="p">)</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">    </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">)</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/default.yaml&quot;</span><span class="p">);</span>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="p">}</span>
 </code></pre></div>
 
 

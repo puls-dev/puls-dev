@@ -1,6 +1,6 @@
 # Stack Outputs
 
-Stack outputs let resources share deployed values — within a single stack or across multiple stacks.
+Stack outputs let resources share deployed values - within a single stack or across multiple stacks.
 
 ---
 
@@ -26,7 +26,7 @@ class Infra extends Stack {
     .cores(4).memory(8192)
     .ip("10.8.10.51").vlan(2010);
 
-  // server.out.ip is an Output<string> — resolves once the VM is up
+  // server.out.ip is an Output<string> - resolves once the VM is up
   dns = DO.Domain("example.com").pointer("app", this.server.out.ip);
 }
 ```
@@ -61,13 +61,13 @@ class DNSStack extends Stack {
 }
 ```
 
-Both stacks deploy concurrently. `DNSStack` will wait for each `Output<string>` to resolve before creating the DNS records — no manual coordination needed.
+Both stacks deploy concurrently. `DNSStack` will wait for each `Output<string>` to resolve before creating the DNS records - no manual coordination needed.
 
 ---
 
 ## Output fields by provider
 
-All outputs live under `.out` on each builder — this avoids conflicts with the builder's own configuration methods.
+All outputs live under `.out` on each builder - this avoids conflicts with the builder's own configuration methods.
 
 | Provider       | Builder         | Output            | Type                                   |
 |----------------|-----------------|-------------------|----------------------------------------|
@@ -91,7 +91,7 @@ const host = this.server.out.ip.apply(ip => `https://${ip}`);
 
 ## Contributing new providers
 
-Every provider that creates a cloud resource should expose an `out` object with `Output<T>` fields for its primary identifiers (ARN, ID, IP, hostname). Resolve each field in **every** code path of `deploy()` — including existing-resource and dry-run branches — so downstream resources never hang.
+Every provider that creates a cloud resource should expose an `out` object with `Output<T>` fields for its primary identifiers (ARN, ID, IP, hostname). Resolve each field in **every** code path of `deploy()` - including existing-resource and dry-run branches - so downstream resources never hang.
 
 ```typescript
 import { Output } from '../../core/output.ts';

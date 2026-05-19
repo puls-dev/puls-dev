@@ -7,7 +7,7 @@ Decorators are the entry point for every Puls stack. They wire up credentials, t
 Instantiates the stack and calls `deploy()` on every resource.
 
 ```typescript
-// Bare — uses ambient env config
+// Bare - uses ambient env config
 @Deploy()
 class MyStack extends Stack { ... }
 
@@ -15,7 +15,7 @@ class MyStack extends Stack { ... }
 @Deploy({ proxmox: CONFIG.STAGING })
 class MyStack extends Stack { ... }
 
-// Dry run — prints plan, makes no API calls
+// Dry run - prints plan, makes no API calls
 @Deploy({ dryRun: true, proxmox: CONFIG.STAGING })
 class MyStack extends Stack { ... }
 ```
@@ -51,7 +51,7 @@ class MyStack extends Stack { ... }
 @Destroy({ proxmox: CONFIG.STAGING })
 class MyStack extends Stack { ... }
 
-// Property decorator — destroys one resource during a deploy
+// Property decorator - destroys one resource during a deploy
 @Deploy({ proxmox: CONFIG.STAGING })
 class MyStack extends Stack {
   @Destroy
@@ -61,7 +61,7 @@ class MyStack extends Stack {
 }
 ```
 
-`@Protected` resources are skipped during teardown — no API call is made.
+`@Protected` resources are skipped during teardown - no API call is made.
 
 ## @Protected
 
@@ -82,4 +82,4 @@ When `@Destroy` runs the stack, protected resources are skipped with a log line:
    🔒 Skipping protected resource "db"
 ```
 
-During `@Deploy`, protected resources are still discovered and reported — they just refuse destructive changes.
+During `@Deploy`, protected resources are still discovered and reported - they just refuse destructive changes.

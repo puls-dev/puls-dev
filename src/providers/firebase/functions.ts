@@ -1,28 +1,28 @@
-import { execSync } from 'node:child_process';
-import { mkdtempSync, readFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { BaseBuilder } from '../../core/resource.js';
-import { cloudFetch, getProjectId } from './api.js';
+import { execSync } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { BaseBuilder } from "../../core/resource.js";
+import { cloudFetch, getProjectId } from "./api.js";
 
-const CF_BASE = 'https://cloudfunctions.googleapis.com/v2';
+const CF_BASE = "https://cloudfunctions.googleapis.com/v2";
 
 export const FUNCTIONS_RUNTIME = {
-  NODEJS_22: 'nodejs22',
-  NODEJS_20: 'nodejs20',
-  NODEJS_18: 'nodejs18',
-  PYTHON_312: 'python312',
-  PYTHON_311: 'python311',
-  GO_122: 'go122',
-  JAVA_21: 'java21',
+  NODEJS_22: "nodejs22",
+  NODEJS_20: "nodejs20",
+  NODEJS_18: "nodejs18",
+  PYTHON_312: "python312",
+  PYTHON_311: "python311",
+  GO_122: "go122",
+  JAVA_21: "java21",
 } as const;
 
 export class FirebaseFunctionsBuilder extends BaseBuilder {
   private _sourcePath?: string;
-  private _entryPoint: string = 'handler';
+  private _entryPoint: string = "handler";
   private _runtime: string = FUNCTIONS_RUNTIME.NODEJS_20;
-  private _region: string = 'us-central1';
-  private _memory: string = '256M';
+  private _region: string = "us-central1";
+  private _memory: string = "256M";
   private _timeout: number = 60;
   private _maxInstances: number = 100;
   private _minInstances: number = 0;
@@ -34,15 +34,42 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
     this.discoveryPromise = Promise.resolve(null);
   }
 
-  source(path: string)             { this._sourcePath = path; return this; }
-  entryPoint(e: string)            { this._entryPoint = e; return this; }
-  runtime(r: string)               { this._runtime = r; return this; }
-  region(r: string)                { this._region = r; return this; }
-  memory(m: string)                { this._memory = m; return this; }
-  timeout(seconds: number)         { this._timeout = seconds; return this; }
-  maxInstances(n: number)          { this._maxInstances = n; return this; }
-  minInstances(n: number)          { this._minInstances = n; return this; }
-  env(vars: Record<string, string>){ this._env = vars; return this; }
+  source(path: string) {
+    this._sourcePath = path;
+    return this;
+  }
+  entryPoint(e: string) {
+    this._entryPoint = e;
+    return this;
+  }
+  runtime(r: string) {
+    this._runtime = r;
+    return this;
+  }
+  region(r: string) {
+    this._region = r;
+    return this;
+  }
+  memory(m: string) {
+    this._memory = m;
+    return this;
+  }
+  timeout(seconds: number) {
+    this._timeout = seconds;
+    return this;
+  }
+  maxInstances(n: number) {
+    this._maxInstances = n;
+    return this;
+  }
+  minInstances(n: number) {
+    this._minInstances = n;
+    return this;
+  }
+  env(vars: Record<string, string>) {
+    this._env = vars;
+    return this;
+  }
 
   private fnPath() {
     return `/projects/${getProjectId()}/locations/${this._region}/functions/${this.name}`;
@@ -52,16 +79,21 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
     try {
       return await cloudFetch(CF_BASE, this.fnPath());
     } catch (e: any) {
-      if (e.message?.includes('404')) return null;
+      if (e.message?.includes("404")) return null;
       throw e;
     }
   }
 
   private zipSource(): Buffer {
-    if (!this._sourcePath) throw new Error(`[Firebase.Functions:${this.name}] .source() is required`);
-    const tmp = mkdtempSync(join(tmpdir(), 'puls-fn-'));
-    const zipPath = join(tmp, 'function.zip');
-    execSync(`cd "${this._sourcePath}" && zip -r "${zipPath}" .`, { stdio: 'pipe' });
+    if (!this._sourcePath)
+      throw new Error(
+        `[Firebase.Functions:${this.name}] .source() is required`,
+      );
+    const tmp = mkdtempSync(join(tmpdir(), "puls-fn-"));
+    const zipPath = join(tmp, "function.zip");
+    execSync(`cd "${this._sourcePath}" && zip -r "${zipPath}" .`, {
+      stdio: "pipe",
+    });
     return readFileSync(zipPath);
   }
 
@@ -69,13 +101,13 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
     const { uploadUrl, storageSource } = await cloudFetch(
       CF_BASE,
       `/projects/${getProjectId()}/locations/${this._region}/functions:generateUploadUrl`,
-      { method: 'POST', body: '{}' },
+      { method: "POST", body: "{}" },
     );
 
     const zipBuffer = this.zipSource();
     const res = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/zip' },
+      method: "PUT",
+      headers: { "Content-Type": "application/zip" },
       body: new Uint8Array(zipBuffer),
     });
     if (!res.ok) throw new Error(`Source upload failed: ${res.status}`);
@@ -86,14 +118,17 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
     const start = Date.now();
     const timeout = 5 * 60 * 1000;
     while (Date.now() - start < timeout) {
-      await new Promise(r => setTimeout(r, 4000));
+      await new Promise((r) => setTimeout(r, 4000));
       const op = await cloudFetch(CF_BASE, `/${operationName}`);
       if (op.done) {
-        if (op.error) throw new Error(`Operation failed: ${JSON.stringify(op.error)}`);
+        if (op.error)
+          throw new Error(`Operation failed: ${JSON.stringify(op.error)}`);
         return;
       }
     }
-    throw new Error(`[Firebase.Functions:${this.name}] Operation timed out after 5 minutes`);
+    throw new Error(
+      `[Firebase.Functions:${this.name}] Operation timed out after 5 minutes`,
+    );
   }
 
   async deploy() {
@@ -102,19 +137,28 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
 
     console.log(`\n⚡ Finalizing Firebase Function "${this.name}"...`);
 
-    if (!this._sourcePath) throw new Error(`[Firebase.Functions:${this.name}] .source() is required`);
+    if (!this._sourcePath)
+      throw new Error(
+        `[Firebase.Functions:${this.name}] .source() is required`,
+      );
 
     if (dryRun) {
       const existing = await this.getExisting();
       if (existing) {
-        console.log(`   ✅ Function "${this.name}" exists (${existing.state ?? 'ACTIVE'})`);
-        console.log(`   📝 [PLAN] Update → ${this._runtime}, ${this._memory}, ${this._timeout}s timeout`);
+        console.log(
+          `   ✅ Function "${this.name}" exists (${existing.state ?? "ACTIVE"})`,
+        );
+        console.log(
+          `   📝 [PLAN] Update → ${this._runtime}, ${this._memory}, ${this._timeout}s timeout`,
+        );
       } else {
         console.log(`   📝 [PLAN] Create function "${this.name}"`);
         console.log(`      └─ runtime: ${this._runtime}`);
         console.log(`      └─ entry point: ${this._entryPoint}`);
         console.log(`      └─ region: ${this._region}`);
-        console.log(`      └─ memory: ${this._memory}, timeout: ${this._timeout}s`);
+        console.log(
+          `      └─ memory: ${this._memory}, timeout: ${this._timeout}s`,
+        );
         console.log(`      └─ source: ${this._sourcePath}`);
       }
       return { name: this.name, project, region: this._region };
@@ -137,7 +181,7 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
         maxInstanceCount: this._maxInstances,
         minInstanceCount: this._minInstances,
         environmentVariables: this._env,
-        ingressSettings: 'ALLOW_ALL',
+        ingressSettings: "ALLOW_ALL",
       },
     };
 
@@ -148,23 +192,25 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
       op = await cloudFetch(
         CF_BASE,
         `/projects/${project}/locations/${this._region}/functions?functionId=${this.name}`,
-        { method: 'POST', body: JSON.stringify(body) },
+        { method: "POST", body: JSON.stringify(body) },
       );
       console.log(`   🚀 Creating function...`);
     } else {
-      const mask = 'buildConfig.source,buildConfig.runtime,buildConfig.entryPoint,buildConfig.environmentVariables,serviceConfig.availableMemory,serviceConfig.timeoutSeconds,serviceConfig.maxInstanceCount,serviceConfig.minInstanceCount,serviceConfig.environmentVariables';
-      op = await cloudFetch(
-        CF_BASE,
-        `${this.fnPath()}?updateMask=${mask}`,
-        { method: 'PATCH', body: JSON.stringify(body) },
-      );
+      const mask =
+        "buildConfig.source,buildConfig.runtime,buildConfig.entryPoint,buildConfig.environmentVariables,serviceConfig.availableMemory,serviceConfig.timeoutSeconds,serviceConfig.maxInstanceCount,serviceConfig.minInstanceCount,serviceConfig.environmentVariables";
+      op = await cloudFetch(CF_BASE, `${this.fnPath()}?updateMask=${mask}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      });
       console.log(`   🔄 Updating function...`);
     }
 
     await this.pollOperation(op.name);
 
     const fn = await this.getExisting();
-    const url = fn?.serviceConfig?.uri ?? `https://${this._region}-${project}.cloudfunctions.net/${this.name}`;
+    const url =
+      fn?.serviceConfig?.uri ??
+      `https://${this._region}-${project}.cloudfunctions.net/${this.name}`;
     console.log(`   ✅ Function live → ${url}`);
     return { name: this.name, url, project, region: this._region };
   }
@@ -176,16 +222,20 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
     const existing = await this.getExisting();
 
     if (!existing) {
-      console.log(`   ✅ Function "${this.name}" does not exist — nothing to do`);
+      console.log(
+        `   ✅ Function "${this.name}" does not exist - nothing to do`,
+      );
       return { destroyed: this.name };
     }
 
     if (dryRun) {
-      console.log(`   📝 [PLAN] Delete function "${this.name}" in ${this._region}`);
+      console.log(
+        `   📝 [PLAN] Delete function "${this.name}" in ${this._region}`,
+      );
       return { destroyed: this.name };
     }
 
-    const op = await cloudFetch(CF_BASE, this.fnPath(), { method: 'DELETE' });
+    const op = await cloudFetch(CF_BASE, this.fnPath(), { method: "DELETE" });
     await this.pollOperation(op.name);
     console.log(`   ✅ Function "${this.name}" deleted`);
     return { destroyed: this.name };

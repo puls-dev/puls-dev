@@ -2,7 +2,7 @@
 
 ## Setup
 
-Uses standard AWS SDK environment variables — no explicit `AWS.init()` needed:
+Uses standard AWS SDK environment variables - no explicit `AWS.init()` needed:
 
 ```bash
 AWS_ACCESS_KEY_ID=
@@ -20,7 +20,8 @@ class MyStack extends Stack { ... }
 **Constants**
 
 ```typescript
-import { REGION, RUNTIME, DB, DB_SIZE, DISTRO, BUCKET } from "./src/types/aws.ts";
+import { AWS_TYPES } from "puls-dev";
+const { REGION, RUNTIME, DB, DB_SIZE, DISTRO, BUCKET } = AWS_TYPES;
 ```
 
 ---
@@ -62,11 +63,11 @@ AWS.APIGateway("my-api")
   .route("GET /users", this.listUsers)
   .route("POST /users", this.createUser)
 
-// Single-function proxy — forwards all traffic to one Lambda
+// Single-function proxy - forwards all traffic to one Lambda
 AWS.APIGateway("my-api").proxy(this.handler)
 ```
 
-Outputs the live endpoint URL on deploy. Uses `$default` stage with auto-deploy — no manual deployment step needed. Lambda invoke permissions are granted automatically and idempotently.
+Outputs the live endpoint URL on deploy. Uses `$default` stage with auto-deploy - no manual deployment step needed. Lambda invoke permissions are granted automatically and idempotently.
 
 ---
 
@@ -87,7 +88,7 @@ AWS.Fargate("my-service")
 
 **What it manages automatically:**
 
-- ECS cluster (`puls` by default) — created if absent
+- ECS cluster (`puls` by default) - created if absent
 - IAM task execution role with `AmazonECSTaskExecutionRolePolicy`
 - CloudWatch log group `/puls/{name}`
 - Default VPC + subnets (or override with `.subnets(ids[])`)
@@ -123,7 +124,7 @@ DB.POSTGRES_15
 DB.MYSQL_8
 DB.MARIADB_11
 
-DB_SIZE.MICRO   // db.t3.micro — free tier eligible
+DB_SIZE.MICRO   // db.t3.micro - free tier eligible
 DB_SIZE.SMALL   // db.t3.small
 DB_SIZE.MEDIUM  // db.t3.medium
 DB_SIZE.LARGE   // db.r6g.large
@@ -143,7 +144,7 @@ AWS.SQS("job-queue")
   .delay(0)              // delivery delay in seconds, default 0
   .dlq("job-queue-dlq", 3)   // DLQ name + max receives before redirect
 
-// FIFO queue — .fifo suffix appended automatically
+// FIFO queue - .fifo suffix appended automatically
 AWS.SQS("order-events")
   .fifo()
   .deduplication()
@@ -172,7 +173,7 @@ Clone an existing distribution and attach it to a domain.
 
 ```typescript
 AWS.CloudFront("my-distro-name")
-  .copyFrom(DISTRO.TURKEY_CDN)              // clone config from existing distribution ID
+  .copyFrom(DISTRO.CDN)              // clone config from existing distribution ID
   .forDomain(this.domain, ["ec", "nc"])     // CNAMEs: ec.zoneName, nc.zoneName
   .invalidate(["/index.html", "/api/*"])    // invalidate paths after deploy
 ```
@@ -195,7 +196,7 @@ AWS.Route53("example.com").withWildcardSSL()  // attach wildcard ACM cert (sidec
 
 ## ACM
 
-Managed automatically as a Route53 sidecar — not used directly.
+Managed automatically as a Route53 sidecar - not used directly.
 
 `.withWildcardSSL()` on a Route53 builder requests a wildcard cert, writes the DNS validation CNAME, and waits for `ISSUED` (up to 10 minutes).
 
@@ -206,15 +207,13 @@ Managed automatically as a Route53 sidecar — not used directly.
 ```typescript
 import "dotenv/config";
 import "reflect-metadata";
-import { AWS } from "./src/providers/aws/index.ts";
-import { REGION, RUNTIME, DB, DB_SIZE } from "./src/types/aws.ts";
-import { Stack } from "./src/core/stack.ts";
-import { Deploy } from "./src/core/decorators.ts";
-import { SECRETS } from "./src/types/secrets.ts";
+import { AWS, AWS_TYPES, Stack, Deploy } from "puls-dev";
+const { REGION, RUNTIME, DB, DB_SIZE } = AWS_TYPES;
+// import { SECRETS } from "./types/secrets.ts"; // your local constants
 
 @Deploy({ region: REGION.EU_CENTRAL_1, dryRun: false })
 class AppStack extends Stack {
-  secret = AWS.SecretsManager(SECRETS.DB_KEY);
+  // secret = AWS.SecretsManager(SECRETS.DB_KEY);
   
   db = AWS.RDS("app-db")
     .engine(DB.POSTGRES_16)

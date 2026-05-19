@@ -5,7 +5,8 @@ import { Stack } from "../src/core/stack.js";
 import { Firebase } from "../src/providers/firebase/index.js";
 
 // Will deploy a Firebase Hosting site for the docs blog.
-@Deploy({ dryRun: true })
+// Make sure to run `mkdocs build` or similar to generate the `./site` directory first.
+@Deploy({ dryRun: false })
 class DocsBlog extends Stack {
   site = Firebase.Hosting("puls-docs").source("./site");
 }

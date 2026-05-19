@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.">
+        <meta name="description" content="Intent-driven infrastructure-as-code. Describe what you want - Puls figures out create, update, or skip.">
       
       
       
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#puls" class="md-skip">
+        <a href="#puls-dev" class="md-skip">
           Skip to content
         </a>
       
@@ -884,8 +884,8 @@
   
 
 
-<h1 id="puls">Puls</h1>
-<p><strong>Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.</strong></p>
+<h1 id="puls-dev">Puls-dev</h1>
+<p><strong>Intent-driven infrastructure-as-code. Describe what you want - Puls figures out create, update, or skip.</strong></p>
 <p>No state files. No plan step. No YAML. Just TypeScript against real APIs, idempotent by default.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.STAGING</span><span class="w"> </span><span class="p">})</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">class</span><span class="w"> </span><span class="nx">GameInfra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
@@ -899,7 +899,7 @@
 </code></pre></div>
 <hr />
 <h2 id="how-it-works">How it works</h2>
-<p>The moment you declare a resource, Puls starts an API lookup in the background — <strong>eager discovery</strong>. By the time <code>deploy()</code> runs, it already knows the current state. It diffs, acts, and moves on.</p>
+<p>The moment you declare a resource, Puls starts an API lookup in the background - <strong>eager discovery</strong>. By the time <code>deploy()</code> runs, it already knows the current state. It diffs, acts, and moves on.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Declare resource  →  Discovery fires immediately
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                  →  You chain config (.cores(), .ip(), ...)
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                  →  deploy() awaits discovery, diffs, acts
@@ -946,7 +946,7 @@
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="p">.</span><span class="nx">size</span><span class="p">(</span><span class="nx">DB_SIZE</span><span class="p">.</span><span class="nx">SMALL</span><span class="p">)</span>
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="p">.</span><span class="nx">credentials</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">secret</span><span class="p">);</span>
 <a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span><span class="c1">// Container service — auto-creates cluster, IAM role, log group, security group</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span><span class="c1">// Container service - auto-creates cluster, IAM role, log group, security group</span>
 <a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">  </span><span class="nx">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Fargate</span><span class="p">(</span><span class="s2">&quot;app-api&quot;</span><span class="p">)</span>
 <a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="s2">&quot;my-org/app:latest&quot;</span><span class="p">)</span>
 <a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="p">.</span><span class="nx">cpu</span><span class="p">(</span><span class="mf">512</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">1024</span><span class="p">)</span>
@@ -972,7 +972,7 @@
 </code></pre></div>
 <hr />
 <h2 id="install">Install</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>npm<span class="w"> </span>install<span class="w">   </span><span class="c1"># or: npm install puls (coming soon)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>npm<span class="w"> </span>install<span class="w"> </span>puls-dev
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env<span class="w">  </span><span class="c1"># fill in your credentials</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>npx<span class="w"> </span>tsx<span class="w"> </span>your-stack.ts
 </code></pre></div>

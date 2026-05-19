@@ -1,6 +1,6 @@
 # Puls-dev
 
-Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.
+Intent-driven infrastructure-as-code. Describe what you want - Puls figures out create, update, or skip.
 
 ```typescript
 @Deploy({ proxmox: CONFIG.STAGING })
@@ -14,7 +14,7 @@ class GameInfra extends Stack {
 }
 ```
 
-No state files. No plan step. Runs against real APIs — idempotent by default.
+No state files. No plan step. Runs against real APIs - idempotent by default.
 
 ---
 
@@ -28,7 +28,7 @@ Declare resource  →  Discovery fires immediately (async)
                   →  deploy() awaits discovery, diffs, acts
 ```
 
-Running the same stack twice is always safe — existing resources are detected and skipped.
+Running the same stack twice is always safe - existing resources are detected and skipped.
 
 ---
 
@@ -47,7 +47,7 @@ Running the same stack twice is always safe — existing resources are detected 
 ### DigitalOcean
 
 ```typescript
-import { DO, DO_TYPES, Stack, Deploy } from "puls";
+import { DO, DO_TYPES, Stack, Deploy } from "puls-dev";
 const { SIZE, REGION } = DO_TYPES;
 
 @Deploy({ token: process.env.DO_TOKEN! })
@@ -60,7 +60,7 @@ class Production extends Stack {
 ### AWS
 
 ```typescript
-import { AWS, AWS_TYPES, Stack, Deploy } from "puls";
+import { AWS, AWS_TYPES, Stack, Deploy } from "puls-dev";
 const { DISTRO, BUCKET, DOMAIN_REGISTER, REGION } = AWS_TYPES;
 
 @Deploy({ region: REGION.US_EAST_1 })
@@ -68,7 +68,7 @@ class CDNStack extends Stack {
   domain = AWS.Route53().randomDomain().register(DOMAIN_REGISTER).withWildcardSSL();
 
   cdn = AWS.CloudFront(`CDN-${this.domain.zoneName.slice(0, 8)}`)
-    .copyFrom(DISTRO.TURKEY_CDN)
+    .copyFrom(DISTRO.CDN)
     .forDomain(this.domain, ["ec", "nc"]);
 
   bucket = AWS.S3(BUCKET.NLC_GAMES_UREG)
@@ -80,7 +80,7 @@ class CDNStack extends Stack {
 ### Proxmox
 
 ```typescript
-import { Proxmox, PROXMOX_TYPES, Stack, Deploy, Protected } from "puls";
+import { Proxmox, PROXMOX_TYPES, Stack, Deploy, Protected } from "puls-dev";
 const { CONFIG, OS, KEYS } = PROXMOX_TYPES;
 
 @Deploy({ proxmox: CONFIG.STAGING })
@@ -121,7 +121,7 @@ See [docs/decorators.md](docs/decorators.md) for full reference.
 ## Running
 
 ```bash
-npm install
+npm install puls-dev
 npx tsx your-stack.ts
 ```
 

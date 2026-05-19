@@ -9,9 +9,7 @@
 ## Install
 
 ```bash
-git clone https://github.com/nolimitcity/puls
-cd puls
-npm install
+npm install puls-dev
 ```
 
 Copy the example env file and fill in your credentials:
@@ -22,15 +20,13 @@ cp .env.example .env
 
 ## Your first stack
 
-Create a file — any name, anywhere in the project:
+Create a file - any name, anywhere in the project:
 
 ```typescript
 import "dotenv/config";
 import "reflect-metadata";
-import { AWS } from "./src/providers/aws/index.ts";
-import { REGION, RUNTIME } from "./src/types/aws.ts";
-import { Stack } from "./src/core/stack.ts";
-import { Deploy } from "./src/core/decorators.ts";
+import { AWS, AWS_TYPES, Stack, Deploy } from "puls-dev";
+const { REGION, RUNTIME } = AWS_TYPES;
 
 @Deploy({ region: REGION.EU_CENTRAL_1, dryRun: true })
 class MyFirstStack extends Stack {
@@ -53,7 +49,7 @@ With `dryRun: true`, Puls prints what it *would* do without touching any API. Wh
 Every stack should be run dry first:
 
 ```typescript
-@Deploy({ region: REGION.EU_CENTRAL_1, dryRun: true })  // safe — no API writes
+@Deploy({ region: REGION.EU_CENTRAL_1, dryRun: true })  // safe - no API writes
 ```
 
 Output looks like:
@@ -108,7 +104,7 @@ instead of an error or a duplicate.
 
 ## Provider setup
 
-See the individual provider pages for credentials and constants:
+See the individual provider pages for credentials and constants. Note that you can always [define your own custom types and constants](concepts.md#extensibility--custom-types) if the built-in ones don't suit your needs.
 
 - [AWS](providers/aws.md)
 - [Proxmox](providers/proxmox.md)

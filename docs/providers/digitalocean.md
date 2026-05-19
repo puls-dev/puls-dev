@@ -26,7 +26,8 @@ DO.Droplet("prod-web")
 **Constants**
 
 ```typescript
-import { OS, REGION, SIZE } from "./src/types/do.ts";
+import { DO_TYPES } from "puls-dev";
+const { OS, REGION, SIZE } = DO_TYPES;
 
 OS.UBUNTU_22_04   // "ubuntu-22-04-x64"
 OS.DEBIAN_11      // "debian-11-x64"
@@ -59,10 +60,8 @@ DO.LoadBalancer("prod-lb")
 ## Full example
 
 ```typescript
-import { DO } from "./src/providers/do/droplet.ts";
-import { OS, REGION, SIZE } from "./src/types/do.ts";
-import { Stack } from "./src/core/stack.ts";
-import { Deploy, Protected } from "./src/core/decorators.ts";
+import { DO, DO_TYPES, Stack, Deploy, Protected } from "puls-dev";
+const { OS, REGION, SIZE } = DO_TYPES;
 
 @Deploy({ token: process.env.DO_TOKEN! })
 class Production extends Stack {

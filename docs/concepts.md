@@ -2,7 +2,7 @@
 
 ## Eager discovery
 
-Every resource starts an API lookup the moment it is declared — before `deploy()` is called.
+Every resource starts an API lookup the moment it is declared - before `deploy()` is called.
 
 ```typescript
 class MyStack extends Stack {
@@ -81,3 +81,28 @@ export const CONFIG = {
 @Deploy({ proxmox: CONFIG.STAGING })
 @Destroy({ proxmox: CONFIG.STAGING })
 ```
+
+## Extensibility & Custom Types
+
+Puls is designed to be completely extendable. While it ships with built-in constants (like `AWS_TYPES` or `PROXMOX_TYPES`), you are **not** required to use them.
+
+If the built-in types don't match your environment (e.g., a custom VM image, a private AWS region, or specific instance sizes), you can simply create your own constants in your project and pass them to the builder methods.
+
+**Example: Custom VM Images**
+```typescript
+// your-project/types/my-images.ts
+export const MY_OS = {
+  GOLDEN_IMAGE: "1234", // Your custom template ID
+  LEGACY_APP: "9999",
+} as const;
+
+// your-project/stack.ts
+import { MY_OS } from "./types/my-images.js";
+
+@Deploy({ proxmox: CONFIG.PROD })
+class MyStack extends Stack {
+  app = Proxmox.VM("app-01").image(MY_OS.GOLDEN_IMAGE)...;
+}
+```
+
+Since the DSL methods typically accept strings or numbers, any constant you define will work as long as the underlying provider API understands it.

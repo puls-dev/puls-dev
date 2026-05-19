@@ -1,6 +1,6 @@
 # Puls-dev
 
-**Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.**
+**Intent-driven infrastructure-as-code. Describe what you want - Puls figures out create, update, or skip.**
 
 No state files. No plan step. No YAML. Just TypeScript against real APIs, idempotent by default.
 
@@ -20,7 +20,7 @@ class GameInfra extends Stack {
 
 ## How it works
 
-The moment you declare a resource, Puls starts an API lookup in the background — **eager discovery**. By the time `deploy()` runs, it already knows the current state. It diffs, acts, and moves on.
+The moment you declare a resource, Puls starts an API lookup in the background - **eager discovery**. By the time `deploy()` runs, it already knows the current state. It diffs, acts, and moves on.
 
 ```
 Declare resource  →  Discovery fires immediately
@@ -57,7 +57,7 @@ class AppStack extends Stack {
     .size(DB_SIZE.SMALL)
     .credentials(this.secret);
 
-  // Container service — auto-creates cluster, IAM role, log group, security group
+  // Container service - auto-creates cluster, IAM role, log group, security group
   api = AWS.Fargate("app-api")
     .image("my-org/app:latest")
     .cpu(512).memory(1024)
@@ -87,7 +87,7 @@ class AppStack extends Stack {
 ## Install
 
 ```bash
-npm install   # or: npm install puls (coming soon)
+npm install puls-dev
 cp .env.example .env  # fill in your credentials
 npx tsx your-stack.ts
 ```

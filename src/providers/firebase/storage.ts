@@ -1,9 +1,9 @@
-import { readFileSync } from 'node:fs';
-import { BaseBuilder } from '../../core/resource.js';
-import { cloudFetch, getProjectId } from './api.js';
+import { readFileSync } from "node:fs";
+import { BaseBuilder } from "../../core/resource.js";
+import { cloudFetch, getProjectId } from "./api.js";
 
-const RULES_BASE = 'https://firebaserules.googleapis.com/v1';
-const GCS_BASE   = 'https://storage.googleapis.com/storage/v1';
+const RULES_BASE = "https://firebaserules.googleapis.com/v1";
+const GCS_BASE = "https://storage.googleapis.com/storage/v1";
 
 interface CorsRule {
   origin: string[];
@@ -25,14 +25,23 @@ export class FirebaseStorageBuilder extends BaseBuilder {
 
   constructor(bucket?: string) {
     // Bucket name resolved lazily in deploy() if not provided (needs projectId)
-    super(bucket ?? '__default__');
+    super(bucket ?? "__default__");
     this._resolvedBucket = bucket;
     this.discoveryPromise = Promise.resolve(null);
   }
 
-  rules(filePath: string)          { this._rulesPath = filePath; return this; }
-  cors(rules: CorsRule[])          { this._cors = rules; return this; }
-  lifecycle(rule: LifecycleRule)   { this._lifecycle = rule; return this; }
+  rules(filePath: string) {
+    this._rulesPath = filePath;
+    return this;
+  }
+  cors(rules: CorsRule[]) {
+    this._cors = rules;
+    return this;
+  }
+  lifecycle(rule: LifecycleRule) {
+    this._lifecycle = rule;
+    return this;
+  }
 
   private bucket(): string {
     return this._resolvedBucket ?? `${getProjectId()}.appspot.com`;
@@ -47,10 +56,12 @@ export class FirebaseStorageBuilder extends BaseBuilder {
   private async deployRules(dryRun: boolean): Promise<void> {
     if (!this._rulesPath) return;
 
-    const source = readFileSync(this._rulesPath, 'utf8');
+    const source = readFileSync(this._rulesPath, "utf8");
 
     if (dryRun) {
-      console.log(`   📝 [PLAN] Deploy Storage rules from "${this._rulesPath}" → ${this.bucket()}`);
+      console.log(
+        `   📝 [PLAN] Deploy Storage rules from "${this._rulesPath}" → ${this.bucket()}`,
+      );
       return;
     }
 
@@ -58,21 +69,24 @@ export class FirebaseStorageBuilder extends BaseBuilder {
       RULES_BASE,
       `/projects/${getProjectId()}/rulesets`,
       {
-        method: 'POST',
-        body: JSON.stringify({ source: { files: [{ name: 'storage.rules', content: source }] } }),
+        method: "POST",
+        body: JSON.stringify({
+          source: { files: [{ name: "storage.rules", content: source }] },
+        }),
       },
     );
 
-    await cloudFetch(
-      RULES_BASE,
-      `/${this.releaseName()}`,
-      {
-        method: 'PUT',
-        body: JSON.stringify({ name: this.releaseName(), rulesetName: ruleset.name }),
-      },
-    );
+    await cloudFetch(RULES_BASE, `/${this.releaseName()}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        name: this.releaseName(),
+        rulesetName: ruleset.name,
+      }),
+    });
 
-    console.log(`   ✅ Storage rules deployed (ruleset: ${ruleset.name.split('/').pop()})`);
+    console.log(
+      `   ✅ Storage rules deployed (ruleset: ${ruleset.name.split("/").pop()})`,
+    );
   }
 
   // ── CORS ──────────────────────────────────────────────────────────────────
@@ -80,7 +94,7 @@ export class FirebaseStorageBuilder extends BaseBuilder {
   private async deployCors(dryRun: boolean): Promise<void> {
     if (this._cors.length === 0) return;
 
-    const corsBody = this._cors.map(r => ({
+    const corsBody = this._cors.map((r) => ({
       origin: r.origin,
       method: r.method,
       responseHeader: r.responseHeader ?? [],
@@ -88,15 +102,19 @@ export class FirebaseStorageBuilder extends BaseBuilder {
     }));
 
     if (dryRun) {
-      console.log(`   📝 [PLAN] Set CORS on bucket "${this.bucket()}" (${this._cors.length} rule(s))`);
+      console.log(
+        `   📝 [PLAN] Set CORS on bucket "${this.bucket()}" (${this._cors.length} rule(s))`,
+      );
       for (const r of this._cors) {
-        console.log(`      └─ origins: [${r.origin.join(', ')}], methods: [${r.method.join(', ')}]`);
+        console.log(
+          `      └─ origins: [${r.origin.join(", ")}], methods: [${r.method.join(", ")}]`,
+        );
       }
       return;
     }
 
     await cloudFetch(GCS_BASE, `/b/${this.bucket()}`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: JSON.stringify({ cors: corsBody }),
     });
 
@@ -109,7 +127,7 @@ export class FirebaseStorageBuilder extends BaseBuilder {
     if (!this._lifecycle) return;
 
     const rule: any = {
-      action: { type: 'Delete' },
+      action: { type: "Delete" },
       condition: {},
     };
 
@@ -120,14 +138,18 @@ export class FirebaseStorageBuilder extends BaseBuilder {
 
     if (dryRun) {
       const parts = [];
-      if (this._lifecycle.deleteAfterDays) parts.push(`delete after ${this._lifecycle.deleteAfterDays} days`);
-      if (this._lifecycle.matchesPrefix)   parts.push(`prefix: [${this._lifecycle.matchesPrefix.join(', ')}]`);
-      console.log(`   📝 [PLAN] Set lifecycle on "${this.bucket()}": ${parts.join(', ')}`);
+      if (this._lifecycle.deleteAfterDays)
+        parts.push(`delete after ${this._lifecycle.deleteAfterDays} days`);
+      if (this._lifecycle.matchesPrefix)
+        parts.push(`prefix: [${this._lifecycle.matchesPrefix.join(", ")}]`);
+      console.log(
+        `   📝 [PLAN] Set lifecycle on "${this.bucket()}": ${parts.join(", ")}`,
+      );
       return;
     }
 
     await cloudFetch(GCS_BASE, `/b/${this.bucket()}`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: JSON.stringify({ lifecycle: { rule: [rule] } }),
     });
 
@@ -139,7 +161,9 @@ export class FirebaseStorageBuilder extends BaseBuilder {
   async deploy() {
     // Resolve bucket name now that projectId is available
     this._resolvedBucket = this.bucket();
-    console.log(`\n🪣  Finalizing Firebase Storage "${this._resolvedBucket}"...`);
+    console.log(
+      `\n🪣  Finalizing Firebase Storage "${this._resolvedBucket}"...`,
+    );
 
     const dryRun = this.isDryRunActive();
     await this.deployRules(dryRun);
@@ -151,11 +175,17 @@ export class FirebaseStorageBuilder extends BaseBuilder {
 
   async destroy() {
     const dryRun = this.isDryRunActive();
-    console.log(`\n🗑️  Destroying Firebase Storage config "${this.bucket()}"...`);
+    console.log(
+      `\n🗑️  Destroying Firebase Storage config "${this.bucket()}"...`,
+    );
     if (dryRun) {
-      console.log(`   ℹ️  Storage buckets cannot be deleted via API — remove manually in the GCP console`);
+      console.log(
+        `   ℹ️  Storage buckets cannot be deleted via API - remove manually in the GCP console`,
+      );
     } else {
-      console.log(`   ℹ️  Storage buckets cannot be deleted via API — remove manually in the GCP console`);
+      console.log(
+        `   ℹ️  Storage buckets cannot be deleted via API - remove manually in the GCP console`,
+      );
     }
     return { destroyed: this.bucket() };
   }
