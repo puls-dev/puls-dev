@@ -184,13 +184,68 @@ AWS.CloudFront("my-distro-name")
 
 ## Route53
 
-Hosted zone discovery and domain registration.
+Hosted zone discovery, DNS record management, and domain registration.
 
 ```typescript
-AWS.Route53("example.com")                    // existing domain
-AWS.Route53().randomDomain().register(DOMAIN_REGISTER)  // register a new random .com
+AWS.Route53("example.com")                    // existing hosted zone
 AWS.Route53("example.com").withWildcardSSL()  // attach wildcard ACM cert (sidecar)
+AWS.Route53().randomDomain().register(DOMAIN_REGISTER)  // register a new random .com
 ```
+
+**Adding records**
+
+```typescript
+AWS.Route53("example.com")
+  .record("@",    "A",     "203.0.113.10")
+  .record("www",  "CNAME", "example.com")
+  .record("@",    "MX",    "10 mail.example.com")   // MX: "priority hostname"
+  .record("@",    "TXT",   "v=spf1 include:_spf.google.com ~all")  // quotes added automatically
+  .record("mail", "AAAA",  "2001:db8::1")
+  .record("_dmarc", "TXT", "v=DMARC1; p=reject", 600)  // optional custom TTL (default 300)
+```
+
+Supported types: `A`, `AAAA`, `CNAME`, `MX`, `TXT`, `NS`, `PTR`, `SRV`, `CAA`, `NAPTR`, `SPF`
+
+TXT and SPF values are automatically wrapped in double quotes if not already quoted.
+
+**Alias pointer**
+
+Use `.pointer()` to point a name at another Puls-managed resource (e.g. a Fargate service or load balancer):
+
+```typescript
+AWS.Route53("example.com")
+  .pointer("api", this.apiService)  // creates an A alias record
+```
+
+**Domain registration**
+
+```typescript
+import { AWS_TYPES } from "puls-dev";
+const { REGION } = AWS_TYPES;
+
+const DOMAIN_REGISTER = {
+  FIRSTNAME: "Jane",
+  LASTNAME: "Doe",
+  EMAIL: "jane@example.com",
+  MOBILE: "+1.5555550100",
+  CONTACT_TYPE: "PERSON",
+  ADDRESSLINE: "123 Main St",
+  CITY: "Seattle",
+  ZIPCODE: "98101",
+  COUNTRY: "US",
+};
+
+AWS.Route53("example.com").register(DOMAIN_REGISTER)
+AWS.Route53().randomDomain().register(DOMAIN_REGISTER)  // registers a random available .com
+```
+
+Registration polls every 15 seconds and waits up to 15 minutes for the domain to become active. Privacy protection is enabled by default for admin, registrant, and tech contacts.
+
+**Outputs**
+
+| Field        | Type                                   |
+|--------------|----------------------------------------|
+| `.out.zone`  | `Output<{ name: string; id: string }>` |
 
 ---
 
@@ -199,6 +254,47 @@ AWS.Route53("example.com").withWildcardSSL()  // attach wildcard ACM cert (sidec
 Managed automatically as a Route53 sidecar - not used directly.
 
 `.withWildcardSSL()` on a Route53 builder requests a wildcard cert, writes the DNS validation CNAME, and waits for `ISSUED` (up to 10 minutes).
+
+---
+
+## SecretsManager
+
+Read and manage AWS Secrets Manager secrets.
+
+```typescript
+// Read an existing secret (value available at deploy time via .resolvedValue)
+AWS.SecretsManager("my-app/db-password")
+
+// Create or update a secret
+AWS.SecretsManager("my-app/db-password")
+  .plainText("s3cr3t")
+  .description("Production DB password")
+
+// Store a JSON object (key-value secret)
+AWS.SecretsManager("my-app/config")
+  .keyValue({ host: "db.internal", port: 5432 })
+```
+
+**Using secrets as env vars**
+
+Pass a `SecretsBuilder` directly into `.env()` on Lambda or Fargate - Puls resolves the secret value at deploy time and injects it as a plain string:
+
+```typescript
+const dbPass = AWS.SecretsManager("my-app/db-password");
+
+AWS.Lambda("my-fn")
+  .code("./dist")
+  .runtime(RUNTIME.NODEJS_20)
+  .env({ DB_PASSWORD: dbPass })
+```
+
+**Destroy behaviour**
+
+By default, `@Destroy` schedules a 30-day recovery window. Use `.forceDelete()` to delete immediately:
+
+```typescript
+AWS.SecretsManager("my-app/temp-token").forceDelete()
+```
 
 ---
 

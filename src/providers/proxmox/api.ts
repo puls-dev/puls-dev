@@ -41,7 +41,7 @@ export class ProxmoxApiClient {
         `Proxmox ${method} ${path}: ${res.status} ${await res.text()}`,
       );
 
-    const json = (await res.json()) as any;
+    const json = (await res.json()) as { data?: unknown };
     return json.data ?? null;
   }
 

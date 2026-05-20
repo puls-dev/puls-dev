@@ -477,65 +477,14 @@ export class VMBuilder extends BaseBuilder {
   private runProvisioner(ip: string, script: string): Promise<void> {
     const ext = script.split(".").pop()?.toLowerCase();
 
-    if (ext === "sh") return this.runShellScript(ip, script);
+    if (ext === "sh") {
+      throw new Error(
+        `Shell script provisioning (.sh) is no longer supported. ` +
+          `Please migrate "${script}" to an Ansible playbook (.yaml/.yml).`,
+      );
+    }
     if (ext === "pp") return this.runPuppet(ip, script);
     return this.runAnsible(ip, script); // .yml / .yaml
-  }
-
-  private runShellScript(ip: string, script: string): Promise<void> {
-    console.log(`   🔧 Running shell script: ${script} → ${ip}`);
-    const keyPath = this.sshKeyPath();
-    const scriptDir = dirname(script); // e.g. 'config'
-    const sshArgs = [
-      "-i",
-      keyPath,
-      "-o",
-      "StrictHostKeyChecking=no",
-      "-o",
-      "ConnectTimeout=30",
-    ];
-
-    return new Promise((resolve, reject) => {
-      // Copy the script's directory to the same path on the remote (e.g. config/ → /config/)
-      console.log(`   📂 Copying ${scriptDir}/ → ${ip}:/${scriptDir}/`);
-      const scp = spawn(
-        "scp",
-        [
-          "-i",
-          keyPath,
-          "-o",
-          "StrictHostKeyChecking=no",
-          "-r",
-          scriptDir,
-          `root@${ip}:/`,
-        ],
-        { stdio: "inherit" },
-      );
-
-      scp.on("error", (err) => reject(new Error(`scp failed: ${err.message}`)));
-      scp.on("close", (scpCode) => {
-        if (scpCode !== 0) {
-          reject(new Error(`scp exited with code ${scpCode}`));
-          return;
-        }
-
-        const proc = spawn("ssh", [...sshArgs, `root@${ip}`, "bash -s"], {
-          stdio: ["pipe", "inherit", "inherit"],
-        });
-
-        proc.stdin.write(readFileSync(script));
-        proc.stdin.end();
-        proc.on("close", (code) => {
-          if (code === 0) {
-            console.log(`   ✅ Provisioning complete`);
-            resolve();
-          } else reject(new Error(`Shell script exited with code ${code}`));
-        });
-        proc.on("error", (err) =>
-          reject(new Error(`ssh failed: ${err.message}`)),
-        );
-      });
-    });
   }
 
   private runPuppet(ip: string, manifest: string): Promise<void> {

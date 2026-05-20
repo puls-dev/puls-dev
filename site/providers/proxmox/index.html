@@ -1094,7 +1094,7 @@
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">vlan</span><span class="p">(</span><span class="mf">2010</span><span class="p">)</span><span class="w">                 </span><span class="c1">// VLAN tag on vmbr1</span>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">)</span><span class="w">               </span><span class="c1">// array of public key strings</span>
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/default.yaml&quot;</span><span class="p">)</span><span class="w">   </span><span class="c1">// single script or playbook</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">([</span><span class="s2">&quot;common.sh&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app.yml&quot;</span><span class="p">])</span><span class="w"> </span><span class="c1">// or multiple files run in order</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">([</span><span class="s2">&quot;common.yml&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app.yml&quot;</span><span class="p">])</span><span class="w"> </span><span class="c1">// or multiple files run in order</span>
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01-old&quot;</span><span class="p">)</span><span class="w">       </span><span class="c1">// destroy old VM after new one is up</span>
 </code></pre></div>
 <h2 id="templates-os-constants">Templates (OS constants)</h2>
@@ -1139,16 +1139,11 @@
 <td><code>ansible-playbook -i "IP," -u root --private-key ...</code></td>
 </tr>
 <tr>
-<td><code>.sh</code></td>
-<td><code>scp -r scriptDir/ root@IP:/</code> then <code>ssh 'bash -s' &lt; script</code></td>
-</tr>
-<tr>
 <td><code>.pp</code></td>
 <td><code>scp manifest.pp /tmp/</code> then <code>ssh 'puppet apply /tmp/manifest.pp'</code></td>
 </tr>
 </tbody>
 </table>
-<p>For shell scripts, the entire directory containing the script is scp'd first - companion files (GPG keys, configs) are available on the remote at the same relative path.</p>
 <h3 id="ansible-example-configdefaultyaml">Ansible example (<code>config/default.yaml</code>)</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nn">---</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install Puppet 8</span>

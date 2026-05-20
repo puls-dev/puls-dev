@@ -8,6 +8,7 @@ import {
   UpdateFunctionCodeCommand,
   UpdateFunctionConfigurationCommand,
   DeleteFunctionCommand,
+  Runtime,
 } from "@aws-sdk/client-lambda";
 import {
   GetRoleCommand,
@@ -176,7 +177,7 @@ export class LambdaBuilder extends BaseBuilder {
 
     const config = {
       FunctionName: this.name,
-      Runtime: this._runtime as any,
+      Runtime: this._runtime as Runtime,
       Handler: this._handler,
       MemorySize: this._memory,
       Timeout: this._timeout,

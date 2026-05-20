@@ -2,6 +2,7 @@ import {
   ListHostedZonesByNameCommand,
   CreateHostedZoneCommand,
   ChangeResourceRecordSetsCommand,
+  RRType,
 } from "@aws-sdk/client-route-53";
 import {
   RegisterDomainCommand,
@@ -84,8 +85,24 @@ export class Route53Builder extends BaseBuilder {
     return this;
   }
 
-  record(name: string, type: "A" | "CNAME" | "AAAA", value: string) {
-    this.records.push({ name, type, value });
+  record(
+    name: string,
+    type:
+      | "A"
+      | "AAAA"
+      | "CNAME"
+      | "MX"
+      | "TXT"
+      | "NS"
+      | "PTR"
+      | "SRV"
+      | "CAA"
+      | "NAPTR"
+      | "SPF",
+    value: string,
+    ttl: number = 300,
+  ) {
+    this.records.push({ name, type, value, ttl });
     return this;
   }
 
@@ -156,11 +173,9 @@ export class Route53Builder extends BaseBuilder {
         name: r.name,
         value:
           r.value instanceof BaseBuilder ? `[alias: ${r.value.name}]` : r.value,
+        ttl: r.ttl ?? 300,
       }));
-      await this.upsertRecords(
-        r53,
-        resolved.map((r) => ({ ...r, ttl: 300 })),
-      );
+      await this.upsertRecords(r53, resolved);
     }
 
     for (const rec of this.records) {
@@ -299,15 +314,22 @@ export class Route53Builder extends BaseBuilder {
       new ChangeResourceRecordSetsCommand({
         HostedZoneId: this.zoneId!,
         ChangeBatch: {
-          Changes: records.map((r) => ({
-            Action: "UPSERT",
-            ResourceRecordSet: {
-              Name: r.name,
-              Type: r.type as any,
-              TTL: r.ttl,
-              ResourceRecords: [{ Value: r.value }],
-            },
-          })),
+          Changes: records.map((r) => {
+            const value =
+              (r.type === "TXT" || r.type === "SPF") &&
+              !r.value.startsWith('"')
+                ? `"${r.value}"`
+                : r.value;
+            return {
+              Action: "UPSERT",
+              ResourceRecordSet: {
+                Name: r.name,
+                Type: r.type as RRType,
+                TTL: r.ttl,
+                ResourceRecords: [{ Value: value }],
+              },
+            };
+          }),
         },
       }),
     );

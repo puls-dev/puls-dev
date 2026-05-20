@@ -1,6 +1,6 @@
 # Puls-dev
 
-**Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.**
+**Intent-driven infrastructure-as-code. Describe what you want - Puls figures out create, update, or skip.**
 
 [Live Documentation](https://pulsdev.io/) | Discord: **pulsdev.io** ([Join](https://discord.gg/CjgRayuH))
 

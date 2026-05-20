@@ -6,7 +6,21 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 
 ## Tech Debt
 
-- [ ] `config/default.sh` is superseded by `config/default.yaml` - can be removed once Ansible is confirmed as the standard
+- [x] `config/default.sh` is superseded by `config/default.yaml` - can be removed once Ansible is confirmed as the standard
+- [x] `LoadBalancerBuilder` (DO) does not extend `BaseBuilder` - inconsistent lifecycle, uses `Config.isGlobalDryRun()` instead of `isDryRunActive()`, no sidecar/protection support
+- [x] DO `DomainBuilder` deletes and recreates records on every deploy instead of true upsert - can cause brief DNS gaps
+- [x] Firebase `FunctionsBuilder` skips eager discovery (resolves `null` immediately) - diverges from the standard pattern where discovery fires in the constructor
+- [x] Scattered `as any` casts on Route53 record types and elsewhere - replace with proper SDK type imports where possible
+
+---
+
+## Testing
+
+- [x] Basic test suite (core: `config.test.ts`, `output.test.ts`)
+- [/] Provider unit tests with mocked API clients - each builder's `deploy()` and `destroy()` paths covered (create, skip, update, dry-run) (DigitalOcean DomainBuilder complete)
+- [ ] Dry-run integration tests - run full stacks with `dryRun: true` against real provider credentials to verify discovery without writing
+- [ ] CI pipeline - run unit tests on every push; dry-run suite on PRs that touch provider code
+- [ ] End-to-end tests against sandboxes (LocalStack for AWS, DO staging token, Firebase emulator)
 
 ---
 
@@ -15,78 +29,99 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 ### Proxmox
 - [ ] Cluster-aware node selection - pick the node with the most free RAM via `/nodes` API instead of always using the first configured node
 - [ ] `.machine()` builder method - let users override machine type (i440fx vs q35) per VM rather than the hardcoded default
-- [ ] CONFIG.PRODUCTION entry in src/types/proxmox.ts
+- [ ] `CONFIG.PRODUCTION` entry in `src/types/proxmox.ts`
 
 ### AWS
 - [x] CloudFront cache invalidation - `.invalidate(paths[])` on a CloudFront builder
 - [x] S3 file upload - `.upload(filePath)` uploads a single file to the bucket on deploy
-- [ ] Route53 A-record upsert - currently only CNAMEs are supported via `upsertCnames()`
-- [ ] S3 static site hosting config
+- [x] Route53 record types - A, AAAA, CNAME, MX, TXT, NS, PTR, SRV, CAA, NAPTR, SPF via `.record()`; per-record TTL; TXT auto-quoting
+- [ ] S3 static site hosting - `.staticSite()` sets index/error documents and public-read policy
+- [ ] IAM - role and inline/managed policy management; useful for cross-service wiring without manual console steps
+- [ ] CloudWatch alarms - CPU/memory thresholds on Fargate and RDS with SNS notification target
+- [ ] EC2 - lower priority; Proxmox already covers the raw-VM use case, and EC2 needs VPC/SG/keypair support to be useful
 
 ### DigitalOcean
-- [ ] VPC support
+- [x] Droplet, Domain, Firewall, Certificate, LoadBalancer
+- [x] `LoadBalancerBuilder` overhaul - extend `BaseBuilder`, add `.region()`, `.healthCheck()`, `.stickySession()`, configurable forwarding rules and SSL termination
+- [ ] Spaces - S3-compatible object storage; `.bucket()`, `.cors()`, `.acl()`
+- [ ] Managed databases - Postgres, MySQL, Redis; analogous to AWS RDS
+- [ ] App Platform - deploy from a GitHub repo or container image without managing Droplets
+- [ ] VPC - create and assign Droplets/databases to a private network
+- [x] Domain: add AAAA, SRV, CAA record types; implement `destroy()` for domain and records
+
+### Firebase / GCP
+- [x] Firebase Hosting - deploy a web app from a local build directory; file-level caching via SHA256
+- [x] Firebase Functions - deploy Cloud Functions v2 from source; full create/update/delete lifecycle
+- [x] Firebase Firestore - rules deployment and composite index management
+- [x] Firebase Auth - email/password, anonymous, phone, and OAuth providers (Google, GitHub, Facebook, Twitter, Apple, Microsoft); authorized domains
+- [x] Firebase Storage - rules deployment, CORS configuration, lifecycle policies
+- [x] Firebase RemoteConfig - typed parameters (string, bool, number, JSON), conditions, and per-condition overrides; ETag-safe PUT
+- [ ] Firebase App Check - enforce attestation on Hosting, Functions, and Firestore
+- [ ] GCP Cloud Run - containerized services; closer to ECS/Fargate parity for teams already on GCP
+- [ ] GCP Cloud SQL - managed Postgres / MySQL with private IP and IAM auth
 
 ---
 
 ## New Providers
 
-### AWS - Completion path (in order)
-- [x] **Lambda** - deploy a function from a local zip or directory; most DSL-friendly compute primitive
-- [x] **API Gateway** - route HTTP → Lambda; pairs naturally, minimal config surface
-- [x] **ECS / Fargate** - container services without instance management; no VPC required for Fargate
-- [x] **RDS** - managed database instances (Postgres, MySQL)
-- [x] **SQS** - queues as event-driven glue between the above
-- [ ] **EC2** - lower priority; Proxmox already covers the raw-VM use case, and EC2 needs VPC/SG/keypair support to be useful
-
-### GCP / Firebase
-Firebase maps naturally to the DSL - each service is a one-liner with sane defaults, no cluster management.
+### Cloudflare
+Strong candidate for a first-class provider - widely used alongside or instead of AWS for DNS and CDN, and the API is clean.
 
 ```typescript
-@Deploy({ region: GCP_REGION.EU_WEST1, token: process.env.FIREBASE_JSON })
-class Blog extends Stack {
-  app  = Firebase.App("myblog").config("./dist");
-  api  = Firebase.Functions("api").source("./functions");
-  db   = Firebase.Firestore("mydb").rules("./firestore.rules");
+@Deploy({ cloudflare: { token: process.env.CF_TOKEN } })
+class EdgeStack extends Stack {
+  zone   = CF.Zone("example.com");
+  worker = CF.Worker("api").script("./workers/api").route("api.example.com/*");
+  kv     = CF.KV("sessions");
+  r2     = CF.R2("assets");
 }
 ```
 
-- [x] `src/types/gcp.ts` - `GCP_REGION` constants
-- [x] **Firebase Hosting** - deploy a web app from a local build directory
-- [ ] **Firebase Functions** - deploy Cloud Functions from a local source directory
-- [ ] **Firebase Firestore** - database with rules deployment
-- [ ] **GCP Cloud Run** - containerized services, closer to ECS/Fargate parity
-- [ ] **GCP Cloud SQL** - managed Postgres / MySQL on GCP
+- [ ] **Zone + DNS** - hosted zone discovery, full record type support (mirrors Route53 implementation)
+- [ ] **Workers** - deploy a Worker script with routes and env bindings
+- [ ] **KV** - key-value namespace management
+- [ ] **R2** - S3-compatible object storage; useful as a cheaper CloudFront+S3 alternative
+- [ ] **Pages** - static site hosting with preview deployments
 
-### Community-driven
-These are good-fit providers but maintained by the community, not core. The contributing guidelines enforce the DSL contract.
+### Hetzner Cloud
+Popular self-hosting alternative to DigitalOcean - similar API shape, easy to add.
 
-- [ ] **CloudFlare** - zones, DNS, CDN; natural alternative to CloudFront for teams avoiding AWS lock-in
-- [ ] **Hetzner Cloud** - popular self-hosting alternative to DigitalOcean, similar API shape
-- [ ] **Akamai** - enterprise CDN / edge; complex enough that it warrants a dedicated maintainer
+- [ ] **Server** - analogous to DO Droplet; image, type, location, SSH key
+- [ ] **Network / VPC** - private networking between servers
+- [ ] **Firewall** - inbound/outbound rules
+- [ ] **Load Balancer** - HTTP/HTTPS with health checks
+- [ ] **Volume** - persistent block storage attached to servers
+
+### Akamai
+Enterprise CDN/edge - complex enough to warrant a dedicated maintainer; community-driven.
 
 ---
 
 ## NPM Package
 
 - [x] Switch `package.json` to `"type": "module"` (ESM)
-- [x] Add basic test suite to satisfy release process
+- [x] Basic test suite
 - [ ] Add `"exports"` map with per-provider sub-paths so consumers can import only what they need:
   ```json
   "exports": {
-    "./proxmox": "./dist/providers/proxmox/index.js",
     "./aws":     "./dist/providers/aws/index.js",
-    "./do":      "./dist/providers/do/index.js"
+    "./do":      "./dist/providers/do/index.js",
+    "./proxmox": "./dist/providers/proxmox/index.js",
+    "./firebase": "./dist/providers/firebase/index.js"
   }
   ```
-- [ ] Ship compiled JS + `.d.ts` declarations; mark provider SDK packages as peer dependencies
+- [ ] Ship compiled JS + `.d.ts` declarations; mark provider SDK packages as `peerDependencies`
 - [ ] Semver versioning - provider additions = minor, breaking DSL changes = major
 
 ---
 
 ## Framework Features
 
-- [x] **Stack outputs** - pass values between stacks (e.g. VM IP from one stack feeds a DNS record in another)
+- [x] **Stack outputs** - pass `Output<T>` values between stacks; eager resolution unblocks dependents automatically
 - [x] **Inventory / `@Check`** - read-only discovery across all configured providers; prints counts, status, and DO cost estimates
-- [ ] **Secrets integration** - pull credentials from Vault or AWS SSM at deploy time instead of env vars
-- [ ] **Hooks** - `beforeDeploy` / `afterDeploy` callbacks on Stack for custom side effects
-- [ ] **Multi-region** - run the same stack across N regions in parallel
+- [x] **Dry run** - `dryRun: true` or `@DryRun` prints a full plan without any API writes
+- [x] **`@Protected`** - marks a resource so it is never modified or destroyed
+- [ ] **Hooks** - `beforeDeploy` / `afterDeploy` callbacks on `Stack` for custom side effects (notify Slack, run migrations, etc.)
+- [ ] **Multi-region** - run the same stack across N regions in parallel; `@Deploy({ regions: [REGION.EU_CENTRAL_1, REGION.US_EAST_1] })`
+- [ ] **Parallel resource deployment** - resources within a stack that have no declared dependency could deploy concurrently instead of sequentially
+- [ ] **Secrets at deploy time** - pull credentials from AWS SSM Parameter Store or HashiCorp Vault instead of requiring them as env vars upfront

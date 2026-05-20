@@ -1,14 +1,14 @@
 # Why Puls?
 
-Infrastructure as Code has always been about **how** to build things - managing state files, wiring up resource dependencies, and wrestling with domain-specific languages like HCL.
+Most infrastructure tools are built around the question "how do you want to build this?" - state files, plan steps, dependency graphs, HCL.
 
-Puls was built to shift the focus to **what** you want.
+Puls is built around a different question: **what do you want?**
 
 ---
 
 ## The Problem
 
-Consider a real-world production environment. A Route53 domain, wildcard SSL via ACM, two CloudFront distributions cloning existing configurations, and an S3 bucket with correctly configured Origin Access Control. Not particularly complex in nature - just a standard environment most teams spin up regularly.
+Consider a real-world production environment: a Route53 domain, wildcard SSL via ACM, two CloudFront distributions cloning existing configurations, and an S3 bucket with correctly configured Origin Access Control. Not particularly complex - just a standard environment most teams spin up regularly.
 
 In Terraform, this is **550+ lines of HCL**. Manual AWS CLI calls via `null_resource`. Complex `dynamic "origin"` blocks. A hardcoded `time_sleep` of 300 seconds waiting for DNS propagation. External Python scripts to fetch distribution IDs. Manual JSON encoding for bucket policies.
 
@@ -68,7 +68,7 @@ locals {
 # ... another 450+ lines below
 ```
 
-A wall of code that is hard to audit, easy to break, and requires deep expertise in both Terraform and AWS internals to maintain. Most companies don't have a dedicated Terraform team. They have engineers who need to ship infrastructure and get back to building product.
+Hard to audit, easy to break, and requires deep expertise in both Terraform and AWS internals to maintain. Most companies don't have a dedicated Terraform team. They have engineers who need to ship infrastructure and get back to building product.
 
 Our own junior engineer couldn't make sense of it. He understood what the environment was supposed to do - he just couldn't connect that intent to what the code was actually saying. So he didn't touch it. Nobody touched it unless they had to.
 
@@ -79,25 +79,23 @@ Our own junior engineer couldn't make sense of it. He understood what the enviro
 The same infrastructure in Puls:
 
 ```typescript
-import { AWS, AWS_TYPES, Stack, Deploy } from "@puls-dev/core";
-const { REGION, DOMAIN_REGISTER, DISTRO, BUCKET } = AWS_TYPES;
+import { AWS, AWS_TYPES, Stack, Deploy } from "puls-dev";
+const { REGION, DISTRO, BUCKET } = AWS_TYPES;
 
 @Deploy({ region: REGION.US_EAST_1, dryRun: true })
-class TurkeyEnvironment extends Stack {
-  domain = AWS.Route53()
-    .withWildcardSSL()
-    .randomDomain()
-    .register(DOMAIN_REGISTER);
+class GameEnvironment extends Stack {
+  domain = AWS.Route53("example.com")
+    .withWildcardSSL();
 
-  cdn = AWS.CloudFront(`Puls-${this.domain.zoneName.slice(0, 12)}-CDN`)
+  cdn = AWS.CloudFront("game-cdn")
     .copyFrom(DISTRO.CDN)
     .forDomain(this.domain, ["ec", "nc"]);
 
-  game = AWS.CloudFront(`Puls-${this.domain.zoneName.slice(0, 12)}-GAME`)
+  game = AWS.CloudFront("game-dist")
     .copyFrom(DISTRO.GAME)
     .forDomain(this.domain, ["eg", "ng"]);
 
-  bucket = AWS.S3(BUCKET.NLC_GAMES_UREG)
+  bucket = AWS.S3(BUCKET.GAMES)
     .allowFrom(this.cdn, this.game)
     .region(REGION.EU_WEST_1);
 }
@@ -105,8 +103,20 @@ class TurkeyEnvironment extends Stack {
 
 That junior engineer can read this. He knows what it does without needing to understand ACM validation, OAC policies, or CloudFront distribution cloning. He can make changes, open a PR, and trust that running it twice won't break anything.
 
-That's what Puls is for.
-
 ---
 
-The complexity lives in the implementation, not the interface.
+## How it works
+
+Two ideas make this possible:
+
+**Eager discovery.** The moment you declare a resource, Puls fires an API lookup in the background. By the time `deploy()` runs, it already knows the current state of every resource. No separate plan step. No local state files.
+
+**Idempotency by default.** Every resource follows the same contract: if it already matches your intent, it is skipped without an API write. Running the same stack twice is always safe.
+
+```
+Declare resource  →  Discovery fires immediately
+                  →  You chain config (.cores(), .image(), ...)
+                  →  deploy() awaits discovery, diffs, acts only if needed
+```
+
+The complexity lives in the implementation, not the interface. A junior engineer shouldn't need to know how a wildcard certificate gets validated through DNS - they should just be able to say `.withWildcardSSL()` and move on.

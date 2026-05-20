@@ -6,7 +6,11 @@ export class DoApiClient {
   constructor(private token: string) {}
 
   private get authHeaders() {
-    return { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' };
+    return { 
+      Authorization: `Bearer ${this.token}`, 
+      'Content-Type': 'application/json',
+      'Accept-Encoding': 'identity'
+    };
   }
 
   async get<T>(path: string): Promise<T> {

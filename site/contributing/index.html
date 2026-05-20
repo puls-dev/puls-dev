@@ -775,17 +775,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-idea-that-powers-puls" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The idea that powers Puls
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#what-belongs-in-the-dsl" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -902,17 +891,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-idea-that-powers-puls" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The idea that powers Puls
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#what-belongs-in-the-dsl" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -979,42 +957,19 @@
 <h1 id="contributing-to-puls">Contributing to Puls</h1>
 <h2 id="the-one-rule">The one rule</h2>
 <p><strong>If you can't describe it in one line, it doesn't belong in the DSL.</strong></p>
-<p>Infrastructure is "give me X" - not "give me X with A, I, O, and P." Puls exists to make that true. A VM, a bucket, a distribution. One expression. The complexity lives in the implementation, not the interface.</p>
+<p>Infrastructure is "give me X" - not "give me X configured with A, B, and C." The complexity lives in the implementation, not the interface.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// This is Puls</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;game-server&quot;</span><span class="p">).</span><span class="nx">image</span><span class="p">(</span><span class="nx">OS</span><span class="p">.</span><span class="nx">UBUNTU_24_04</span><span class="p">).</span><span class="nx">cores</span><span class="p">(</span><span class="mf">4</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">8192</span><span class="p">).</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/default.yaml&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1">// This is not</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="ow">new</span><span class="w"> </span><span class="nx">VM</span><span class="p">({</span><span class="w"> </span><span class="nx">image</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ubuntu&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">cores</span><span class="o">:</span><span class="w"> </span><span class="kt">4</span><span class="p">,</span><span class="w"> </span><span class="nx">memory</span><span class="o">:</span><span class="w"> </span><span class="kt">8192</span><span class="p">,</span><span class="w"> </span><span class="nx">network</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">bridge</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;vmbr1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">vlan</span><span class="o">:</span><span class="w"> </span><span class="kt">2010</span><span class="p">,</span><span class="w"> </span><span class="nx">virtio</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nx">storage</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">pool</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;rbd_pool&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">format</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;raw&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">size</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;32G&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nx">cloudinit</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">})</span>
 </code></pre></div>
-<p>The DSL is TypeScript. You can write whatever you want around it. But anything that ships <em>inside</em> it has to pass the one-liner test.</p>
-<h2 id="the-idea-that-powers-puls">The idea that powers Puls</h2>
-<p>The idea is to make infrastructure easy to describe and deploy, with sane defaults hiding the complexity underneath. You don't need to know how the DSL works - you just need to know what you want. It has no limitations and is designed to be extensible, without ever feeling like you have to reach for custom resources just because the abstraction broke down.</p>
-<p>A junior engineer unfamiliar with the underlying platform can spin up a domain with a wildcard certificate, link it to two CloudFront distributions, and wire those to an S3 bucket - all correctly configured and idempotent - without understanding any of the plumbing. Because it's plain TypeScript with typed constants, they get autocomplete, type checking, and a readable stack that a senior engineer would be comfortable owning.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="kt">REGION.US_EAST_1</span><span class="p">,</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">class</span><span class="w"> </span><span class="nx">Example</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nx">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">()</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="p">.</span><span class="nx">withWildcardSSL</span><span class="p">()</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="p">.</span><span class="nx">randomDomain</span><span class="p">()</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="nx">DOMAIN_REGISTER</span><span class="p">);</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="nx">cdn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">CloudFront</span><span class="p">(</span><span class="sb">`OPSDSL-</span><span class="si">${</span><span class="k">this</span><span class="p">.</span><span class="nx">domain</span><span class="p">.</span><span class="nx">zoneName</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="mf">12</span><span class="p">)</span><span class="si">}</span><span class="sb">-CDN`</span><span class="p">)</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="p">.</span><span class="nx">copyFrom</span><span class="p">(</span><span class="nx">DISTRO</span><span class="p">.</span><span class="nx">CDN_DISTRIBUTION</span><span class="p">)</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="p">.</span><span class="nx">forDomain</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">domain</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ec&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;nc&quot;</span><span class="p">]);</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="nx">game</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">CloudFront</span><span class="p">(</span><span class="sb">`OPSDSL-</span><span class="si">${</span><span class="k">this</span><span class="p">.</span><span class="nx">domain</span><span class="p">.</span><span class="nx">zoneName</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="mf">12</span><span class="p">)</span><span class="si">}</span><span class="sb">-GAME`</span><span class="p">)</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="p">.</span><span class="nx">copyFrom</span><span class="p">(</span><span class="nx">DISTRO</span><span class="p">.</span><span class="nx">GAME_DISTRIBUTION</span><span class="p">)</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="p">.</span><span class="nx">forDomain</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">domain</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;eg&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ng&quot;</span><span class="p">]);</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">  </span><span class="nx">bucket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">S3</span><span class="p">(</span><span class="nx">BUCKET</span><span class="p">.</span><span class="nx">GAMES_BUCKET</span><span class="p">)</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="p">.</span><span class="nx">allowFrom</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">cdn</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">game</span><span class="p">)</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">region</span><span class="p">(</span><span class="nx">REGION</span><span class="p">.</span><span class="nx">EU_WEST_1</span><span class="p">);</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="p">}</span>
-</code></pre></div>
+<p>If a use case is too complex to fit a one-liner - that's fine. It belongs in userland TypeScript, not in the DSL. See <a href="../why/">Why Puls?</a> for the full motivation.</p>
 <hr />
 <h2 id="what-belongs-in-the-dsl">What belongs in the DSL</h2>
 <p>A contribution belongs here if it:</p>
 <ul>
-<li><strong>Hides real complexity behind a sane default.</strong> The user says what they want. The DSL figures out how. <code>allowPublicWeb()</code> opens ports 80 and 443 - the user doesn't think about firewall rules.</li>
+<li><strong>Hides real complexity behind a sane default.</strong> The user says what they want; the DSL figures out how. <code>allowPublicWeb()</code> opens ports 80 and 443 - the user doesn't think about firewall rules.</li>
 <li><strong>Is idempotent by default.</strong> Running the same stack twice must always be safe. Every resource checks current state before acting.</li>
 <li><strong>Follows eager discovery.</strong> The moment a resource is declared, it starts checking the real API in the background. No separate plan step, no local state files.</li>
 <li><strong>Uses the constants pattern.</strong> IDs, sizes, regions, and credentials live in typed constants - not inline strings.</li>
@@ -1026,19 +981,19 @@
 <li>Escape hatches that let users pass raw provider config through the DSL surface</li>
 <li>Anything that breaks the one-expression-per-resource model</li>
 </ul>
-<p>If the use case is genuinely too complex to fit - that's fine. It belongs in userland TypeScript, not in the DSL.</p>
 <hr />
 <h2 id="adding-a-provider">Adding a provider</h2>
 <p>A new provider must implement:</p>
 <ol>
 <li><strong>Eager discovery</strong> in the constructor - <code>this.discoveryPromise = this.discover(name)</code></li>
-<li><strong>Idempotent <code>deploy()</code></strong> - check discovery result, skip if already correct</li>
+<li><strong>Idempotent <code>deploy()</code></strong> - check the discovery result, skip if already correct</li>
 <li><strong><code>destroy()</code></strong> - stop and remove the resource cleanly</li>
 <li><strong>Dry-run support</strong> - <code>this.isDryRunActive()</code> gates every API write</li>
-<li><strong>Constants</strong> - a types file with named environments (<code>CONFIG</code>), images (<code>OS</code>), sizes, etc.</li>
+<li><strong><code>Output&lt;T&gt;</code> fields</strong> - expose primary identifiers (IP, ARN, ID) under <code>.out</code> so other resources can depend on them</li>
+<li><strong>Constants</strong> - a types file with named environments, images, sizes, etc.</li>
 <li><strong>Sane defaults</strong> - a resource declared with only a name should be deployable</li>
 </ol>
-<p>The existing providers (DigitalOcean, AWS, Proxmox) are the reference implementation. When in doubt, look at how they do it.</p>
+<p>The existing providers (AWS, DigitalOcean, Proxmox, Firebase) are the reference implementation. When in doubt, look at how they do it.</p>
 <hr />
 <h2 id="the-bar-for-a-pr">The bar for a PR</h2>
 <p>Before opening a pull request, ask:</p>

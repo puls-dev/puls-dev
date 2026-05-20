@@ -181,7 +181,7 @@ export class FirebaseHostingBuilder extends BaseBuilder {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/octet-stream",
         },
-        body: compressed as any,
+        body: compressed as BodyInit,
       });
       if (!res.ok) {
         const errorBody = await res.text();

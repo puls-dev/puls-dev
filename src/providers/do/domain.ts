@@ -5,9 +5,14 @@ import { CertificateBuilder } from "./certificate.js";
 import { getDoApi } from "./api.js";
 
 export interface DNSRecord {
-  type: "A" | "CNAME" | "TXT" | "MX";
+  type: "A" | "CNAME" | "TXT" | "MX" | "AAAA" | "SRV" | "CAA";
   name: string;
   value: string | DropletBuilder | Output<string>;
+  priority?: number;
+  port?: number;
+  weight?: number;
+  flags?: number;
+  tag?: string;
 }
 
 export class DomainBuilder extends BaseBuilder {
@@ -45,6 +50,31 @@ export class DomainBuilder extends BaseBuilder {
     return this;
   }
 
+  aaaa(name: string, target: string | Output<string>) {
+    this.records.push({ type: "AAAA", name, value: target });
+    return this;
+  }
+
+  txt(name: string, target: string) {
+    this.records.push({ type: "TXT", name, value: target });
+    return this;
+  }
+
+  mx(name: string, target: string, priority: number = 10) {
+    this.records.push({ type: "MX", name, value: target, priority });
+    return this;
+  }
+
+  srv(name: string, target: string, port: number, priority: number = 10, weight: number = 10) {
+    this.records.push({ type: "SRV", name, value: target, port, priority, weight });
+    return this;
+  }
+
+  caa(name: string, tag: string, target: string, flags: number = 0) {
+    this.records.push({ type: "CAA", name, value: target, tag, flags });
+    return this;
+  }
+
   async deploy() {
     const dryRun = this.isDryRunActive();
     const existing = await this.discoveryPromise;
@@ -61,6 +91,22 @@ export class DomainBuilder extends BaseBuilder {
       }
     }
 
+    // Fetch existing records in a single batch
+    let existingRecords: any[] = [];
+    if (existing) {
+      try {
+        const res = await api.get<{ domain_records: any[] }>(
+          `/domains/${this.domainName}/records?per_page=200`
+        );
+        existingRecords = res.domain_records;
+      } catch {
+        existingRecords = [];
+      }
+    }
+
+    // Track matched existing records
+    const consumedRecordIds = new Set<number>();
+
     for (const record of this.records) {
       let data: string;
 
@@ -74,36 +120,127 @@ export class DomainBuilder extends BaseBuilder {
         data = record.value;
       }
 
-      if (dryRun) {
+      const targetPriority = record.priority ?? null;
+      const targetPort = record.port ?? null;
+      const targetWeight = record.weight ?? null;
+      const targetFlags = record.flags ?? null;
+      const targetTag = record.tag ?? null;
+
+      // 1. Check for a perfect match
+      const perfectMatch = existingRecords.find((r) => {
+        if (consumedRecordIds.has(r.id)) return false;
+        return (
+          r.type === record.type &&
+          r.name === record.name &&
+          String(r.data) === String(data) &&
+          (r.priority ?? null) === targetPriority &&
+          (r.port ?? null) === targetPort &&
+          (r.weight ?? null) === targetWeight &&
+          (r.flags ?? null) === targetFlags &&
+          (r.tag ?? null) === targetTag
+        );
+      });
+
+      if (perfectMatch) {
+        consumedRecordIds.add(perfectMatch.id);
         console.log(
-          `   📝 [PLAN] ${record.type} ${record.name}.${this.domainName} → ${data}`,
+          `   ✅ ${record.type} ${record.name}.${this.domainName} is up to date (→ ${data})`
         );
         continue;
       }
 
-      // Delete existing record with same type+name before creating
-      const existing_records = await api.get<{ domain_records: any[] }>(
-        `/domains/${this.domainName}/records?per_page=200`,
-      );
-      const dupe = existing_records.domain_records.find(
-        (r) => r.type === record.type && r.name === record.name,
-      );
-      if (dupe)
-        await api.delete(`/domains/${this.domainName}/records/${dupe.id}`);
-
-      await api.post(`/domains/${this.domainName}/records`, {
-        type: record.type,
-        name: record.name,
-        data,
-        ttl: 3600,
+      // 2. Look for updateable match (same type and name, different data)
+      const updateableMatch = existingRecords.find((r) => {
+        if (consumedRecordIds.has(r.id)) return false;
+        return r.type === record.type && r.name === record.name;
       });
 
-      console.log(
-        `   ✅ ${record.type} ${record.name}.${this.domainName} → ${data}`,
-      );
+      if (updateableMatch) {
+        consumedRecordIds.add(updateableMatch.id);
+        if (dryRun) {
+          console.log(
+            `   📝 [PLAN] Update ${record.type} ${record.name}.${this.domainName} → ${data} (was ${updateableMatch.data})`
+          );
+        } else {
+          await api.put(`/domains/${this.domainName}/records/${updateableMatch.id}`, {
+            type: record.type,
+            name: record.name,
+            data,
+            ttl: 3600,
+            priority: targetPriority,
+            port: targetPort,
+            weight: targetWeight,
+            flags: targetFlags,
+            tag: targetTag,
+          });
+          console.log(
+            `   🔄 Updated ${record.type} ${record.name}.${this.domainName} → ${data}`
+          );
+        }
+      } else {
+        // 3. No match found, create a new record
+        if (dryRun) {
+          console.log(
+            `   📝 [PLAN] Create ${record.type} ${record.name}.${this.domainName} → ${data}`
+          );
+        } else {
+          await api.post(`/domains/${this.domainName}/records`, {
+            type: record.type,
+            name: record.name,
+            data,
+            ttl: 3600,
+            priority: targetPriority,
+            port: targetPort,
+            weight: targetWeight,
+            flags: targetFlags,
+            tag: targetTag,
+          });
+          console.log(
+            `   🚀 Created ${record.type} ${record.name}.${this.domainName} → ${data}`
+          );
+        }
+      }
+    }
+
+    // 4. Delete duplicate/stale records of the types we declared
+    const declaredTypesAndNames = new Set(
+      this.records.map((r) => `${r.type}:${r.name}`)
+    );
+    for (const r of existingRecords) {
+      if (consumedRecordIds.has(r.id)) continue;
+      if (declaredTypesAndNames.has(`${r.type}:${r.name}`)) {
+        if (dryRun) {
+          console.log(
+            `   📝 [PLAN] Delete stale ${r.type} ${r.name}.${this.domainName} (→ ${r.data})`
+          );
+        } else {
+          await api.delete(`/domains/${this.domainName}/records/${r.id}`);
+          console.log(
+            `   🗑️  Deleted stale ${r.type} ${r.name}.${this.domainName}`
+          );
+        }
+      }
     }
 
     await this.deploySidecars();
     return { domain: this.domainName, records: this.records };
+  }
+
+  async destroy(): Promise<any> {
+    const dryRun = this.isDryRunActive();
+    await this.discoveryPromise;
+
+    console.log(`\n🗑️  Destroying DNS domain "${this.domainName}"...`);
+
+    if (dryRun) {
+      console.log(`   📝 [PLAN] Would delete domain ${this.domainName}`);
+    } else {
+      const api = getDoApi();
+      await api.delete(`/domains/${this.domainName}`);
+      console.log(`   ✅ Deleted.`);
+    }
+
+    await this.destroySidecars();
+    return { destroyed: this.domainName };
   }
 }

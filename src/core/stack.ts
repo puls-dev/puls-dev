@@ -109,7 +109,7 @@ export abstract class Stack {
     const outputs: Record<string, any> = {};
 
     for (const prop of props) {
-      const resource = (this as any)[prop];
+      const resource = (this as Record<string, unknown>)[prop];
 
       if (resource instanceof BaseBuilder) {
         const isProtected = Reflect.getMetadata("protected", this, prop);
@@ -135,7 +135,7 @@ export abstract class Stack {
     const outputs: Record<string, any> = {};
 
     for (const prop of props) {
-      const resource = (this as any)[prop];
+      const resource = (this as Record<string, unknown>)[prop];
       if (resource instanceof BaseBuilder) {
         if (Reflect.getMetadata("protected", this, prop)) {
           console.log(`   🔒 Skipping protected resource "${prop}"`);

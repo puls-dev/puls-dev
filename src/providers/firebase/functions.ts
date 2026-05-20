@@ -30,8 +30,24 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
 
   constructor(functionName: string) {
     super(functionName);
-    // Discovery runs lazily in deploy() because we need _region, which may not be set at construction time
-    this.discoveryPromise = Promise.resolve(null);
+    this.discoveryPromise = Promise.resolve().then(() => this.discoverFunction());
+  }
+
+  private async discoverFunction(): Promise<any> {
+    try {
+      return await this.getExisting();
+    } catch (e: any) {
+      if (
+        e.message?.includes("403") ||
+        e.message?.includes("404") ||
+        e.message?.includes("Firebase not configured") ||
+        e.message?.includes("private_key") ||
+        e.code === "MISSING_CREDENTIALS"
+      ) {
+        return null;
+      }
+      throw e;
+    }
   }
 
   source(path: string) {
@@ -143,7 +159,7 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
       );
 
     if (dryRun) {
-      const existing = await this.getExisting();
+      const existing = await this.discoveryPromise;
       if (existing) {
         console.log(
           `   ✅ Function "${this.name}" exists (${existing.state ?? "ACTIVE"})`,
@@ -185,7 +201,7 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
       },
     };
 
-    const existing = await this.getExisting();
+    const existing = await this.discoveryPromise;
     let op: any;
 
     if (!existing) {
@@ -219,7 +235,7 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
     const dryRun = this.isDryRunActive();
     console.log(`\n🗑️  Destroying Firebase Function "${this.name}"...`);
 
-    const existing = await this.getExisting();
+    const existing = await this.discoveryPromise;
 
     if (!existing) {
       console.log(

@@ -760,6 +760,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#secretsmanager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SecretsManager
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#full-example" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1061,6 +1072,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#secretsmanager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SecretsManager
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#full-example" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1218,50 +1240,129 @@
 <p><code>.forDomain()</code> wires the ACM cert from the Route53 sidecar automatically. Retries cert propagation for up to 5 minutes.</p>
 <hr />
 <h2 id="route53">Route53</h2>
-<p>Hosted zone discovery and domain registration.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">(</span><span class="s2">&quot;example.com&quot;</span><span class="p">)</span><span class="w">                    </span><span class="c1">// existing domain</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">().</span><span class="nx">randomDomain</span><span class="p">().</span><span class="nx">register</span><span class="p">(</span><span class="nx">DOMAIN_REGISTER</span><span class="p">)</span><span class="w">  </span><span class="c1">// register a new random .com</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">(</span><span class="s2">&quot;example.com&quot;</span><span class="p">).</span><span class="nx">withWildcardSSL</span><span class="p">()</span><span class="w">  </span><span class="c1">// attach wildcard ACM cert (sidecar)</span>
+<p>Hosted zone discovery, DNS record management, and domain registration.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">(</span><span class="s2">&quot;example.com&quot;</span><span class="p">)</span><span class="w">                    </span><span class="c1">// existing hosted zone</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">(</span><span class="s2">&quot;example.com&quot;</span><span class="p">).</span><span class="nx">withWildcardSSL</span><span class="p">()</span><span class="w">  </span><span class="c1">// attach wildcard ACM cert (sidecar)</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">().</span><span class="nx">randomDomain</span><span class="p">().</span><span class="nx">register</span><span class="p">(</span><span class="nx">DOMAIN_REGISTER</span><span class="p">)</span><span class="w">  </span><span class="c1">// register a new random .com</span>
 </code></pre></div>
+<p><strong>Adding records</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">(</span><span class="s2">&quot;example.com&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">record</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">,</span><span class="w">    </span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="w">     </span><span class="s2">&quot;203.0.113.10&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">record</span><span class="p">(</span><span class="s2">&quot;www&quot;</span><span class="p">,</span><span class="w">  </span><span class="s2">&quot;CNAME&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">record</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">,</span><span class="w">    </span><span class="s2">&quot;MX&quot;</span><span class="p">,</span><span class="w">    </span><span class="s2">&quot;10 mail.example.com&quot;</span><span class="p">)</span><span class="w">   </span><span class="c1">// MX: &quot;priority hostname&quot;</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">record</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">,</span><span class="w">    </span><span class="s2">&quot;TXT&quot;</span><span class="p">,</span><span class="w">   </span><span class="s2">&quot;v=spf1 include:_spf.google.com ~all&quot;</span><span class="p">)</span><span class="w">  </span><span class="c1">// quotes added automatically</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">record</span><span class="p">(</span><span class="s2">&quot;mail&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;AAAA&quot;</span><span class="p">,</span><span class="w">  </span><span class="s2">&quot;2001:db8::1&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">  </span><span class="p">.</span><span class="nx">record</span><span class="p">(</span><span class="s2">&quot;_dmarc&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;TXT&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;v=DMARC1; p=reject&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">600</span><span class="p">)</span><span class="w">  </span><span class="c1">// optional custom TTL (default 300)</span>
+</code></pre></div>
+<p>Supported types: <code>A</code>, <code>AAAA</code>, <code>CNAME</code>, <code>MX</code>, <code>TXT</code>, <code>NS</code>, <code>PTR</code>, <code>SRV</code>, <code>CAA</code>, <code>NAPTR</code>, <code>SPF</code></p>
+<p>TXT and SPF values are automatically wrapped in double quotes if not already quoted.</p>
+<p><strong>Alias pointer</strong></p>
+<p>Use <code>.pointer()</code> to point a name at another Puls-managed resource (e.g. a Fargate service or load balancer):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">(</span><span class="s2">&quot;example.com&quot;</span><span class="p">)</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">pointer</span><span class="p">(</span><span class="s2">&quot;api&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">apiService</span><span class="p">)</span><span class="w">  </span><span class="c1">// creates an A alias record</span>
+</code></pre></div>
+<p><strong>Domain registration</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">AWS_TYPES</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">REGION</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS_TYPES</span><span class="p">;</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="kd">const</span><span class="w"> </span><span class="nx">DOMAIN_REGISTER</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">  </span><span class="nx">FIRSTNAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jane&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">  </span><span class="nx">LASTNAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Doe&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">  </span><span class="nx">EMAIL</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;jane@example.com&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">  </span><span class="nx">MOBILE</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;+1.5555550100&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">  </span><span class="nx">CONTACT_TYPE</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;PERSON&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">  </span><span class="nx">ADDRESSLINE</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;123 Main St&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="w">  </span><span class="nx">CITY</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Seattle&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="w">  </span><span class="nx">ZIPCODE</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;98101&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="w">  </span><span class="nx">COUNTRY</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="p">};</span>
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a>
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">(</span><span class="s2">&quot;example.com&quot;</span><span class="p">).</span><span class="nx">register</span><span class="p">(</span><span class="nx">DOMAIN_REGISTER</span><span class="p">)</span>
+<a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">().</span><span class="nx">randomDomain</span><span class="p">().</span><span class="nx">register</span><span class="p">(</span><span class="nx">DOMAIN_REGISTER</span><span class="p">)</span><span class="w">  </span><span class="c1">// registers a random available .com</span>
+</code></pre></div>
+<p>Registration polls every 15 seconds and waits up to 15 minutes for the domain to become active. Privacy protection is enabled by default for admin, registrant, and tech contacts.</p>
+<p><strong>Outputs</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.out.zone</code></td>
+<td><code>Output&lt;{ name: string; id: string }&gt;</code></td>
+</tr>
+</tbody>
+</table>
 <hr />
 <h2 id="acm">ACM</h2>
 <p>Managed automatically as a Route53 sidecar - not used directly.</p>
 <p><code>.withWildcardSSL()</code> on a Route53 builder requests a wildcard cert, writes the DNS validation CNAME, and waits for <code>ISSUED</code> (up to 10 minutes).</p>
 <hr />
+<h2 id="secretsmanager">SecretsManager</h2>
+<p>Read and manage AWS Secrets Manager secrets.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1">// Read an existing secret (value available at deploy time via .resolvedValue)</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">SecretsManager</span><span class="p">(</span><span class="s2">&quot;my-app/db-password&quot;</span><span class="p">)</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="c1">// Create or update a secret</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">SecretsManager</span><span class="p">(</span><span class="s2">&quot;my-app/db-password&quot;</span><span class="p">)</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">plainText</span><span class="p">(</span><span class="s2">&quot;s3cr3t&quot;</span><span class="p">)</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">  </span><span class="p">.</span><span class="nx">description</span><span class="p">(</span><span class="s2">&quot;Production DB password&quot;</span><span class="p">)</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="c1">// Store a JSON object (key-value secret)</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">SecretsManager</span><span class="p">(</span><span class="s2">&quot;my-app/config&quot;</span><span class="p">)</span>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="w">  </span><span class="p">.</span><span class="nx">keyValue</span><span class="p">({</span><span class="w"> </span><span class="nx">host</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;db.internal&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">port</span><span class="o">:</span><span class="w"> </span><span class="kt">5432</span><span class="w"> </span><span class="p">})</span>
+</code></pre></div>
+<p><strong>Using secrets as env vars</strong></p>
+<p>Pass a <code>SecretsBuilder</code> directly into <code>.env()</code> on Lambda or Fargate - Puls resolves the secret value at deploy time and injects it as a plain string:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">dbPass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">SecretsManager</span><span class="p">(</span><span class="s2">&quot;my-app/db-password&quot;</span><span class="p">);</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Lambda</span><span class="p">(</span><span class="s2">&quot;my-fn&quot;</span><span class="p">)</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">code</span><span class="p">(</span><span class="s2">&quot;./dist&quot;</span><span class="p">)</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">runtime</span><span class="p">(</span><span class="nx">RUNTIME</span><span class="p">.</span><span class="nx">NODEJS_20</span><span class="p">)</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">env</span><span class="p">({</span><span class="w"> </span><span class="nx">DB_PASSWORD</span><span class="o">:</span><span class="w"> </span><span class="kt">dbPass</span><span class="w"> </span><span class="p">})</span>
+</code></pre></div>
+<p><strong>Destroy behaviour</strong></p>
+<p>By default, <code>@Destroy</code> schedules a 30-day recovery window. Use <code>.forceDelete()</code> to delete immediately:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">SecretsManager</span><span class="p">(</span><span class="s2">&quot;my-app/temp-token&quot;</span><span class="p">).</span><span class="nx">forceDelete</span><span class="p">()</span>
+</code></pre></div>
+<hr />
 <h2 id="full-example">Full example</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;dotenv/config&quot;</span><span class="p">;</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;reflect-metadata&quot;</span><span class="p">;</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">AWS</span><span class="p">,</span><span class="w"> </span><span class="nx">AWS_TYPES</span><span class="p">,</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">REGION</span><span class="p">,</span><span class="w"> </span><span class="nx">RUNTIME</span><span class="p">,</span><span class="w"> </span><span class="nx">DB</span><span class="p">,</span><span class="w"> </span><span class="nx">DB_SIZE</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS_TYPES</span><span class="p">;</span>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="c1">// import { SECRETS } from &quot;./types/secrets.ts&quot;; // your local constants</span>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="kt">REGION.EU_CENTRAL_1</span><span class="p">,</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="kd">class</span><span class="w"> </span><span class="nx">AppStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">  </span><span class="c1">// secret = AWS.SecretsManager(SECRETS.DB_KEY);</span>
-<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>
-<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">RDS</span><span class="p">(</span><span class="s2">&quot;app-db&quot;</span><span class="p">)</span>
-<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">    </span><span class="p">.</span><span class="nx">engine</span><span class="p">(</span><span class="nx">DB</span><span class="p">.</span><span class="nx">POSTGRES_16</span><span class="p">)</span>
-<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="w">    </span><span class="p">.</span><span class="nx">size</span><span class="p">(</span><span class="nx">DB_SIZE</span><span class="p">.</span><span class="nx">SMALL</span><span class="p">)</span>
-<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="w">    </span><span class="p">.</span><span class="nx">credentials</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">secret</span><span class="p">);</span>
-<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>
-<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a><span class="w">  </span><span class="nx">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Fargate</span><span class="p">(</span><span class="s2">&quot;app-api&quot;</span><span class="p">)</span>
-<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="s2">&quot;my-org/app:latest&quot;</span><span class="p">)</span>
-<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">cpu</span><span class="p">(</span><span class="mf">512</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">1024</span><span class="p">)</span>
-<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a><span class="w">    </span><span class="p">.</span><span class="nx">port</span><span class="p">(</span><span class="mf">3000</span><span class="p">)</span>
-<a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a><span class="w">    </span><span class="p">.</span><span class="nx">replicas</span><span class="p">(</span><span class="mf">2</span><span class="p">);</span>
-<a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a>
-<a id="__codelineno-13-22" name="__codelineno-13-22" href="#__codelineno-13-22"></a><span class="w">  </span><span class="nx">resizer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Lambda</span><span class="p">(</span><span class="s2">&quot;image-resizer&quot;</span><span class="p">)</span>
-<a id="__codelineno-13-23" name="__codelineno-13-23" href="#__codelineno-13-23"></a><span class="w">    </span><span class="p">.</span><span class="nx">code</span><span class="p">(</span><span class="s2">&quot;./functions/resizer&quot;</span><span class="p">)</span>
-<a id="__codelineno-13-24" name="__codelineno-13-24" href="#__codelineno-13-24"></a><span class="w">    </span><span class="p">.</span><span class="nx">runtime</span><span class="p">(</span><span class="nx">RUNTIME</span><span class="p">.</span><span class="nx">NODEJS_20</span><span class="p">)</span>
-<a id="__codelineno-13-25" name="__codelineno-13-25" href="#__codelineno-13-25"></a><span class="w">    </span><span class="p">.</span><span class="nx">memory</span><span class="p">(</span><span class="mf">512</span><span class="p">);</span>
-<a id="__codelineno-13-26" name="__codelineno-13-26" href="#__codelineno-13-26"></a>
-<a id="__codelineno-13-27" name="__codelineno-13-27" href="#__codelineno-13-27"></a><span class="w">  </span><span class="nx">gateway</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">APIGateway</span><span class="p">(</span><span class="s2">&quot;app-gateway&quot;</span><span class="p">)</span>
-<a id="__codelineno-13-28" name="__codelineno-13-28" href="#__codelineno-13-28"></a><span class="w">    </span><span class="p">.</span><span class="nx">route</span><span class="p">(</span><span class="s2">&quot;GET /resize&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">resizer</span><span class="p">);</span>
-<a id="__codelineno-13-29" name="__codelineno-13-29" href="#__codelineno-13-29"></a>
-<a id="__codelineno-13-30" name="__codelineno-13-30" href="#__codelineno-13-30"></a><span class="w">  </span><span class="nx">jobs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">SQS</span><span class="p">(</span><span class="s2">&quot;resize-jobs&quot;</span><span class="p">)</span>
-<a id="__codelineno-13-31" name="__codelineno-13-31" href="#__codelineno-13-31"></a><span class="w">    </span><span class="p">.</span><span class="nx">retention</span><span class="p">(</span><span class="mf">7</span><span class="p">)</span>
-<a id="__codelineno-13-32" name="__codelineno-13-32" href="#__codelineno-13-32"></a><span class="w">    </span><span class="p">.</span><span class="nx">dlq</span><span class="p">(</span><span class="s2">&quot;resize-jobs-dlq&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">3</span><span class="p">);</span>
-<a id="__codelineno-13-33" name="__codelineno-13-33" href="#__codelineno-13-33"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;dotenv/config&quot;</span><span class="p">;</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;reflect-metadata&quot;</span><span class="p">;</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">AWS</span><span class="p">,</span><span class="w"> </span><span class="nx">AWS_TYPES</span><span class="p">,</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">REGION</span><span class="p">,</span><span class="w"> </span><span class="nx">RUNTIME</span><span class="p">,</span><span class="w"> </span><span class="nx">DB</span><span class="p">,</span><span class="w"> </span><span class="nx">DB_SIZE</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS_TYPES</span><span class="p">;</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="c1">// import { SECRETS } from &quot;./types/secrets.ts&quot;; // your local constants</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="kt">REGION.EU_CENTRAL_1</span><span class="p">,</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="kd">class</span><span class="w"> </span><span class="nx">AppStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">  </span><span class="c1">// secret = AWS.SecretsManager(SECRETS.DB_KEY);</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">RDS</span><span class="p">(</span><span class="s2">&quot;app-db&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="w">    </span><span class="p">.</span><span class="nx">engine</span><span class="p">(</span><span class="nx">DB</span><span class="p">.</span><span class="nx">POSTGRES_16</span><span class="p">)</span>
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="w">    </span><span class="p">.</span><span class="nx">size</span><span class="p">(</span><span class="nx">DB_SIZE</span><span class="p">.</span><span class="nx">SMALL</span><span class="p">)</span>
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a><span class="w">    </span><span class="p">.</span><span class="nx">credentials</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">secret</span><span class="p">);</span>
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a>
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a><span class="w">  </span><span class="nx">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Fargate</span><span class="p">(</span><span class="s2">&quot;app-api&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="s2">&quot;my-org/app:latest&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">cpu</span><span class="p">(</span><span class="mf">512</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">1024</span><span class="p">)</span>
+<a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="w">    </span><span class="p">.</span><span class="nx">port</span><span class="p">(</span><span class="mf">3000</span><span class="p">)</span>
+<a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a><span class="w">    </span><span class="p">.</span><span class="nx">replicas</span><span class="p">(</span><span class="mf">2</span><span class="p">);</span>
+<a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a>
+<a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a><span class="w">  </span><span class="nx">resizer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Lambda</span><span class="p">(</span><span class="s2">&quot;image-resizer&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a><span class="w">    </span><span class="p">.</span><span class="nx">code</span><span class="p">(</span><span class="s2">&quot;./functions/resizer&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-24" name="__codelineno-19-24" href="#__codelineno-19-24"></a><span class="w">    </span><span class="p">.</span><span class="nx">runtime</span><span class="p">(</span><span class="nx">RUNTIME</span><span class="p">.</span><span class="nx">NODEJS_20</span><span class="p">)</span>
+<a id="__codelineno-19-25" name="__codelineno-19-25" href="#__codelineno-19-25"></a><span class="w">    </span><span class="p">.</span><span class="nx">memory</span><span class="p">(</span><span class="mf">512</span><span class="p">);</span>
+<a id="__codelineno-19-26" name="__codelineno-19-26" href="#__codelineno-19-26"></a>
+<a id="__codelineno-19-27" name="__codelineno-19-27" href="#__codelineno-19-27"></a><span class="w">  </span><span class="nx">gateway</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">APIGateway</span><span class="p">(</span><span class="s2">&quot;app-gateway&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-28" name="__codelineno-19-28" href="#__codelineno-19-28"></a><span class="w">    </span><span class="p">.</span><span class="nx">route</span><span class="p">(</span><span class="s2">&quot;GET /resize&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">resizer</span><span class="p">);</span>
+<a id="__codelineno-19-29" name="__codelineno-19-29" href="#__codelineno-19-29"></a>
+<a id="__codelineno-19-30" name="__codelineno-19-30" href="#__codelineno-19-30"></a><span class="w">  </span><span class="nx">jobs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">SQS</span><span class="p">(</span><span class="s2">&quot;resize-jobs&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-31" name="__codelineno-19-31" href="#__codelineno-19-31"></a><span class="w">    </span><span class="p">.</span><span class="nx">retention</span><span class="p">(</span><span class="mf">7</span><span class="p">)</span>
+<a id="__codelineno-19-32" name="__codelineno-19-32" href="#__codelineno-19-32"></a><span class="w">    </span><span class="p">.</span><span class="nx">dlq</span><span class="p">(</span><span class="s2">&quot;resize-jobs-dlq&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">3</span><span class="p">);</span>
+<a id="__codelineno-19-33" name="__codelineno-19-33" href="#__codelineno-19-33"></a><span class="p">}</span>
 </code></pre></div>
 
 

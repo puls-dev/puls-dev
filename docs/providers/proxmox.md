@@ -44,7 +44,7 @@ Proxmox.VM("ix-sto1-app01")
   .vlan(2010)                 // VLAN tag on vmbr1
   .sshKey(KEYS)               // array of public key strings
   .provision("config/default.yaml")   // single script or playbook
-  .provision(["common.sh", "app.yml"]) // or multiple files run in order
+  .provision(["common.yml", "app.yml"]) // or multiple files run in order
   .replace("ix-sto1-app01-old")       // destroy old VM after new one is up
 ```
 
@@ -95,10 +95,7 @@ After a VM starts, Puls runs these steps for each provisioner provided to `.prov
 | Extension | Action |
 |-----------|--------|
 | `.yaml` / `.yml` | `ansible-playbook -i "IP," -u root --private-key ...` |
-| `.sh` | `scp -r scriptDir/ root@IP:/` then `ssh 'bash -s' < script` |
 | `.pp` | `scp manifest.pp /tmp/` then `ssh 'puppet apply /tmp/manifest.pp'` |
-
-For shell scripts, the entire directory containing the script is scp'd first - companion files (GPG keys, configs) are available on the remote at the same relative path.
 
 ### Ansible example (`config/default.yaml`)
 

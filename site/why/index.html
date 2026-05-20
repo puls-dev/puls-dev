@@ -506,6 +506,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -868,6 +879,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -889,11 +911,11 @@
 
 
 <h1 id="why-puls">Why Puls?</h1>
-<p>Infrastructure as Code has always been about <strong>how</strong> to build things - managing state files, wiring up resource dependencies, and wrestling with domain-specific languages like HCL.</p>
-<p>Puls was built to shift the focus to <strong>what</strong> you want.</p>
+<p>Most infrastructure tools are built around the question "how do you want to build this?" - state files, plan steps, dependency graphs, HCL.</p>
+<p>Puls is built around a different question: <strong>what do you want?</strong></p>
 <hr />
 <h2 id="the-problem">The Problem</h2>
-<p>Consider a real-world production environment. A Route53 domain, wildcard SSL via ACM, two CloudFront distributions cloning existing configurations, and an S3 bucket with correctly configured Origin Access Control. Not particularly complex in nature - just a standard environment most teams spin up regularly.</p>
+<p>Consider a real-world production environment: a Route53 domain, wildcard SSL via ACM, two CloudFront distributions cloning existing configurations, and an S3 bucket with correctly configured Origin Access Control. Not particularly complex - just a standard environment most teams spin up regularly.</p>
 <p>In Terraform, this is <strong>550+ lines of HCL</strong>. Manual AWS CLI calls via <code>null_resource</code>. Complex <code>dynamic "origin"</code> blocks. A hardcoded <code>time_sleep</code> of 300 seconds waiting for DNS propagation. External Python scripts to fetch distribution IDs. Manual JSON encoding for bucket policies.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Only run if domain doesn&#39;t already exist</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kr">provisioner</span><span class="w"> </span><span class="nv">&quot;local-exec&quot;</span><span class="w"> </span><span class="p">{</span>
@@ -949,38 +971,43 @@
 <a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a><span class="p">}</span>
 <a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a><span class="c1"># ... another 450+ lines below</span>
 </code></pre></div>
-<p>A wall of code that is hard to audit, easy to break, and requires deep expertise in both Terraform and AWS internals to maintain. Most companies don't have a dedicated Terraform team. They have engineers who need to ship infrastructure and get back to building product.</p>
+<p>Hard to audit, easy to break, and requires deep expertise in both Terraform and AWS internals to maintain. Most companies don't have a dedicated Terraform team. They have engineers who need to ship infrastructure and get back to building product.</p>
 <p>Our own junior engineer couldn't make sense of it. He understood what the environment was supposed to do - he just couldn't connect that intent to what the code was actually saying. So he didn't touch it. Nobody touched it unless they had to.</p>
 <hr />
 <h2 id="the-solution">The Solution</h2>
 <p>The same infrastructure in Puls:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">AWS</span><span class="p">,</span><span class="w"> </span><span class="nx">AWS_TYPES</span><span class="p">,</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@puls-dev/core&quot;</span><span class="p">;</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">REGION</span><span class="p">,</span><span class="w"> </span><span class="nx">DOMAIN_REGISTER</span><span class="p">,</span><span class="w"> </span><span class="nx">DISTRO</span><span class="p">,</span><span class="w"> </span><span class="nx">BUCKET</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS_TYPES</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">AWS</span><span class="p">,</span><span class="w"> </span><span class="nx">AWS_TYPES</span><span class="p">,</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">REGION</span><span class="p">,</span><span class="w"> </span><span class="nx">DISTRO</span><span class="p">,</span><span class="w"> </span><span class="nx">BUCKET</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS_TYPES</span><span class="p">;</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="kt">REGION.US_EAST_1</span><span class="p">,</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="kd">class</span><span class="w"> </span><span class="nx">TurkeyEnvironment</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nx">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">()</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="p">.</span><span class="nx">withWildcardSSL</span><span class="p">()</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="p">.</span><span class="nx">randomDomain</span><span class="p">()</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="nx">DOMAIN_REGISTER</span><span class="p">);</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="nx">cdn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">CloudFront</span><span class="p">(</span><span class="sb">`Puls-</span><span class="si">${</span><span class="k">this</span><span class="p">.</span><span class="nx">domain</span><span class="p">.</span><span class="nx">zoneName</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="mf">12</span><span class="p">)</span><span class="si">}</span><span class="sb">-CDN`</span><span class="p">)</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="p">.</span><span class="nx">copyFrom</span><span class="p">(</span><span class="nx">DISTRO</span><span class="p">.</span><span class="nx">CDN</span><span class="p">)</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="p">.</span><span class="nx">forDomain</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">domain</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ec&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;nc&quot;</span><span class="p">]);</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">  </span><span class="nx">game</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">CloudFront</span><span class="p">(</span><span class="sb">`Puls-</span><span class="si">${</span><span class="k">this</span><span class="p">.</span><span class="nx">domain</span><span class="p">.</span><span class="nx">zoneName</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="mf">12</span><span class="p">)</span><span class="si">}</span><span class="sb">-GAME`</span><span class="p">)</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">    </span><span class="p">.</span><span class="nx">copyFrom</span><span class="p">(</span><span class="nx">DISTRO</span><span class="p">.</span><span class="nx">GAME</span><span class="p">)</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="p">.</span><span class="nx">forDomain</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">domain</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;eg&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ng&quot;</span><span class="p">]);</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">  </span><span class="nx">bucket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">S3</span><span class="p">(</span><span class="nx">BUCKET</span><span class="p">.</span><span class="nx">NLC_GAMES_UREG</span><span class="p">)</span>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">    </span><span class="p">.</span><span class="nx">allowFrom</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">cdn</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">game</span><span class="p">)</span>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">    </span><span class="p">.</span><span class="nx">region</span><span class="p">(</span><span class="nx">REGION</span><span class="p">.</span><span class="nx">EU_WEST_1</span><span class="p">);</span>
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="p">}</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="kd">class</span><span class="w"> </span><span class="nx">GameEnvironment</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nx">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Route53</span><span class="p">(</span><span class="s2">&quot;example.com&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="p">.</span><span class="nx">withWildcardSSL</span><span class="p">();</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="nx">cdn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">CloudFront</span><span class="p">(</span><span class="s2">&quot;game-cdn&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="p">.</span><span class="nx">copyFrom</span><span class="p">(</span><span class="nx">DISTRO</span><span class="p">.</span><span class="nx">CDN</span><span class="p">)</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="p">.</span><span class="nx">forDomain</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">domain</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ec&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;nc&quot;</span><span class="p">]);</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">  </span><span class="nx">game</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">CloudFront</span><span class="p">(</span><span class="s2">&quot;game-dist&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="p">.</span><span class="nx">copyFrom</span><span class="p">(</span><span class="nx">DISTRO</span><span class="p">.</span><span class="nx">GAME</span><span class="p">)</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="p">.</span><span class="nx">forDomain</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">domain</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;eg&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ng&quot;</span><span class="p">]);</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">  </span><span class="nx">bucket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">S3</span><span class="p">(</span><span class="nx">BUCKET</span><span class="p">.</span><span class="nx">GAMES</span><span class="p">)</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">allowFrom</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">cdn</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">game</span><span class="p">)</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">    </span><span class="p">.</span><span class="nx">region</span><span class="p">(</span><span class="nx">REGION</span><span class="p">.</span><span class="nx">EU_WEST_1</span><span class="p">);</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="p">}</span>
 </code></pre></div>
 <p>That junior engineer can read this. He knows what it does without needing to understand ACM validation, OAC policies, or CloudFront distribution cloning. He can make changes, open a PR, and trust that running it twice won't break anything.</p>
-<p>That's what Puls is for.</p>
 <hr />
-<p>The complexity lives in the implementation, not the interface.</p>
+<h2 id="how-it-works">How it works</h2>
+<p>Two ideas make this possible:</p>
+<p><strong>Eager discovery.</strong> The moment you declare a resource, Puls fires an API lookup in the background. By the time <code>deploy()</code> runs, it already knows the current state of every resource. No separate plan step. No local state files.</p>
+<p><strong>Idempotency by default.</strong> Every resource follows the same contract: if it already matches your intent, it is skipped without an API write. Running the same stack twice is always safe.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Declare resource  →  Discovery fires immediately
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>                  →  You chain config (.cores(), .image(), ...)
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>                  →  deploy() awaits discovery, diffs, acts only if needed
+</code></pre></div>
+<p>The complexity lives in the implementation, not the interface. A junior engineer shouldn't need to know how a wildcard certificate gets validated through DNS - they should just be able to say <code>.withWildcardSSL()</code> and move on.</p>
 
 
 
