@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import fs from 'fs';
 import { homedir } from 'os';
 import { OS, REGION, SIZE, NETWORK } from '../../types/do.js';
 import { Config } from '../../core/config.js';
@@ -81,7 +81,7 @@ export class DropletBuilder extends BaseBuilder {
 
   private async resolveOrRegisterSshKey(api: DoApiClient): Promise<number> {
     const pubPath = this.sshKeyPath!.replace(/\.pub$/, '') + '.pub';
-    const pubKey = readFileSync(pubPath, 'utf8').trim();
+    const pubKey = fs.readFileSync(pubPath, 'utf8').trim();
 
     const { ssh_keys } = await api.get<{ ssh_keys: any[] }>('/account/keys?per_page=200');
     const existing = ssh_keys.find(k => k.public_key.trim() === pubKey);

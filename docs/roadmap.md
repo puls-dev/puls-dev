@@ -17,7 +17,7 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 ## Testing
 
 - [x] Basic test suite (core: `config.test.ts`, `output.test.ts`)
-- [/] Provider unit tests with mocked API clients - each builder's `deploy()` and `destroy()` paths covered (create, skip, update, dry-run) (DigitalOcean DomainBuilder complete)
+- [/] Provider unit tests with mocked API clients - each builder's `deploy()` and `destroy()` paths covered (create, skip, update, dry-run) (DigitalOcean complete)
 - [ ] Dry-run integration tests - run full stacks with `dryRun: true` against real provider credentials to verify discovery without writing
 - [ ] CI pipeline - run unit tests on every push; dry-run suite on PRs that touch provider code
 - [ ] End-to-end tests against sandboxes (LocalStack for AWS, DO staging token, Firebase emulator)

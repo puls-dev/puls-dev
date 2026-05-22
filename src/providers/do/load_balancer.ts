@@ -105,8 +105,8 @@ export class LoadBalancerBuilder extends BaseBuilder {
   stickySession(type: 'cookies' | 'none', cookieName?: string, cookieTtlSeconds?: number) {
     this.stickySessionConfig = {
       type,
-      ...(cookieName && { cookie_name: cookieName }),
-      ...(cookieTtlSeconds && { cookie_ttl_seconds: cookieTtlSeconds }),
+      ...(cookieName && { cookieName }),
+      ...(cookieTtlSeconds && { cookieTtlSeconds }),
     };
     return this;
   }
