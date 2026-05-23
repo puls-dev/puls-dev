@@ -168,8 +168,8 @@ Provisioning is **skipped** during destroy - only discovery and deletion run.
 ## Full example
 
 ```typescript
-import { Proxmox, PROXMOX_TYPES, Stack, Deploy, Destroy, Protected } from "puls-dev";
-const { CONFIG, OS, KEYS } = PROXMOX_TYPES;
+import { Stack, Deploy, Destroy, Protected } from "puls-dev";
+import { Proxmox, CONFIG, OS, KEYS } from "puls-dev/proxmox";
 
 @Deploy({ proxmox: CONFIG.STAGING })
 class StagingInfra extends Stack {

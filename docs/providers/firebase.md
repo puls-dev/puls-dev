@@ -53,7 +53,8 @@ The site ID is the Firebase Hosting site name - by default it matches your proje
 ```typescript
 import "dotenv/config";
 import "reflect-metadata";
-import { Firebase, Stack, Deploy } from "puls-dev";
+import { Stack, Deploy } from "puls-dev";
+import { Firebase } from "puls-dev/firebase";
 
 @Deploy({ dryRun: false })
 class DocsSite extends Stack {

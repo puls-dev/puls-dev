@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import fs from 'node:fs';
 import { GoogleAuth } from 'google-auth-library';
 import { Config } from '../../core/config.js';
 
@@ -9,7 +9,7 @@ function resolveFirebaseConfig() {
   // Fallback: auto-configure from FIREBASE_SA env var so the decorator option is optional
   const saPath = process.env.FIREBASE_SA;
   if (saPath) {
-    const sa = JSON.parse(readFileSync(saPath, 'utf8'));
+    const sa = JSON.parse(fs.readFileSync(saPath, 'utf8'));
     return { projectId: sa.project_id as string, serviceAccountPath: saPath };
   }
 

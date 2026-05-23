@@ -47,6 +47,7 @@ export class Route53Builder extends BaseBuilder {
       );
       if (match) {
         this.zoneId = match.Id!.replace("/hostedzone/", "");
+        this.out.zone.resolve({ name: this.zoneName, id: this.zoneId });
         return match;
       }
       return null;

@@ -17,7 +17,7 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 ## Testing
 
 - [x] Basic test suite (core: `config.test.ts`, `output.test.ts`)
-- [/] Provider unit tests with mocked API clients - each builder's `deploy()` and `destroy()` paths covered (create, skip, update, dry-run) (DigitalOcean complete)
+- [x] Provider unit tests with mocked API clients - each builder's `deploy()` and `destroy()` paths covered (create, skip, update, dry-run) (DO, AWS S3/Route53/Lambda, and Firebase Hosting/Functions fully complete)
 - [ ] Dry-run integration tests - run full stacks with `dryRun: true` against real provider credentials to verify discovery without writing
 - [ ] CI pipeline - run unit tests on every push; dry-run suite on PRs that touch provider code
 - [ ] End-to-end tests against sandboxes (LocalStack for AWS, DO staging token, Firebase emulator)
@@ -35,7 +35,7 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 - [x] CloudFront cache invalidation - `.invalidate(paths[])` on a CloudFront builder
 - [x] S3 file upload - `.upload(filePath)` uploads a single file to the bucket on deploy
 - [x] Route53 record types - A, AAAA, CNAME, MX, TXT, NS, PTR, SRV, CAA, NAPTR, SPF via `.record()`; per-record TTL; TXT auto-quoting
-- [ ] S3 static site hosting - `.staticSite()` sets index/error documents and public-read policy
+- [x] S3 static site hosting - `.staticSite()` sets index/error documents and public-read policy
 - [ ] IAM - role and inline/managed policy management; useful for cross-service wiring without manual console steps
 - [ ] CloudWatch alarms - CPU/memory thresholds on Fargate and RDS with SNS notification target
 - [ ] EC2 - lower priority; Proxmox already covers the raw-VM use case, and EC2 needs VPC/SG/keypair support to be useful
@@ -101,16 +101,8 @@ Enterprise CDN/edge - complex enough to warrant a dedicated maintainer; communit
 
 - [x] Switch `package.json` to `"type": "module"` (ESM)
 - [x] Basic test suite
-- [ ] Add `"exports"` map with per-provider sub-paths so consumers can import only what they need:
-  ```json
-  "exports": {
-    "./aws":     "./dist/providers/aws/index.js",
-    "./do":      "./dist/providers/do/index.js",
-    "./proxmox": "./dist/providers/proxmox/index.js",
-    "./firebase": "./dist/providers/firebase/index.js"
-  }
-  ```
-- [ ] Ship compiled JS + `.d.ts` declarations; mark provider SDK packages as `peerDependencies`
+- [x] Add `"exports"` map with per-provider sub-paths so consumers can import only what they need (e.g. `puls-dev/aws`, `puls-dev/firebase`)
+- [x] Ship compiled JS + `.d.ts` declarations; mark provider SDK packages as `peerDependencies`
 - [ ] Semver versioning - provider additions = minor, breaking DSL changes = major
 
 ---

@@ -1,5 +1,5 @@
-import { readFileSync, unlinkSync } from "node:fs";
-import { execSync } from "node:child_process";
+import fs from "node:fs";
+import cp from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, extname } from "node:path";
 import {
@@ -131,18 +131,18 @@ export class LambdaBuilder extends BaseBuilder {
       throw new Error(`[Lambda:${this.name}] .code(path) is required`);
 
     if (extname(this._codePath) === ".zip") {
-      return readFileSync(this._codePath);
+      return fs.readFileSync(this._codePath);
     }
 
     const outPath = join(
       tmpdir(),
       `puls-lambda-${this.name}-${Date.now()}.zip`,
     );
-    execSync(`cd "${this._codePath}" && zip -r "${outPath}" .`, {
+    cp.execSync(`cd "${this._codePath}" && zip -r "${outPath}" .`, {
       stdio: "pipe",
     });
-    const buf = readFileSync(outPath);
-    unlinkSync(outPath);
+    const buf = fs.readFileSync(outPath);
+    fs.unlinkSync(outPath);
     return buf;
   }
 

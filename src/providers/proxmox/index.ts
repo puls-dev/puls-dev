@@ -19,3 +19,6 @@ export const Proxmox = {
   },
   VM: (name: string) => new VMBuilder(name),
 };
+
+export * from "../../types/proxmox.js";
+

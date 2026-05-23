@@ -25,8 +25,8 @@ Create a file - any name, anywhere in the project:
 ```typescript
 import "dotenv/config";
 import "reflect-metadata";
-import { AWS, AWS_TYPES, Stack, Deploy } from "puls-dev";
-const { REGION, RUNTIME } = AWS_TYPES;
+import { Stack, Deploy } from "puls-dev";
+import { AWS, REGION, RUNTIME } from "puls-dev/aws";
 
 @Deploy({ region: REGION.EU_CENTRAL_1, dryRun: true })
 class MyFirstStack extends Stack {

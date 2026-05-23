@@ -49,8 +49,8 @@ Running the same stack twice is always safe - existing resources are detected an
 ### DigitalOcean
 
 ```typescript
-import { DO, DO_TYPES, Stack, Deploy } from "puls-dev";
-const { SIZE, REGION } = DO_TYPES;
+import { Stack, Deploy } from "puls-dev";
+import { DO, SIZE, REGION } from "puls-dev/do";
 
 @Deploy({ token: process.env.DO_TOKEN! })
 class Production extends Stack {
@@ -62,8 +62,8 @@ class Production extends Stack {
 ### AWS
 
 ```typescript
-import { AWS, AWS_TYPES, Stack, Deploy } from "puls-dev";
-const { DISTRO, BUCKET, DOMAIN_REGISTER, REGION } = AWS_TYPES;
+import { Stack, Deploy } from "puls-dev";
+import { AWS, DISTRO, BUCKET, DOMAIN_REGISTER, REGION } from "puls-dev/aws";
 
 @Deploy({ region: REGION.US_EAST_1 })
 class CDNStack extends Stack {
@@ -82,8 +82,8 @@ class CDNStack extends Stack {
 ### Proxmox
 
 ```typescript
-import { Proxmox, PROXMOX_TYPES, Stack, Deploy, Protected } from "puls-dev";
-const { CONFIG, OS, KEYS } = PROXMOX_TYPES;
+import { Stack, Deploy, Protected } from "puls-dev";
+import { Proxmox, CONFIG, OS, KEYS } from "puls-dev/proxmox";
 
 @Deploy({ proxmox: CONFIG.STAGING })
 class StagingInfra extends Stack {

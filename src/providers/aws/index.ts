@@ -28,3 +28,6 @@ export const AWS = {
   SQS: (name: string) => new SQSBuilder(name),
   Secret: (secretId: string) => new SecretsBuilder(secretId),
 };
+
+export * from "../../types/aws.js";
+

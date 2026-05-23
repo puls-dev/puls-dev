@@ -20,3 +20,6 @@ export const DO = {
   Certificate: (name: string) => new CertificateBuilder(name),
   LoadBalancer: (name: string) => new LoadBalancerBuilder(name),
 };
+
+export * from "../../types/do.js";
+

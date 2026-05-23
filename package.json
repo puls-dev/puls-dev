@@ -6,6 +6,28 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./aws": {
+      "types": "./dist/providers/aws/index.d.ts",
+      "default": "./dist/providers/aws/index.js"
+    },
+    "./do": {
+      "types": "./dist/providers/do/index.d.ts",
+      "default": "./dist/providers/do/index.js"
+    },
+    "./proxmox": {
+      "types": "./dist/providers/proxmox/index.d.ts",
+      "default": "./dist/providers/proxmox/index.js"
+    },
+    "./firebase": {
+      "types": "./dist/providers/firebase/index.d.ts",
+      "default": "./dist/providers/firebase/index.js"
+    }
+  },
   "files": [
     "dist",
     "README.md",
@@ -34,6 +56,10 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
+    "dotenv": "^17.4.2",
+    "reflect-metadata": "^0.2.2"
+  },
+  "peerDependencies": {
     "@aws-sdk/client-acm": "^3.1040.0",
     "@aws-sdk/client-apigatewayv2": "^3.1044.0",
     "@aws-sdk/client-cloudfront": "^3.1040.0",
@@ -48,10 +74,25 @@
     "@aws-sdk/client-s3": "^3.1040.0",
     "@aws-sdk/client-secrets-manager": "^3.1045.0",
     "@aws-sdk/client-sqs": "^3.1045.0",
-    "dotenv": "^17.4.2",
     "google-auth-library": "^10.6.2",
-    "mkdocs": "^0.0.1",
-    "reflect-metadata": "^0.2.2",
     "undici": "^8.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@aws-sdk/client-acm": { "optional": true },
+    "@aws-sdk/client-apigatewayv2": { "optional": true },
+    "@aws-sdk/client-cloudfront": { "optional": true },
+    "@aws-sdk/client-cloudwatch-logs": { "optional": true },
+    "@aws-sdk/client-ec2": { "optional": true },
+    "@aws-sdk/client-ecs": { "optional": true },
+    "@aws-sdk/client-iam": { "optional": true },
+    "@aws-sdk/client-lambda": { "optional": true },
+    "@aws-sdk/client-rds": { "optional": true },
+    "@aws-sdk/client-route-53": { "optional": true },
+    "@aws-sdk/client-route-53-domains": { "optional": true },
+    "@aws-sdk/client-s3": { "optional": true },
+    "@aws-sdk/client-secrets-manager": { "optional": true },
+    "@aws-sdk/client-sqs": { "optional": true },
+    "google-auth-library": { "optional": true },
+    "undici": { "optional": true }
   }
 }

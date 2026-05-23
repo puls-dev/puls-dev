@@ -1,5 +1,5 @@
-import { execSync } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
+import cp from "node:child_process";
+import fs from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { BaseBuilder } from "../../core/resource.js";
@@ -105,12 +105,12 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
       throw new Error(
         `[Firebase.Functions:${this.name}] .source() is required`,
       );
-    const tmp = mkdtempSync(join(tmpdir(), "puls-fn-"));
+    const tmp = fs.mkdtempSync(join(tmpdir(), "puls-fn-"));
     const zipPath = join(tmp, "function.zip");
-    execSync(`cd "${this._sourcePath}" && zip -r "${zipPath}" .`, {
+    cp.execSync(`cd "${this._sourcePath}" && zip -r "${zipPath}" .`, {
       stdio: "pipe",
     });
-    return readFileSync(zipPath);
+    return fs.readFileSync(zipPath);
   }
 
   private async uploadSource(): Promise<{ bucket: string; object: string }> {

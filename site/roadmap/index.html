@@ -1167,7 +1167,7 @@
 <h2 id="testing">Testing</h2>
 <ul>
 <li>[x] Basic test suite (core: <code>config.test.ts</code>, <code>output.test.ts</code>)</li>
-<li>[/] Provider unit tests with mocked API clients - each builder's <code>deploy()</code> and <code>destroy()</code> paths covered (create, skip, update, dry-run) (DigitalOcean complete)</li>
+<li>[x] Provider unit tests with mocked API clients - each builder's <code>deploy()</code> and <code>destroy()</code> paths covered (create, skip, update, dry-run) (DO, AWS S3/Route53/Lambda, and Firebase Hosting/Functions fully complete)</li>
 <li>[ ] Dry-run integration tests - run full stacks with <code>dryRun: true</code> against real provider credentials to verify discovery without writing</li>
 <li>[ ] CI pipeline - run unit tests on every push; dry-run suite on PRs that touch provider code</li>
 <li>[ ] End-to-end tests against sandboxes (LocalStack for AWS, DO staging token, Firebase emulator)</li>
@@ -1185,7 +1185,7 @@
 <li>[x] CloudFront cache invalidation - <code>.invalidate(paths[])</code> on a CloudFront builder</li>
 <li>[x] S3 file upload - <code>.upload(filePath)</code> uploads a single file to the bucket on deploy</li>
 <li>[x] Route53 record types - A, AAAA, CNAME, MX, TXT, NS, PTR, SRV, CAA, NAPTR, SPF via <code>.record()</code>; per-record TTL; TXT auto-quoting</li>
-<li>[ ] S3 static site hosting - <code>.staticSite()</code> sets index/error documents and public-read policy</li>
+<li>[x] S3 static site hosting - <code>.staticSite()</code> sets index/error documents and public-read policy</li>
 <li>[ ] IAM - role and inline/managed policy management; useful for cross-service wiring without manual console steps</li>
 <li>[ ] CloudWatch alarms - CPU/memory thresholds on Fargate and RDS with SNS notification target</li>
 <li>[ ] EC2 - lower priority; Proxmox already covers the raw-VM use case, and EC2 needs VPC/SG/keypair support to be useful</li>
@@ -1247,15 +1247,8 @@
 <ul>
 <li>[x] Switch <code>package.json</code> to <code>"type": "module"</code> (ESM)</li>
 <li>[x] Basic test suite</li>
-<li>[ ] Add <code>"exports"</code> map with per-provider sub-paths so consumers can import only what they need:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">&quot;exports&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;./aws&quot;</span><span class="p">:</span><span class="w">     </span><span class="s2">&quot;./dist/providers/aws/index.js&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;./do&quot;</span><span class="p">:</span><span class="w">      </span><span class="s2">&quot;./dist/providers/do/index.js&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">&quot;./proxmox&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;./dist/providers/proxmox/index.js&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">&quot;./firebase&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;./dist/providers/firebase/index.js&quot;</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">}</span>
-</code></pre></div></li>
-<li>[ ] Ship compiled JS + <code>.d.ts</code> declarations; mark provider SDK packages as <code>peerDependencies</code></li>
+<li>[x] Add <code>"exports"</code> map with per-provider sub-paths so consumers can import only what they need (e.g. <code>puls-dev/aws</code>, <code>puls-dev/firebase</code>)</li>
+<li>[x] Ship compiled JS + <code>.d.ts</code> declarations; mark provider SDK packages as <code>peerDependencies</code></li>
 <li>[ ] Semver versioning - provider additions = minor, breaking DSL changes = major</li>
 </ul>
 <hr />

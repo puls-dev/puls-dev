@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { createReadStream, readdirSync, statSync, readFileSync } from "node:fs";
+import fs from "node:fs";
 import { join, relative, extname } from "node:path";
 import { gzipSync } from "node:zlib";
 import { BaseBuilder } from "../../core/resource.js";
@@ -23,9 +23,9 @@ const CONTENT_TYPES: Record<string, string> = {
 
 function walkDir(dir: string): string[] {
   const results: string[] = [];
-  for (const entry of readdirSync(dir)) {
+  for (const entry of fs.readdirSync(dir)) {
     const full = join(dir, entry);
-    if (statSync(full).isDirectory()) {
+    if (fs.statSync(full).isDirectory()) {
       results.push(...walkDir(full));
     } else {
       results.push(full);
@@ -35,7 +35,7 @@ function walkDir(dir: string): string[] {
 }
 
 function sha256(filePath: string): string {
-  const content = readFileSync(filePath);
+  const content = fs.readFileSync(filePath);
   return createHash("sha256").update(content).digest("hex");
 }
 
@@ -142,7 +142,7 @@ export class FirebaseHostingBuilder extends BaseBuilder {
     
     for (const absPath of files) {
       const urlPath = "/" + relative(this._sourcePath, absPath).replace(/\\/g, "/");
-      const content = readFileSync(absPath);
+      const content = fs.readFileSync(absPath);
       const compressed = gzipSync(content);
       const hash = createHash("sha256").update(compressed).digest("hex");
       

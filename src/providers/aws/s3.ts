@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import fs from "node:fs";
 import { basename, extname } from "node:path";
 import {
   HeadBucketCommand,
@@ -6,6 +6,8 @@ import {
   GetBucketPolicyCommand,
   PutBucketPolicyCommand,
   PutObjectCommand,
+  PutBucketWebsiteCommand,
+  PutPublicAccessBlockCommand,
 } from "@aws-sdk/client-s3";
 import { BaseBuilder } from "../../core/resource.js";
 import { CloudFrontBuilder } from "./cloudfront.js";
@@ -17,6 +19,7 @@ export class S3BucketBuilder extends BaseBuilder {
   private _allowedDistributions: CloudFrontBuilder[] = [];
   private _region?: string;
   private _uploadPath?: string;
+  private _websiteConfig?: { index: string; error: string };
 
   constructor(public bucketName: string) {
     super(bucketName);
@@ -56,6 +59,11 @@ export class S3BucketBuilder extends BaseBuilder {
 
   upload(filePath: string) {
     this._uploadPath = filePath;
+    return this;
+  }
+
+  staticSite(indexDocument: string = "index.html", errorDocument: string = "error.html") {
+    this._websiteConfig = { index: indexDocument, error: errorDocument };
     return this;
   }
 
@@ -110,6 +118,41 @@ export class S3BucketBuilder extends BaseBuilder {
         await this.updateBucketPolicy(s3, newArns);
       }
     }
+    if (this._websiteConfig) {
+      if (dryRun) {
+        console.log(
+          `   📝 [PLAN] Enable static site hosting: index=${this._websiteConfig.index}, error=${this._websiteConfig.error}`,
+        );
+        console.log(`   📝 [PLAN] Remove public access block from bucket`);
+        console.log(`   📝 [PLAN] Configure public read bucket policy`);
+      } else {
+        await s3.send(
+          new PutPublicAccessBlockCommand({
+            Bucket: this.bucketName,
+            PublicAccessBlockConfiguration: {
+              BlockPublicAcls: false,
+              IgnorePublicAcls: false,
+              BlockPublicPolicy: false,
+              RestrictPublicBuckets: false,
+            },
+          }),
+        );
+        console.log(`   ✅ Public access block removed`);
+
+        await s3.send(
+          new PutBucketWebsiteCommand({
+            Bucket: this.bucketName,
+            WebsiteConfiguration: {
+              IndexDocument: { Suffix: this._websiteConfig.index },
+              ErrorDocument: { Key: this._websiteConfig.error },
+            },
+          }),
+        );
+        console.log(`   ✅ Configured static website hosting`);
+
+        await this.applyPublicReadPolicy(s3);
+      }
+    }
 
     if (this._uploadPath) {
       if (dryRun) {
@@ -130,7 +173,7 @@ export class S3BucketBuilder extends BaseBuilder {
     filePath: string,
   ) {
     const key = basename(filePath);
-    const body = readFileSync(filePath);
+    const body = fs.readFileSync(filePath);
     const contentTypeMap: Record<string, string> = {
       ".json": "application/json",
       ".js": "application/javascript",
@@ -217,5 +260,43 @@ export class S3BucketBuilder extends BaseBuilder {
       `   ✅ Updated bucket policy - ${merged.length} distribution ARN(s) allowed`,
     );
     for (const arn of newArns) console.log(`      └─ ${arn}`);
+  }
+
+  private async applyPublicReadPolicy(s3: ReturnType<typeof getS3Client>) {
+    let policy: any = { Version: "2012-10-17", Statement: [] };
+
+    try {
+      const existing = await s3.send(
+        new GetBucketPolicyCommand({ Bucket: this.bucketName }),
+      );
+      if (existing.Policy) policy = JSON.parse(existing.Policy);
+    } catch (e: any) {
+      if (e.name !== "NoSuchBucketPolicy") throw e;
+    }
+
+    let stmt = policy.Statement.find(
+      (s: any) =>
+        s.Sid === "PublicReadGetObject" ||
+        (s.Effect === "Allow" && s.Principal === "*" && s.Action === "s3:GetObject"),
+    );
+
+    if (!stmt) {
+      stmt = {
+        Sid: "PublicReadGetObject",
+        Effect: "Allow",
+        Principal: "*",
+        Action: "s3:GetObject",
+        Resource: `arn:aws:s3:::${this.bucketName}/*`,
+      };
+      policy.Statement.push(stmt);
+    }
+
+    await s3.send(
+      new PutBucketPolicyCommand({
+        Bucket: this.bucketName,
+        Policy: JSON.stringify(policy),
+      }),
+    );
+    console.log(`   ✅ Public read policy statement applied`);
   }
 }

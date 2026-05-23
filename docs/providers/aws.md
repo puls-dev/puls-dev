@@ -20,8 +20,7 @@ class MyStack extends Stack { ... }
 **Constants**
 
 ```typescript
-import { AWS_TYPES } from "puls-dev";
-const { REGION, RUNTIME, DB, DB_SIZE, DISTRO, BUCKET } = AWS_TYPES;
+import { AWS, REGION, RUNTIME, DB, DB_SIZE, DISTRO, BUCKET } from "puls-dev/aws";
 ```
 
 ---
@@ -220,8 +219,7 @@ AWS.Route53("example.com")
 **Domain registration**
 
 ```typescript
-import { AWS_TYPES } from "puls-dev";
-const { REGION } = AWS_TYPES;
+import { REGION } from "puls-dev/aws";
 
 const DOMAIN_REGISTER = {
   FIRSTNAME: "Jane",
@@ -303,8 +301,8 @@ AWS.SecretsManager("my-app/temp-token").forceDelete()
 ```typescript
 import "dotenv/config";
 import "reflect-metadata";
-import { AWS, AWS_TYPES, Stack, Deploy } from "puls-dev";
-const { REGION, RUNTIME, DB, DB_SIZE } = AWS_TYPES;
+import { Stack, Deploy } from "puls-dev";
+import { AWS, REGION, RUNTIME, DB, DB_SIZE } from "puls-dev/aws";
 // import { SECRETS } from "./types/secrets.ts"; // your local constants
 
 @Deploy({ region: REGION.EU_CENTRAL_1, dryRun: false })
