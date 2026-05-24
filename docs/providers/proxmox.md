@@ -43,6 +43,7 @@ Proxmox.VM("ix-sto1-app01")
   .ip("10.8.10.83")           // static IP - omit for DHCP or DNS auto-resolve
   .vlan(2010)                 // VLAN tag on vmbr1
   .sshKey(KEYS)               // array of public key strings
+  .machine("i440fx")          // machine type ("q35" or "i440fx", default "q35")
   .provision("config/default.yaml")   // single script or playbook
   .provision(["common.yml", "app.yml"]) // or multiple files run in order
   .replace("ix-sto1-app01-old")       // destroy old VM after new one is up

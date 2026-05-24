@@ -27,17 +27,17 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 ## Provider Improvements
 
 ### Proxmox
-- [ ] Cluster-aware node selection - pick the node with the most free RAM via `/nodes` API instead of always using the first configured node
-- [ ] `.machine()` builder method - let users override machine type (i440fx vs q35) per VM rather than the hardcoded default
-- [ ] `CONFIG.PRODUCTION` entry in `src/types/proxmox.ts`
+- [x] Cluster-aware node selection - pick the node with the most free RAM via `/nodes` API instead of always using the first configured node
+- [x] `.machine()` builder method - let users override machine type (i440fx vs q35) per VM rather than the hardcoded default
+- [x] `CONFIG.PRODUCTION` entry in `src/types/proxmox.ts`
 
 ### AWS
 - [x] CloudFront cache invalidation - `.invalidate(paths[])` on a CloudFront builder
 - [x] S3 file upload - `.upload(filePath)` uploads a single file to the bucket on deploy
 - [x] Route53 record types - A, AAAA, CNAME, MX, TXT, NS, PTR, SRV, CAA, NAPTR, SPF via `.record()`; per-record TTL; TXT auto-quoting
 - [x] S3 static site hosting - `.staticSite()` sets index/error documents and public-read policy
-- [ ] IAM - role and inline/managed policy management; useful for cross-service wiring without manual console steps
-- [ ] CloudWatch alarms - CPU/memory thresholds on Fargate and RDS with SNS notification target
+- [x] IAM - role and inline/managed policy management; useful for cross-service wiring without manual console steps
+- [x] CloudWatch alarms - CPU/memory thresholds on Fargate and RDS with SNS notification target
 - [ ] EC2 - lower priority; Proxmox already covers the raw-VM use case, and EC2 needs VPC/SG/keypair support to be useful
 
 ### DigitalOcean

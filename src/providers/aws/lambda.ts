@@ -18,6 +18,7 @@ import {
 import { BaseBuilder } from "../../core/resource.js";
 import { getLambdaClient, getIAMClient } from "./api.js";
 import { SecretsBuilder, resolveEnvVars } from "./secrets.js";
+import { IAMRoleBuilder } from "./iam.js";
 
 const ASSUME_ROLE_POLICY = JSON.stringify({
   Version: "2012-10-17",
@@ -38,6 +39,7 @@ export class LambdaBuilder extends BaseBuilder {
   private _codePath?: string;
   private _env: Record<string, string | SecretsBuilder> = {};
   private _roleArn?: string;
+  private _roleBuilder?: IAMRoleBuilder;
   resolvedArn: string | null = null;
 
   constructor(name: string) {
@@ -79,8 +81,12 @@ export class LambdaBuilder extends BaseBuilder {
     this._timeout = seconds;
     return this;
   }
-  role(arn: string) {
-    this._roleArn = arn;
+  role(arnOrBuilder: string | IAMRoleBuilder) {
+    if (typeof arnOrBuilder === "string") {
+      this._roleArn = arnOrBuilder;
+    } else {
+      this._roleBuilder = arnOrBuilder;
+    }
     return this;
   }
   env(vars: Record<string, string | SecretsBuilder>) {
@@ -89,6 +95,9 @@ export class LambdaBuilder extends BaseBuilder {
   }
 
   private async ensureRole(): Promise<string> {
+    if (this._roleBuilder) {
+      return await this._roleBuilder.out.arn.get();
+    }
     if (this._roleArn) return this._roleArn;
 
     const roleName = `puls-lambda-${this.name}-role`;

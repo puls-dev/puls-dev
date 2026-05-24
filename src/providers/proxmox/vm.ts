@@ -29,6 +29,7 @@ export class VMBuilder extends BaseBuilder {
   private _vlan?: number;
   private _ip?: string;
   private _sshKeys?: string | string[];
+  private _machine: "q35" | "i440fx" = "q35";
 
   constructor(name: string) {
     super(name);
@@ -88,6 +89,10 @@ export class VMBuilder extends BaseBuilder {
     this._sshKeys = Array.isArray(keys) ? [...keys] : (keys as string);
     return this;
   }
+  machine(type: "q35" | "i440fx") {
+    this._machine = type;
+    return this;
+  }
 
   async deploy() {
     const dryRun = this.isDryRunActive();
@@ -114,7 +119,7 @@ export class VMBuilder extends BaseBuilder {
     if (dryRun) {
       console.log(`   📝 [PLAN] Create VM "${this.name}"`);
       if (this._image) console.log(`      └─ Image: ${this._image}`);
-      console.log(`      └─ Cores: ${this._cores}  Memory: ${this._memory} MB`);
+      console.log(`      └─ Cores: ${this._cores}  Memory: ${this._memory} MB  Machine: ${this._machine}`);
       if (this._vlan) console.log(`      └─ VLAN: ${this._vlan}`);
       if (this._provision) {
         const p = Array.isArray(this._provision)
@@ -151,8 +156,37 @@ export class VMBuilder extends BaseBuilder {
       );
     }
 
-    // Resolve target node: explicit → configured nodes list → template's node → API discovery
+    // Resolve target node: explicit → cluster-aware (online & max free RAM) → configured nodes list → template's node → API discovery
     let node = this._node;
+    if (!node) {
+      try {
+        const nodesList = await pm.get<any[]>("/nodes");
+        const configuredNodes = Config.get().providers.proxmox?.nodes;
+        const onlineNodes = (nodesList ?? []).filter((n) => {
+          if (n.status !== "online") return false;
+          if (configuredNodes && configuredNodes.length > 0) {
+            return configuredNodes.includes(n.node);
+          }
+          return true;
+        });
+
+        if (onlineNodes.length > 0) {
+          // Sort descending by free memory (maxmem - mem)
+          onlineNodes.sort((a, b) => {
+            const freeA = (a.maxmem ?? 0) - (a.mem ?? 0);
+            const freeB = (b.maxmem ?? 0) - (b.mem ?? 0);
+            return freeB - freeA;
+          });
+          node = onlineNodes[0].node;
+          console.log(
+            `   🧠 Cluster-aware node selection: picked "${node}" with the most free RAM (${Math.round((((onlineNodes[0].maxmem ?? 0) - (onlineNodes[0].mem ?? 0)) / 1024 / 1024 / 1024) * 10) / 10} GB free)`
+          );
+        }
+      } catch (err) {
+        // Fallback silently to configured nodes list or discovery
+      }
+    }
+
     if (!node) {
       const configuredNodes = Config.get().providers.proxmox?.nodes;
       node = configuredNodes?.[0] ?? template?.node;
@@ -219,7 +253,7 @@ export class VMBuilder extends BaseBuilder {
 
     const configPatch: any = {
       onboot: 1,
-      machine: "q35",
+      machine: this._machine,
       cores: this._cores,
       memory: this._memory,
       net0,

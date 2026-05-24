@@ -8,6 +8,9 @@ import { FargateBuilder } from "./fargate.js";
 import { RDSBuilder } from "./rds.js";
 import { SQSBuilder } from "./sqs.js";
 import { SecretsBuilder } from "./secrets.js";
+import { IAMRoleBuilder, IAMPolicyBuilder } from "./iam.js";
+import { SNSTopicBuilder } from "./sns.js";
+import { CloudWatchAlarmBuilder } from "./cloudwatch.js";
 
 export const AWS = {
   init: (opts: { region: string }) => {
@@ -27,6 +30,10 @@ export const AWS = {
   RDS: (name: string) => new RDSBuilder(name),
   SQS: (name: string) => new SQSBuilder(name),
   Secret: (secretId: string) => new SecretsBuilder(secretId),
+  IAMRole: (name: string) => new IAMRoleBuilder(name),
+  IAMPolicy: (name: string) => new IAMPolicyBuilder(name),
+  SNS: (name: string) => new SNSTopicBuilder(name),
+  Alarm: (name: string) => new CloudWatchAlarmBuilder(name),
 };
 
 export * from "../../types/aws.js";

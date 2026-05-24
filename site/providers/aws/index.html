@@ -771,6 +771,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#iam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IAM
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SNS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloudwatch-alarms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CloudWatch Alarms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#full-example" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1083,6 +1116,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#iam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IAM
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SNS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloudwatch-alarms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CloudWatch Alarms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#full-example" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1327,40 +1393,170 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">SecretsManager</span><span class="p">(</span><span class="s2">&quot;my-app/temp-token&quot;</span><span class="p">).</span><span class="nx">forceDelete</span><span class="p">()</span>
 </code></pre></div>
 <hr />
+<h2 id="iam">IAM</h2>
+<p>Create and manage custom IAM roles and policies with automatic version pruning.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1">// Create a managed policy</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="kd">const</span><span class="w"> </span><span class="nx">s3Policy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">IAMPolicy</span><span class="p">(</span><span class="s2">&quot;s3-read-policy&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">  </span><span class="p">.</span><span class="nb">document</span><span class="p">({</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">    </span><span class="nx">Version</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">    </span><span class="nx">Statement</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="w">      </span><span class="p">{</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">        </span><span class="nx">Effect</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">        </span><span class="nx">Action</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;s3:GetObject&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;s3:ListBucket&quot;</span><span class="p">],</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">        </span><span class="nx">Resource</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;arn:aws:s3:::my-bucket&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;arn:aws:s3:::my-bucket/*&quot;</span><span class="p">],</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="w">      </span><span class="p">},</span>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="w">  </span><span class="p">})</span>
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="w">  </span><span class="p">.</span><span class="nx">description</span><span class="p">(</span><span class="s2">&quot;Grants read access to my-bucket&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a>
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="c1">// Create a role and attach policies</span>
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a><span class="kd">const</span><span class="w"> </span><span class="nx">workerRole</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">IAMRole</span><span class="p">(</span><span class="s2">&quot;worker-execution-role&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a><span class="w">  </span><span class="p">.</span><span class="nx">description</span><span class="p">(</span><span class="s2">&quot;Execution role for background workers&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="w">  </span><span class="p">.</span><span class="nx">attach</span><span class="p">(</span><span class="nx">s3Policy</span><span class="p">)</span><span class="w">                                      </span><span class="c1">// attach managed policy builder</span>
+<a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="w">  </span><span class="p">.</span><span class="nx">attach</span><span class="p">(</span><span class="s2">&quot;arn:aws:iam::aws:policy/AWSLambda_FullAccess&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// or attach ARN directly</span>
+<a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a><span class="w">  </span><span class="p">.</span><span class="nx">inlinePolicy</span><span class="p">(</span><span class="s2">&quot;sqs-write&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w">                            </span><span class="c1">// add inline policy</span>
+<a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a><span class="w">    </span><span class="nx">Version</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a><span class="w">    </span><span class="nx">Statement</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a><span class="w">      </span><span class="p">{</span>
+<a id="__codelineno-19-24" name="__codelineno-19-24" href="#__codelineno-19-24"></a><span class="w">        </span><span class="nx">Effect</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-25" name="__codelineno-19-25" href="#__codelineno-19-25"></a><span class="w">        </span><span class="nx">Action</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sqs:SendMessage&quot;</span><span class="p">],</span>
+<a id="__codelineno-19-26" name="__codelineno-19-26" href="#__codelineno-19-26"></a><span class="w">        </span><span class="nx">Resource</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;*&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-27" name="__codelineno-19-27" href="#__codelineno-19-27"></a><span class="w">      </span><span class="p">},</span>
+<a id="__codelineno-19-28" name="__codelineno-19-28" href="#__codelineno-19-28"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-19-29" name="__codelineno-19-29" href="#__codelineno-19-29"></a><span class="w">  </span><span class="p">});</span>
+<a id="__codelineno-19-30" name="__codelineno-19-30" href="#__codelineno-19-30"></a>
+<a id="__codelineno-19-31" name="__codelineno-19-31" href="#__codelineno-19-31"></a><span class="c1">// Attach custom role to a Lambda function</span>
+<a id="__codelineno-19-32" name="__codelineno-19-32" href="#__codelineno-19-32"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Lambda</span><span class="p">(</span><span class="s2">&quot;worker&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-33" name="__codelineno-19-33" href="#__codelineno-19-33"></a><span class="w">  </span><span class="p">.</span><span class="nx">code</span><span class="p">(</span><span class="s2">&quot;./dist&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-34" name="__codelineno-19-34" href="#__codelineno-19-34"></a><span class="w">  </span><span class="p">.</span><span class="nx">runtime</span><span class="p">(</span><span class="nx">RUNTIME</span><span class="p">.</span><span class="nx">NODEJS_20</span><span class="p">)</span>
+<a id="__codelineno-19-35" name="__codelineno-19-35" href="#__codelineno-19-35"></a><span class="w">  </span><span class="p">.</span><span class="nx">role</span><span class="p">(</span><span class="nx">workerRole</span><span class="p">);</span><span class="w"> </span><span class="c1">// wires the role automatically</span>
+</code></pre></div>
+<ul>
+<li><strong>Version Pruning</strong>: AWS limits customer-managed policies to 5 versions. <code>AWS.IAMPolicy</code> automatically lists and prunes the oldest non-default version before applying updates, guaranteeing failure-free continuous deployments.</li>
+</ul>
+<hr />
+<h2 id="sns">SNS</h2>
+<p>Provision Simple Notification Service (SNS) topics and manage subscriptions with clean, idempotent synchronization.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">alertTopic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">SNS</span><span class="p">(</span><span class="s2">&quot;billing-alerts&quot;</span><span class="p">)</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">displayName</span><span class="p">(</span><span class="s2">&quot;Billing Alert Topic&quot;</span><span class="p">)</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">subscribe</span><span class="p">(</span><span class="s2">&quot;email&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;admin@company.com&quot;</span><span class="p">)</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">subscribe</span><span class="p">(</span><span class="s2">&quot;sms&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;+15555550199&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p>On deploy, Puls creates the topic, updates the display name, and automatically synchronizes subscriptions by removing stale endpoints and subscribing new ones.</p>
+<p><strong>Outputs</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.out.arn</code></td>
+<td><code>Output&lt;string&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="cloudwatch-alarms">CloudWatch Alarms</h2>
+<p>Configure metric threshold alerts and wire them to SNS notification targets. Includes premium auto-wiring helpers for Fargate and RDS.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1">// General-purpose custom metric alarm</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Alarm</span><span class="p">(</span><span class="s2">&quot;checkout-errors&quot;</span><span class="p">)</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">metric</span><span class="p">(</span><span class="s2">&quot;CheckoutService&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ErrorCount&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Environment</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">comparison</span><span class="p">(</span><span class="s2">&quot;GreaterThanThreshold&quot;</span><span class="p">)</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">threshold</span><span class="p">(</span><span class="mf">5</span><span class="p">)</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">period</span><span class="p">(</span><span class="mf">60</span><span class="p">)</span><span class="w">                     </span><span class="c1">// 60 seconds</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="w">  </span><span class="p">.</span><span class="nx">evaluationPeriods</span><span class="p">(</span><span class="mf">2</span><span class="p">)</span><span class="w">           </span><span class="c1">// 2 consecutive periods</span>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="w">  </span><span class="p">.</span><span class="nx">statistic</span><span class="p">(</span><span class="s2">&quot;Sum&quot;</span><span class="p">)</span>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="w">  </span><span class="p">.</span><span class="nx">actions</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">alertTopic</span><span class="p">);</span><span class="w">       </span><span class="c1">// wires the SNS topic builder eagerly</span>
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="c1">// Premium Fargate helper: triggers if CPU usage &gt;= 80%</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Alarm</span><span class="p">(</span><span class="s2">&quot;api-cpu-high&quot;</span><span class="p">)</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a><span class="w">  </span><span class="p">.</span><span class="nx">fargateCPU</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">apiService</span><span class="p">,</span><span class="w"> </span><span class="mf">80</span><span class="p">)</span>
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a><span class="w">  </span><span class="p">.</span><span class="nx">actions</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">alertTopic</span><span class="p">);</span>
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a><span class="c1">// Premium Fargate helper: triggers if memory usage &gt;= 85%</span>
+<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Alarm</span><span class="p">(</span><span class="s2">&quot;api-mem-high&quot;</span><span class="p">)</span>
+<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a><span class="w">  </span><span class="p">.</span><span class="nx">fargateMemory</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">apiService</span><span class="p">,</span><span class="w"> </span><span class="mf">85</span><span class="p">)</span>
+<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a><span class="w">  </span><span class="p">.</span><span class="nx">actions</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">alertTopic</span><span class="p">);</span>
+<a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a>
+<a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a><span class="c1">// Premium RDS helper: triggers if CPU usage &gt;= 90%</span>
+<a id="__codelineno-21-22" name="__codelineno-21-22" href="#__codelineno-21-22"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Alarm</span><span class="p">(</span><span class="s2">&quot;db-cpu-high&quot;</span><span class="p">)</span>
+<a id="__codelineno-21-23" name="__codelineno-21-23" href="#__codelineno-21-23"></a><span class="w">  </span><span class="p">.</span><span class="nx">rdsCPU</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">database</span><span class="p">,</span><span class="w"> </span><span class="mf">90</span><span class="p">)</span>
+<a id="__codelineno-21-24" name="__codelineno-21-24" href="#__codelineno-21-24"></a><span class="w">  </span><span class="p">.</span><span class="nx">actions</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">alertTopic</span><span class="p">);</span>
+<a id="__codelineno-21-25" name="__codelineno-21-25" href="#__codelineno-21-25"></a>
+<a id="__codelineno-21-26" name="__codelineno-21-26" href="#__codelineno-21-26"></a><span class="c1">// Premium RDS helper: triggers if free storage space falls below 5GB</span>
+<a id="__codelineno-21-27" name="__codelineno-21-27" href="#__codelineno-21-27"></a><span class="nx">AWS</span><span class="p">.</span><span class="nx">Alarm</span><span class="p">(</span><span class="s2">&quot;db-storage-low&quot;</span><span class="p">)</span>
+<a id="__codelineno-21-28" name="__codelineno-21-28" href="#__codelineno-21-28"></a><span class="w">  </span><span class="p">.</span><span class="nx">rdsStorage</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">database</span><span class="p">,</span><span class="w"> </span><span class="mf">5</span><span class="nx">_000_000_000</span><span class="p">)</span>
+<a id="__codelineno-21-29" name="__codelineno-21-29" href="#__codelineno-21-29"></a><span class="w">  </span><span class="p">.</span><span class="nx">actions</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">alertTopic</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>Outputs</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.out.name</code></td>
+<td><code>Output&lt;string&gt;</code></td>
+</tr>
+<tr>
+<td><code>.out.arn</code></td>
+<td><code>Output&lt;string&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h2 id="full-example">Full example</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;dotenv/config&quot;</span><span class="p">;</span>
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;reflect-metadata&quot;</span><span class="p">;</span>
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">AWS</span><span class="p">,</span><span class="w"> </span><span class="nx">REGION</span><span class="p">,</span><span class="w"> </span><span class="nx">RUNTIME</span><span class="p">,</span><span class="w"> </span><span class="nx">DB</span><span class="p">,</span><span class="w"> </span><span class="nx">DB_SIZE</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/aws&quot;</span><span class="p">;</span>
-<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="c1">// import { SECRETS } from &quot;./types/secrets.ts&quot;; // your local constants</span>
-<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>
-<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="kt">REGION.EU_CENTRAL_1</span><span class="p">,</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="kd">class</span><span class="w"> </span><span class="nx">AppStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">  </span><span class="c1">// secret = AWS.SecretsManager(SECRETS.DB_KEY);</span>
-<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>
-<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">RDS</span><span class="p">(</span><span class="s2">&quot;app-db&quot;</span><span class="p">)</span>
-<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="w">    </span><span class="p">.</span><span class="nx">engine</span><span class="p">(</span><span class="nx">DB</span><span class="p">.</span><span class="nx">POSTGRES_16</span><span class="p">)</span>
-<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="w">    </span><span class="p">.</span><span class="nx">size</span><span class="p">(</span><span class="nx">DB_SIZE</span><span class="p">.</span><span class="nx">SMALL</span><span class="p">)</span>
-<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a><span class="w">    </span><span class="p">.</span><span class="nx">credentials</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">secret</span><span class="p">);</span>
-<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a>
-<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a><span class="w">  </span><span class="nx">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Fargate</span><span class="p">(</span><span class="s2">&quot;app-api&quot;</span><span class="p">)</span>
-<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="s2">&quot;my-org/app:latest&quot;</span><span class="p">)</span>
-<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">cpu</span><span class="p">(</span><span class="mf">512</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">1024</span><span class="p">)</span>
-<a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="w">    </span><span class="p">.</span><span class="nx">port</span><span class="p">(</span><span class="mf">3000</span><span class="p">)</span>
-<a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a><span class="w">    </span><span class="p">.</span><span class="nx">replicas</span><span class="p">(</span><span class="mf">2</span><span class="p">);</span>
-<a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a>
-<a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a><span class="w">  </span><span class="nx">resizer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Lambda</span><span class="p">(</span><span class="s2">&quot;image-resizer&quot;</span><span class="p">)</span>
-<a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a><span class="w">    </span><span class="p">.</span><span class="nx">code</span><span class="p">(</span><span class="s2">&quot;./functions/resizer&quot;</span><span class="p">)</span>
-<a id="__codelineno-19-24" name="__codelineno-19-24" href="#__codelineno-19-24"></a><span class="w">    </span><span class="p">.</span><span class="nx">runtime</span><span class="p">(</span><span class="nx">RUNTIME</span><span class="p">.</span><span class="nx">NODEJS_20</span><span class="p">)</span>
-<a id="__codelineno-19-25" name="__codelineno-19-25" href="#__codelineno-19-25"></a><span class="w">    </span><span class="p">.</span><span class="nx">memory</span><span class="p">(</span><span class="mf">512</span><span class="p">);</span>
-<a id="__codelineno-19-26" name="__codelineno-19-26" href="#__codelineno-19-26"></a>
-<a id="__codelineno-19-27" name="__codelineno-19-27" href="#__codelineno-19-27"></a><span class="w">  </span><span class="nx">gateway</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">APIGateway</span><span class="p">(</span><span class="s2">&quot;app-gateway&quot;</span><span class="p">)</span>
-<a id="__codelineno-19-28" name="__codelineno-19-28" href="#__codelineno-19-28"></a><span class="w">    </span><span class="p">.</span><span class="nx">route</span><span class="p">(</span><span class="s2">&quot;GET /resize&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">resizer</span><span class="p">);</span>
-<a id="__codelineno-19-29" name="__codelineno-19-29" href="#__codelineno-19-29"></a>
-<a id="__codelineno-19-30" name="__codelineno-19-30" href="#__codelineno-19-30"></a><span class="w">  </span><span class="nx">jobs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">SQS</span><span class="p">(</span><span class="s2">&quot;resize-jobs&quot;</span><span class="p">)</span>
-<a id="__codelineno-19-31" name="__codelineno-19-31" href="#__codelineno-19-31"></a><span class="w">    </span><span class="p">.</span><span class="nx">retention</span><span class="p">(</span><span class="mf">7</span><span class="p">)</span>
-<a id="__codelineno-19-32" name="__codelineno-19-32" href="#__codelineno-19-32"></a><span class="w">    </span><span class="p">.</span><span class="nx">dlq</span><span class="p">(</span><span class="s2">&quot;resize-jobs-dlq&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">3</span><span class="p">);</span>
-<a id="__codelineno-19-33" name="__codelineno-19-33" href="#__codelineno-19-33"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;dotenv/config&quot;</span><span class="p">;</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;reflect-metadata&quot;</span><span class="p">;</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">AWS</span><span class="p">,</span><span class="w"> </span><span class="nx">REGION</span><span class="p">,</span><span class="w"> </span><span class="nx">RUNTIME</span><span class="p">,</span><span class="w"> </span><span class="nx">DB</span><span class="p">,</span><span class="w"> </span><span class="nx">DB_SIZE</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/aws&quot;</span><span class="p">;</span>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="kt">REGION.EU_CENTRAL_1</span><span class="p">,</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="kd">class</span><span class="w"> </span><span class="nx">AppStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="w">  </span><span class="nx">secret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">SecretsManager</span><span class="p">(</span><span class="s2">&quot;my-app/db-password&quot;</span><span class="p">);</span>
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>
+<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">RDS</span><span class="p">(</span><span class="s2">&quot;app-db&quot;</span><span class="p">)</span>
+<a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a><span class="w">    </span><span class="p">.</span><span class="nx">engine</span><span class="p">(</span><span class="nx">DB</span><span class="p">.</span><span class="nx">POSTGRES_16</span><span class="p">)</span>
+<a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a><span class="w">    </span><span class="p">.</span><span class="nx">size</span><span class="p">(</span><span class="nx">DB_SIZE</span><span class="p">.</span><span class="nx">SMALL</span><span class="p">)</span>
+<a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a><span class="w">    </span><span class="p">.</span><span class="nx">credentials</span><span class="p">(</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">secret</span><span class="p">);</span>
+<a id="__codelineno-22-14" name="__codelineno-22-14" href="#__codelineno-22-14"></a>
+<a id="__codelineno-22-15" name="__codelineno-22-15" href="#__codelineno-22-15"></a><span class="w">  </span><span class="nx">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Fargate</span><span class="p">(</span><span class="s2">&quot;app-api&quot;</span><span class="p">)</span>
+<a id="__codelineno-22-16" name="__codelineno-22-16" href="#__codelineno-22-16"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="s2">&quot;my-org/app:latest&quot;</span><span class="p">)</span>
+<a id="__codelineno-22-17" name="__codelineno-22-17" href="#__codelineno-22-17"></a><span class="w">    </span><span class="p">.</span><span class="nx">cpu</span><span class="p">(</span><span class="mf">512</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">1024</span><span class="p">)</span>
+<a id="__codelineno-22-18" name="__codelineno-22-18" href="#__codelineno-22-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">port</span><span class="p">(</span><span class="mf">3000</span><span class="p">)</span>
+<a id="__codelineno-22-19" name="__codelineno-22-19" href="#__codelineno-22-19"></a><span class="w">    </span><span class="p">.</span><span class="nx">replicas</span><span class="p">(</span><span class="mf">2</span><span class="p">);</span>
+<a id="__codelineno-22-20" name="__codelineno-22-20" href="#__codelineno-22-20"></a>
+<a id="__codelineno-22-21" name="__codelineno-22-21" href="#__codelineno-22-21"></a><span class="w">  </span><span class="nx">resizer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Lambda</span><span class="p">(</span><span class="s2">&quot;image-resizer&quot;</span><span class="p">)</span>
+<a id="__codelineno-22-22" name="__codelineno-22-22" href="#__codelineno-22-22"></a><span class="w">    </span><span class="p">.</span><span class="nx">code</span><span class="p">(</span><span class="s2">&quot;./functions/resizer&quot;</span><span class="p">)</span>
+<a id="__codelineno-22-23" name="__codelineno-22-23" href="#__codelineno-22-23"></a><span class="w">    </span><span class="p">.</span><span class="nx">runtime</span><span class="p">(</span><span class="nx">RUNTIME</span><span class="p">.</span><span class="nx">NODEJS_20</span><span class="p">)</span>
+<a id="__codelineno-22-24" name="__codelineno-22-24" href="#__codelineno-22-24"></a><span class="w">    </span><span class="p">.</span><span class="nx">memory</span><span class="p">(</span><span class="mf">512</span><span class="p">);</span>
+<a id="__codelineno-22-25" name="__codelineno-22-25" href="#__codelineno-22-25"></a>
+<a id="__codelineno-22-26" name="__codelineno-22-26" href="#__codelineno-22-26"></a><span class="w">  </span><span class="nx">gateway</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">APIGateway</span><span class="p">(</span><span class="s2">&quot;app-gateway&quot;</span><span class="p">)</span>
+<a id="__codelineno-22-27" name="__codelineno-22-27" href="#__codelineno-22-27"></a><span class="w">    </span><span class="p">.</span><span class="nx">route</span><span class="p">(</span><span class="s2">&quot;GET /resize&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">resizer</span><span class="p">);</span>
+<a id="__codelineno-22-28" name="__codelineno-22-28" href="#__codelineno-22-28"></a>
+<a id="__codelineno-22-29" name="__codelineno-22-29" href="#__codelineno-22-29"></a><span class="w">  </span><span class="nx">jobs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">SQS</span><span class="p">(</span><span class="s2">&quot;resize-jobs&quot;</span><span class="p">)</span>
+<a id="__codelineno-22-30" name="__codelineno-22-30" href="#__codelineno-22-30"></a><span class="w">    </span><span class="p">.</span><span class="nx">retention</span><span class="p">(</span><span class="mf">7</span><span class="p">)</span>
+<a id="__codelineno-22-31" name="__codelineno-22-31" href="#__codelineno-22-31"></a><span class="w">    </span><span class="p">.</span><span class="nx">dlq</span><span class="p">(</span><span class="s2">&quot;resize-jobs-dlq&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">3</span><span class="p">);</span>
+<a id="__codelineno-22-32" name="__codelineno-22-32" href="#__codelineno-22-32"></a>
+<a id="__codelineno-22-33" name="__codelineno-22-33" href="#__codelineno-22-33"></a><span class="w">  </span><span class="c1">// Alerts &amp; Alarms</span>
+<a id="__codelineno-22-34" name="__codelineno-22-34" href="#__codelineno-22-34"></a><span class="w">  </span><span class="nx">alerts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">SNS</span><span class="p">(</span><span class="s2">&quot;ops-alerts&quot;</span><span class="p">)</span>
+<a id="__codelineno-22-35" name="__codelineno-22-35" href="#__codelineno-22-35"></a><span class="w">    </span><span class="p">.</span><span class="nx">displayName</span><span class="p">(</span><span class="s2">&quot;Operations Alerts&quot;</span><span class="p">)</span>
+<a id="__codelineno-22-36" name="__codelineno-22-36" href="#__codelineno-22-36"></a><span class="w">    </span><span class="p">.</span><span class="nx">subscribe</span><span class="p">(</span><span class="s2">&quot;email&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ops@company.com&quot;</span><span class="p">);</span>
+<a id="__codelineno-22-37" name="__codelineno-22-37" href="#__codelineno-22-37"></a>
+<a id="__codelineno-22-38" name="__codelineno-22-38" href="#__codelineno-22-38"></a><span class="w">  </span><span class="nx">apiCpuAlarm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Alarm</span><span class="p">(</span><span class="s2">&quot;api-cpu-alarm&quot;</span><span class="p">)</span>
+<a id="__codelineno-22-39" name="__codelineno-22-39" href="#__codelineno-22-39"></a><span class="w">    </span><span class="p">.</span><span class="nx">fargateCPU</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">api</span><span class="p">,</span><span class="w"> </span><span class="mf">80</span><span class="p">)</span>
+<a id="__codelineno-22-40" name="__codelineno-22-40" href="#__codelineno-22-40"></a><span class="w">    </span><span class="p">.</span><span class="nx">actions</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">alerts</span><span class="p">);</span>
+<a id="__codelineno-22-41" name="__codelineno-22-41" href="#__codelineno-22-41"></a>
+<a id="__codelineno-22-42" name="__codelineno-22-42" href="#__codelineno-22-42"></a><span class="w">  </span><span class="nx">dbCpuAlarm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AWS</span><span class="p">.</span><span class="nx">Alarm</span><span class="p">(</span><span class="s2">&quot;db-cpu-alarm&quot;</span><span class="p">)</span>
+<a id="__codelineno-22-43" name="__codelineno-22-43" href="#__codelineno-22-43"></a><span class="w">    </span><span class="p">.</span><span class="nx">rdsCPU</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">db</span><span class="p">,</span><span class="w"> </span><span class="mf">90</span><span class="p">)</span>
+<a id="__codelineno-22-44" name="__codelineno-22-44" href="#__codelineno-22-44"></a><span class="w">    </span><span class="p">.</span><span class="nx">actions</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">alerts</span><span class="p">);</span>
+<a id="__codelineno-22-45" name="__codelineno-22-45" href="#__codelineno-22-45"></a><span class="p">}</span>
 </code></pre></div>
 
 

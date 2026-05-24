@@ -65,3 +65,16 @@ export const DOMAIN_REGISTER: RegistrantContact = {
   ZIPCODE: "zip-code",
   COUNTRY: "country",
 };
+
+export interface IAMPolicyStatement {
+  Effect: "Allow" | "Deny";
+  Action: string | string[];
+  Resource?: string | string[];
+  Principal?: Record<string, string | string[]>;
+  Condition?: Record<string, any>;
+}
+
+export interface IAMPolicyDocument {
+  Version?: string;
+  Statement: IAMPolicyStatement[];
+}

@@ -12,6 +12,8 @@ import { CloudWatchLogsClient } from "@aws-sdk/client-cloudwatch-logs";
 import { RDSClient } from "@aws-sdk/client-rds";
 import { SQSClient } from "@aws-sdk/client-sqs";
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
+import { CloudWatchClient } from "@aws-sdk/client-cloudwatch";
+import { SNSClient } from "@aws-sdk/client-sns";
 import { Config } from "../../core/config.js";
 
 function getRegion(): string {
@@ -49,3 +51,7 @@ export const getSQSClient = (region?: string) =>
   new SQSClient({ region: region ?? getRegion() });
 export const getSecretsClient = (region?: string) =>
   new SecretsManagerClient({ region: region ?? getRegion() });
+export const getCWClient = (region?: string) =>
+  new CloudWatchClient({ region: region ?? getRegion() });
+export const getSNSClient = (region?: string) =>
+  new SNSClient({ region: region ?? getRegion() });

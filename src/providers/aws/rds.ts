@@ -43,6 +43,10 @@ export class RDSBuilder extends BaseBuilder {
     this.discoveryPromise = this.discoverInstance(name);
   }
 
+  get dbInstanceIdentifier(): string {
+    return this.name;
+  }
+
   engine(e: { engine: string; version: string }) {
     this._engine = e.engine;
     this._engineVersion = e.version;
@@ -94,7 +98,7 @@ export class RDSBuilder extends BaseBuilder {
       this.resolvedPort = instance.Endpoint?.Port ?? null;
       return instance;
     } catch (e: any) {
-      if (e.name === "DBInstanceNotFound") return null;
+      if (e.name === "DBInstanceNotFound" || e.name === "DBInstanceNotFoundFault") return null;
       if (e.name === "CredentialsProviderError") return null;
       throw e;
     }

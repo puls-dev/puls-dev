@@ -65,6 +65,14 @@ export class FargateBuilder extends BaseBuilder {
     this.discoveryPromise = this.discoverService(name);
   }
 
+  get clusterName(): string {
+    return this._clusterName;
+  }
+
+  get serviceName(): string {
+    return this.name;
+  }
+
   image(img: string) {
     this._image = img;
     return this;

@@ -1176,9 +1176,9 @@
 <h2 id="provider-improvements">Provider Improvements</h2>
 <h3 id="proxmox">Proxmox</h3>
 <ul>
-<li>[ ] Cluster-aware node selection - pick the node with the most free RAM via <code>/nodes</code> API instead of always using the first configured node</li>
-<li>[ ] <code>.machine()</code> builder method - let users override machine type (i440fx vs q35) per VM rather than the hardcoded default</li>
-<li>[ ] <code>CONFIG.PRODUCTION</code> entry in <code>src/types/proxmox.ts</code></li>
+<li>[x] Cluster-aware node selection - pick the node with the most free RAM via <code>/nodes</code> API instead of always using the first configured node</li>
+<li>[x] <code>.machine()</code> builder method - let users override machine type (i440fx vs q35) per VM rather than the hardcoded default</li>
+<li>[x] <code>CONFIG.PRODUCTION</code> entry in <code>src/types/proxmox.ts</code></li>
 </ul>
 <h3 id="aws">AWS</h3>
 <ul>
@@ -1186,8 +1186,8 @@
 <li>[x] S3 file upload - <code>.upload(filePath)</code> uploads a single file to the bucket on deploy</li>
 <li>[x] Route53 record types - A, AAAA, CNAME, MX, TXT, NS, PTR, SRV, CAA, NAPTR, SPF via <code>.record()</code>; per-record TTL; TXT auto-quoting</li>
 <li>[x] S3 static site hosting - <code>.staticSite()</code> sets index/error documents and public-read policy</li>
-<li>[ ] IAM - role and inline/managed policy management; useful for cross-service wiring without manual console steps</li>
-<li>[ ] CloudWatch alarms - CPU/memory thresholds on Fargate and RDS with SNS notification target</li>
+<li>[x] IAM - role and inline/managed policy management; useful for cross-service wiring without manual console steps</li>
+<li>[x] CloudWatch alarms - CPU/memory thresholds on Fargate and RDS with SNS notification target</li>
 <li>[ ] EC2 - lower priority; Proxmox already covers the raw-VM use case, and EC2 needs VPC/SG/keypair support to be useful</li>
 </ul>
 <h3 id="digitalocean">DigitalOcean</h3>

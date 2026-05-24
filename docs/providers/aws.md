@@ -296,6 +296,118 @@ AWS.SecretsManager("my-app/temp-token").forceDelete()
 
 ---
 
+## IAM
+
+Create and manage custom IAM roles and policies with automatic version pruning.
+
+```typescript
+// Create a managed policy
+const s3Policy = AWS.IAMPolicy("s3-read-policy")
+  .document({
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Effect: "Allow",
+        Action: ["s3:GetObject", "s3:ListBucket"],
+        Resource: ["arn:aws:s3:::my-bucket", "arn:aws:s3:::my-bucket/*"],
+      },
+    ],
+  })
+  .description("Grants read access to my-bucket");
+
+// Create a role and attach policies
+const workerRole = AWS.IAMRole("worker-execution-role")
+  .description("Execution role for background workers")
+  .attach(s3Policy)                                      // attach managed policy builder
+  .attach("arn:aws:iam::aws:policy/AWSLambda_FullAccess") // or attach ARN directly
+  .inlinePolicy("sqs-write", {                            // add inline policy
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Effect: "Allow",
+        Action: ["sqs:SendMessage"],
+        Resource: "*",
+      },
+    ],
+  });
+
+// Attach custom role to a Lambda function
+AWS.Lambda("worker")
+  .code("./dist")
+  .runtime(RUNTIME.NODEJS_20)
+  .role(workerRole); // wires the role automatically
+```
+
+* **Version Pruning**: AWS limits customer-managed policies to 5 versions. `AWS.IAMPolicy` automatically lists and prunes the oldest non-default version before applying updates, guaranteeing failure-free continuous deployments.
+
+---
+
+## SNS
+
+Provision Simple Notification Service (SNS) topics and manage subscriptions with clean, idempotent synchronization.
+
+```typescript
+const alertTopic = AWS.SNS("billing-alerts")
+  .displayName("Billing Alert Topic")
+  .subscribe("email", "admin@company.com")
+  .subscribe("sms", "+15555550199");
+```
+
+On deploy, Puls creates the topic, updates the display name, and automatically synchronizes subscriptions by removing stale endpoints and subscribing new ones.
+
+**Outputs**
+
+| Field      | Type             |
+|------------|------------------|
+| `.out.arn` | `Output<string>` |
+
+---
+
+## CloudWatch Alarms
+
+Configure metric threshold alerts and wire them to SNS notification targets. Includes premium auto-wiring helpers for Fargate and RDS.
+
+```typescript
+// General-purpose custom metric alarm
+AWS.Alarm("checkout-errors")
+  .metric("CheckoutService", "ErrorCount", { Environment: "production" })
+  .comparison("GreaterThanThreshold")
+  .threshold(5)
+  .period(60)                     // 60 seconds
+  .evaluationPeriods(2)           // 2 consecutive periods
+  .statistic("Sum")
+  .actions(this.alertTopic);       // wires the SNS topic builder eagerly
+
+// Premium Fargate helper: triggers if CPU usage >= 80%
+AWS.Alarm("api-cpu-high")
+  .fargateCPU(this.apiService, 80)
+  .actions(this.alertTopic);
+
+// Premium Fargate helper: triggers if memory usage >= 85%
+AWS.Alarm("api-mem-high")
+  .fargateMemory(this.apiService, 85)
+  .actions(this.alertTopic);
+
+// Premium RDS helper: triggers if CPU usage >= 90%
+AWS.Alarm("db-cpu-high")
+  .rdsCPU(this.database, 90)
+  .actions(this.alertTopic);
+
+// Premium RDS helper: triggers if free storage space falls below 5GB
+AWS.Alarm("db-storage-low")
+  .rdsStorage(this.database, 5_000_000_000)
+  .actions(this.alertTopic);
+```
+
+**Outputs**
+
+| Field       | Type             |
+|-------------|------------------|
+| `.out.name` | `Output<string>` |
+| `.out.arn`  | `Output<string>` |
+
+---
+
 ## Full example
 
 ```typescript
@@ -303,16 +415,15 @@ import "dotenv/config";
 import "reflect-metadata";
 import { Stack, Deploy } from "puls-dev";
 import { AWS, REGION, RUNTIME, DB, DB_SIZE } from "puls-dev/aws";
-// import { SECRETS } from "./types/secrets.ts"; // your local constants
 
 @Deploy({ region: REGION.EU_CENTRAL_1, dryRun: false })
 class AppStack extends Stack {
-  // secret = AWS.SecretsManager(SECRETS.DB_KEY);
+  secret = AWS.SecretsManager("my-app/db-password");
   
   db = AWS.RDS("app-db")
     .engine(DB.POSTGRES_16)
     .size(DB_SIZE.SMALL)
-    .credentials(this.secret);
+    .credentials("admin", this.secret);
 
   api = AWS.Fargate("app-api")
     .image("my-org/app:latest")
@@ -331,5 +442,18 @@ class AppStack extends Stack {
   jobs = AWS.SQS("resize-jobs")
     .retention(7)
     .dlq("resize-jobs-dlq", 3);
+
+  // Alerts & Alarms
+  alerts = AWS.SNS("ops-alerts")
+    .displayName("Operations Alerts")
+    .subscribe("email", "ops@company.com");
+
+  apiCpuAlarm = AWS.Alarm("api-cpu-alarm")
+    .fargateCPU(this.api, 80)
+    .actions(this.alerts);
+
+  dbCpuAlarm = AWS.Alarm("db-cpu-alarm")
+    .rdsCPU(this.db, 90)
+    .actions(this.alerts);
 }
 ```
