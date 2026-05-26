@@ -1,8 +1,5 @@
 import "reflect-metadata";
 import { Config } from "./config.js";
-import { listProxmoxVMs } from "../providers/proxmox/list.js";
-import { listDoResources } from "../providers/do/list.js";
-import { listAwsResources } from "../providers/aws/list.js";
 import type {
   InventoryResult,
   InventoryError,
@@ -10,6 +7,7 @@ import type {
   DoInventory,
   AwsInventory,
 } from "../types/inventory.ts";
+
 
 // ─── Box-drawing ──────────────────────────────────────────────────────────────
 
@@ -204,7 +202,8 @@ export abstract class Checker {
 
     if (cfg.providers.proxmox?.url && cfg.providers.proxmox?.tokenSecret) {
       tasks.push(
-        listProxmoxVMs()
+        import("../providers/proxmox/list.js")
+          .then((m) => m.listProxmoxVMs())
           .then((inv) => {
             result.proxmox = inv;
           })
@@ -216,7 +215,8 @@ export abstract class Checker {
 
     if (cfg.providers.do?.token) {
       tasks.push(
-        listDoResources()
+        import("../providers/do/list.js")
+          .then((m) => m.listDoResources())
           .then((inv) => {
             result.do = inv;
           })
@@ -228,7 +228,8 @@ export abstract class Checker {
 
     if (cfg.providers.aws?.region) {
       tasks.push(
-        listAwsResources()
+        import("../providers/aws/list.js")
+          .then((m) => m.listAwsResources())
           .then((inv) => {
             result.aws = inv;
           })
