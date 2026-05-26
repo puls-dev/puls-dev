@@ -1,6 +1,6 @@
 {
   "name": "puls-dev",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Intent-driven infrastructure-as-code with eager discovery and no state files.",
   "type": "module",
   "main": "./dist/index.js",
@@ -78,83 +78,26 @@
     "undici": "^8.3.0"
   },
   "dependencies": {
+    "@aws-sdk/client-acm": "^3.1053.0",
+    "@aws-sdk/client-apigatewayv2": "^3.1053.0",
+    "@aws-sdk/client-cloudfront": "^3.1053.0",
+    "@aws-sdk/client-cloudwatch": "^3.1053.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.1053.0",
+    "@aws-sdk/client-ec2": "^3.1053.0",
+    "@aws-sdk/client-ecs": "^3.1053.0",
+    "@aws-sdk/client-iam": "^3.1053.0",
+    "@aws-sdk/client-lambda": "^3.1053.0",
+    "@aws-sdk/client-rds": "^3.1053.0",
+    "@aws-sdk/client-route-53": "^3.1053.0",
+    "@aws-sdk/client-route-53-domains": "^3.1053.0",
+    "@aws-sdk/client-s3": "^3.1053.0",
+    "@aws-sdk/client-secrets-manager": "^3.1053.0",
+    "@aws-sdk/client-sns": "^3.1053.0",
+    "@aws-sdk/client-sqs": "^3.1053.0",
     "dotenv": "^17.4.2",
-    "reflect-metadata": "^0.2.2"
-  },
-  "peerDependencies": {
-    "@aws-sdk/client-acm": "^3.1040.0",
-    "@aws-sdk/client-apigatewayv2": "^3.1044.0",
-    "@aws-sdk/client-cloudfront": "^3.1040.0",
-    "@aws-sdk/client-cloudwatch": "^3.1045.0",
-    "@aws-sdk/client-cloudwatch-logs": "^3.1045.0",
-    "@aws-sdk/client-ec2": "^3.1045.0",
-    "@aws-sdk/client-ecs": "^3.1045.0",
-    "@aws-sdk/client-iam": "^3.1044.0",
-    "@aws-sdk/client-lambda": "^3.1044.0",
-    "@aws-sdk/client-rds": "^3.1045.0",
-    "@aws-sdk/client-route-53": "^3.1040.0",
-    "@aws-sdk/client-route-53-domains": "^3.1041.0",
-    "@aws-sdk/client-s3": "^3.1040.0",
-    "@aws-sdk/client-secrets-manager": "^3.1045.0",
-    "@aws-sdk/client-sns": "^3.1045.0",
-    "@aws-sdk/client-sqs": "^3.1045.0",
     "google-auth-library": "^10.6.2",
-    "undici": "^8.2.0"
-  },
-  "peerDependenciesMeta": {
-    "@aws-sdk/client-acm": {
-      "optional": true
-    },
-    "@aws-sdk/client-apigatewayv2": {
-      "optional": true
-    },
-    "@aws-sdk/client-cloudfront": {
-      "optional": true
-    },
-    "@aws-sdk/client-cloudwatch": {
-      "optional": true
-    },
-    "@aws-sdk/client-cloudwatch-logs": {
-      "optional": true
-    },
-    "@aws-sdk/client-ec2": {
-      "optional": true
-    },
-    "@aws-sdk/client-ecs": {
-      "optional": true
-    },
-    "@aws-sdk/client-iam": {
-      "optional": true
-    },
-    "@aws-sdk/client-lambda": {
-      "optional": true
-    },
-    "@aws-sdk/client-rds": {
-      "optional": true
-    },
-    "@aws-sdk/client-route-53": {
-      "optional": true
-    },
-    "@aws-sdk/client-route-53-domains": {
-      "optional": true
-    },
-    "@aws-sdk/client-s3": {
-      "optional": true
-    },
-    "@aws-sdk/client-secrets-manager": {
-      "optional": true
-    },
-    "@aws-sdk/client-sns": {
-      "optional": true
-    },
-    "@aws-sdk/client-sqs": {
-      "optional": true
-    },
-    "google-auth-library": {
-      "optional": true
-    },
-    "undici": {
-      "optional": true
-    }
+    "reflect-metadata": "^0.2.2",
+    "undici": "^8.3.0"
   }
 }
+
