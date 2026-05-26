@@ -23,6 +23,11 @@ export interface GlobalConfig {
       projectId: string;
       serviceAccountPath: string;
     };
+    gcp?: {
+      projectId?: string;
+      serviceAccountPath?: string;
+      region?: string;
+    };
   };
 }
 

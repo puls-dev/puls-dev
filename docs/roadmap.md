@@ -49,7 +49,7 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 - [ ] VPC - create and assign Droplets/databases to a private network
 - [x] Domain: add AAAA, SRV, CAA record types; implement `destroy()` for domain and records
 
-### Firebase / GCP
+### Firebase
 - [x] Firebase Hosting - deploy a web app from a local build directory; file-level caching via SHA256
 - [x] Firebase Functions - deploy Cloud Functions v2 from source; full create/update/delete lifecycle
 - [x] Firebase Firestore - rules deployment and composite index management
@@ -57,8 +57,16 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 - [x] Firebase Storage - rules deployment, CORS configuration, lifecycle policies
 - [x] Firebase RemoteConfig - typed parameters (string, bool, number, JSON), conditions, and per-condition overrides; ETag-safe PUT
 - [x] Firebase App Check - enforce attestation on Hosting, Functions, and Firestore
-- [ ] GCP Cloud Run - containerized services; closer to ECS/Fargate parity for teams already on GCP
-- [ ] GCP Cloud SQL - managed Postgres / MySQL with private IP and IAM auth
+
+### Google Cloud Platform (GCP)
+- [x] GCP Cloud Run (`GCP.CloudRun`) - Deploy containerized services with auto-scaling and public URLs (Fargate parity)
+- [x] GCP Cloud SQL (`GCP.CloudSQL`) - Managed PostgreSQL and MySQL database instances (RDS parity)
+- [x] GCP Secret Manager (`GCP.Secret`) - Manage and inject GCP secrets at deploy-time (SecretsManager parity)
+- [x] GCP Pub/Sub (`GCP.PubSub`) - Topics and subscriptions for decoupled messaging (SQS/SNS parity)
+- [x] GCP Cloud DNS (`GCP.CloudDNS`) - Managed zones, record sets, and DNS routing (Route53 parity)
+- [x] GCP IAM (`GCP.ServiceAccount` / `GCP.IAMBinding`) - Service accounts, custom roles, and resource-level IAM bindings (IAM parity)
+
+
 
 ---
 

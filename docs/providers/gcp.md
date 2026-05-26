@@ -1,0 +1,323 @@
+# Google Cloud Platform (GCP) Provider
+
+## Setup
+
+Authentication uses a **Google Cloud Service Account JSON key file**.
+
+1. Go to the **Google Cloud Console → IAM & Admin → Service Accounts**.
+2. Click **Create Service Account**, assign it the relevant roles, and click Done.
+3. Click on the created service account, go to the **Keys** tab, click **Add Key → Create new key** (JSON format).
+4. Save the downloaded JSON file securely.
+
+### Authentication Config
+
+Puls dynamically resolves the GCP configuration through several fallbacks to make local and CI usage painless:
+
+1. **Explicit GCP configuration**:
+   ```typescript
+   Config.set({
+     providers: {
+       gcp: {
+         projectId: "my-gcp-project",
+         serviceAccountPath: "/path/to/sa.json",
+         region: "us-central1" // Optional, defaults to "us-central1"
+       }
+     }
+   });
+   ```
+2. **Firebase reuse fallback**: If you are already using the Firebase provider, GCP automatically reuses `Config.providers.firebase` configuration.
+3. **Environment variables**: If config objects are omitted, Puls checks the `GCP_SA` or `FIREBASE_SA` environment variables pointing to a JSON key file.
+
+---
+
+## Cloud Run
+
+Deploy containerized microservices to Google Cloud Run v2 with support for custom CPU, memory limits, autoscaling, custom regions, environment variables, and public IAM invoker policies.
+
+```typescript
+GCP.CloudRun("my-web-service")
+  .image("gcr.io/my-project/my-image:latest")
+  .port(8080)
+  .cpu("1")
+  .memory("512Mi")
+  .minInstances(0)
+  .maxInstances(10)
+  .env({
+    NODE_ENV: "production",
+    DATABASE_URL: "postgresql://...",
+  })
+  .region("us-central1")
+  .public(true)
+```
+
+### Cloud Run API Reference
+
+| Method | Type | Description | Default |
+|--------|------|-------------|---------|
+| `.image(img)` | `string` | **Required.** The container image URL (e.g. Artifact Registry or GCR). | - |
+| `.port(p)` | `number` | The container port to expose. | `8080` |
+| `.cpu(c)` | `string \| number` | CPU limits (e.g., `"1"`, `2`, `"1000m"`). Numbers are stringified. | `"1"` |
+| `.memory(m)` | `string \| number` | Memory limits (e.g., `"512Mi"`, `1024`, `"2Gi"`). Numbers are treated as Mi. | `"512Mi"` |
+| `.minInstances(n)` | `number` | Minimum instance scaling. | `0` |
+| `.maxInstances(n)` | `number` | Maximum instance scaling. | `100` |
+| `.env(vars)` | `Record<string, string \| GCPSecretBuilder>` | Key-value pairs of environment variables to inject. Values can be either raw strings or `GCP.Secret` builders. | `{}` |
+| `.region(name)` | `string` | Custom GCP region. | `"us-central1"` |
+| `.public(enabled)` | `boolean` | Toggles whether the service is publicly accessible via the internet. | `true` |
+
+---
+
+## Cloud SQL
+
+Provision and manage PostgreSQL and MySQL relational database instances on Google Cloud SQL, with support for automatic engine mappings, custom sizing, custom database initialization, secure networking, and credentials management.
+
+```typescript
+GCP.CloudSQL("my-database")
+  .engine({ engine: "postgres", version: "16" })
+  .size("db-f1-micro")
+  .storage(20)
+  .credentials("db_user", "secure_password")
+  .database("my_app_db")
+  .publicAccess(false)
+```
+
+### Cloud SQL API Reference
+
+| Method | Type | Description | Default |
+|--------|------|-------------|---------|
+| `.engine(e)` | `{ engine: "postgres" \| "mysql", version: string }` | Database engine and version. Version is mapped automatically (e.g. `postgres`, `16` -> `POSTGRES_16`). | `postgres`, `16` |
+| `.size(tier)` | `string` | Machine tier (e.g. `"db-f1-micro"`, `"db-g1-small"`, `"db-custom-2-7680"`). | `"db-f1-micro"` |
+| `.storage(gb)` | `number` | Storage size in GB. Disk size can only be increased, not decreased. | `10` |
+| `.credentials(user, pwd)` | `string, string` | **Required.** The master username and password. If a custom user is specified (not `postgres` or `root`), it is automatically created post-deploy. | - |
+| `.database(name)` | `string` | Custom database name to be created inside the instance post-deploy. | - |
+| `.publicAccess(enabled)` | `boolean` | Toggles whether `0.0.0.0/0` is authorized to access the public IP of the database. | `false` |
+| `.region(name)` | `string` | Custom GCP region. | `"us-central1"` |
+
+### Outputs
+
+* `endpoint` (`PRIMARY` IP address, once available).
+* `port` (mapped according to the selected engine, e.g., `5432` for Postgres, `3306` for MySQL).
+* `connectionName` (the connection string `project:region:instance` required to connect via Cloud SQL Auth Proxy).
+
+---
+
+## Secret Manager
+
+Manage sensitive settings and keys on Google Cloud Secret Manager. Values are automatically base64-encoded on upload and safely decoded upon retrieval. You can wire `GCP.Secret` instances directly to `GCP.CloudRun` environment variables for seamless, secure value injection.
+
+```typescript
+GCP.Secret("database-password")
+  .plainText("supersecretpwd123")
+```
+
+### Secret Manager API Reference
+
+| Method | Type | Description | Default |
+|--------|------|-------------|---------|
+| `.plainText(value)` | `string` | Sets the raw plaintext value of the secret. Automatically pushes a new version when deployed if it differs from the active value. | - |
+| `.keyValue(obj)` | `object` | Serializes an object to JSON string format before storing it. | - |
+
+---
+
+## Pub/Sub (Topics & Subscriptions)
+
+Create and manage asynchronous event-driven queues on GCP Pub/Sub. Puls separates decoupled messaging into two first-class builders: `GCP.PubSub.Topic` (analogous to AWS SNS) and `GCP.PubSub.Subscription` (analogous to AWS SQS).
+
+```typescript
+// 1. Topic definition
+const myTopic = GCP.PubSub.Topic("user-events");
+
+// 2. Pull-based Subscription
+GCP.PubSub.Subscription("user-events-pull")
+  .topic(myTopic)
+  .ackDeadline(20);
+
+// 3. Push-based Subscription
+GCP.PubSub.Subscription("user-events-push")
+  .topic(myTopic)
+  .pushEndpoint("https://my-api-service.run.app/events")
+  .ackDeadline(10);
+```
+
+### Topic API Reference
+
+No additional configurations are required to deploy a basic Pub/Sub topic container.
+
+* `resolvedTopicName` (resolves to the full Google Cloud topic resource path `projects/{project}/topics/{topicId}`).
+
+### Subscription API Reference
+
+| Method | Type | Description | Default |
+|--------|------|-------------|---------|
+| `.topic(t)` | `string \| GCPPubSubTopicBuilder` | **Required.** The topic ID or topic builder instance to bind this subscription to. | - |
+| `.pushEndpoint(url)` | `string` | Optional. Setting this configures a **Push Subscription** that automatically posts event payloads to the given URL. Omit this to create a default **Pull Subscription**. | - |
+| `.ackDeadline(seconds)` | `number` | Acknowledgment deadline in seconds. | `10` |
+
+---
+
+## Cloud DNS
+
+Provision and manage Google Cloud DNS Hosted Zones and record sets with 100% parity to AWS Route53 and DigitalOcean Domain. Features auto-trailing-dot formatting, uppercase alphanumeric zone ID conversions, transactional record updates (deleting the old set and adding the new one in a single request), and dynamic cross-resource target resolving.
+
+```typescript
+GCP.CloudDNS("mycompany.com")
+  .record("www", "CNAME", "lb.google.com")
+  .record("mail", "A", "1.2.3.4", 600)
+  .record("@", "TXT", "v=spf1 include:_spf.google.com ~all")
+  .pointer("api", apiService) // Point directly to a Cloud Run or VM instance
+```
+
+### Cloud DNS API Reference
+
+| Method | Type | Description | Default |
+|--------|------|-------------|---------|
+| `.record(name, type, value, ttl?)` | `string, string, string, number` | Adds a custom DNS record set to the zone. Target names and values are automatically appended with trailing dots, and `TXT`/`SPF` records are auto-quoted matching standard formats. | - |
+| `.pointer(name, target)` | `string, BaseBuilder \| Output<string> \| string` | Resolves a cross-resource target endpoint (e.g. Cloud Run service URL or VM IP) at deploy-time, automatically converting `A` records to `CNAME` and stripping protocol headers for external domain integrations. | - |
+
+---
+
+## IAM (Service Accounts & Bindings)
+
+Provision and manage custom Google Cloud Service Accounts (`GCP.ServiceAccount`) and project-level IAM bindings (`GCP.IAMBinding`) to automate secure credentials setup.
+
+### Service Account
+
+Create a new Service Account cleanly.
+
+```typescript
+const mySA = GCP.ServiceAccount("backup-agent")
+  .displayName("Backup Agent Service Account")
+  .description("Used for nightly database backup jobs");
+```
+
+#### Service Account API Reference
+
+| Method | Type | Description | Default |
+|--------|------|-------------|---------|
+| `.displayName(name)` | `string` | Sets the readable display name. | - |
+| `.description(desc)` | `string` | Sets the description. | - |
+
+* `email` (dynamically resolves to the fully-qualified service account email address, e.g. `backup-agent@project.iam.gserviceaccount.com`).
+
+---
+
+### IAM Binding
+
+Bind members safely to project-level roles with Optimistic Concurrency Control (ETag lock) and non-destructive merges.
+
+```typescript
+GCP.IAMBinding("storage-admin-binding")
+  .role("roles/storage.admin")
+  .member(mySA) // Wire Service Account builder directly!
+  .member("user:bob@gmail.com")
+```
+
+#### IAM Binding API Reference
+
+| Method | Type | Description | Default |
+|--------|------|-------------|---------|
+| `.role(name)` | `string` | **Required.** The project-level IAM role to bind (e.g. `roles/pubsub.publisher`, `roles/storage.admin`). | - |
+| `.member(m)` | `string \| GCPServiceAccountBuilder \| Output<string>` | Binds a single member. Strings are automatically prefixed with the correct type (e.g., `serviceAccount:` or `user:`). | - |
+| `.members(...m)` | `Array<string \| GCPServiceAccountBuilder \| Output<string>>` | Binds multiple members. | - |
+
+---
+
+## Complete Example
+
+This example demonstrates deploying a secure stack consisting of a Cloud SQL database, a Secret Manager secret containing the database credentials, a Pub/Sub topic + push subscription, a Cloud Run API service, a custom Service Account with publisher rights, and a Cloud DNS zone that points a CNAME to the API service.
+
+```typescript
+import "dotenv/config";
+import "reflect-metadata";
+import { Stack, Deploy, Config } from "puls-dev";
+import { GCP } from "puls-dev/gcp";
+
+Config.set({
+  providers: {
+    gcp: {
+      projectId: "prod-stack-101",
+      serviceAccountPath: "./gcp-key.json",
+      region: "us-east1",
+    },
+  },
+});
+
+@Deploy({ dryRun: false })
+class CloudStack extends Stack {
+  // 1. Pub/Sub Topic for background tasks
+  eventsTopic = GCP.PubSub.Topic("background-tasks");
+
+  // 2. Secret Credentials
+  dbPassword = GCP.Secret("app-db-password")
+    .plainText("supersecurepassword123");
+
+  // 3. Private Postgres Database
+  db = GCP.CloudSQL("app-db")
+    .engine({ engine: "postgres", version: "16" })
+    .size("db-f1-micro")
+    .storage(20)
+    .credentials("app_user", this.dbPassword.resolvedValue ?? "fallbackpwd")
+    .database("production_db")
+    .publicAccess(false);
+
+  // 4. Public API Service
+  web = GCP.CloudRun("api-service")
+    .image("us-east1-docker.pkg.dev/prod-stack-101/images/api:latest")
+    .port(3000)
+    .cpu(1)
+    .memory(512)
+    .env({
+      NODE_ENV: "production",
+      DATABASE_HOST: this.db.endpoint,
+      DATABASE_PORT: this.db.port,
+      DATABASE_NAME: "production_db",
+      DATABASE_USER: "app_user",
+      DATABASE_PASS: this.dbPassword,
+      TOPIC_NAME: this.eventsTopic.resolvedTopicName ?? "unknown-topic",
+    })
+    .public(true);
+
+  // 5. Push Subscription sending Topic events directly back to API handler
+  pushSub = GCP.PubSub.Subscription("tasks-push")
+    .topic(this.eventsTopic)
+    .pushEndpoint("https://api-service-xyz.run.app/tasks/webhook")
+    .ackDeadline(15);
+
+  // 6. Custom Service Account for background workers
+  workerSA = GCP.ServiceAccount("background-worker")
+    .displayName("Background Worker")
+    .description("Service account with publisher permissions");
+
+  // 7. IAM Binding giving the Service Account publisher rights
+  pubBinding = GCP.IAMBinding("worker-pub-rights")
+    .role("roles/pubsub.publisher")
+    .member(this.workerSA);
+
+  // 8. Cloud DNS Zone pointing to the API service CNAME
+  dns = GCP.CloudDNS("mycompany.com")
+    .record("www", "CNAME", "lb.google.com")
+    .pointer("api", this.web);
+}
+```
+
+Deploy your stack with:
+
+```bash
+npx tsx examples/deploy.ts
+```
+
+---
+
+## Required Permissions
+
+To manage Cloud Run, Cloud SQL, Secret Manager, Pub/Sub, Cloud DNS, and IAM resources, your service account key needs the following IAM roles:
+
+* **Cloud Run Admin** (`roles/run.admin`) — full control over Cloud Run services.
+* **Service Account User** (`roles/iam.serviceAccountUser`) — to associate runtime service accounts.
+* **Cloud SQL Admin** (`roles/cloudsql.admin`) — full control over Cloud SQL database instances.
+* **Secret Manager Admin** (`roles/secretmanager.admin`) — full control over Secret Manager containers and values.
+* **Pub/Sub Admin** (`roles/pubsub.admin`) — full control over Pub/Sub topics and subscriptions.
+* **DNS Administrator** (`roles/dns.admin`) — full control over Google Cloud DNS zones and records.
+* **Create/Delete Service Accounts** (`roles/iam.serviceAccountAdmin`) — to create, modify, and delete custom service accounts.
+* **Project IAM Admin** (`roles/resourcemanager.projectIamAdmin`) — to set and modify project-level IAM policies.
+
+

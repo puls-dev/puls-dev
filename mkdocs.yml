@@ -45,5 +45,6 @@ nav:
       - Proxmox: providers/proxmox.md
       - DigitalOcean: providers/digitalocean.md
       - Firebase: providers/firebase.md
+      - GCP: providers/gcp.md
   - Contributing: contributing.md
   - Roadmap: roadmap.md

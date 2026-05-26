@@ -688,6 +688,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../providers/gcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -856,10 +884,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#firebase-gcp" class="md-nav__link">
+  <a href="#firebase" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Firebase / GCP
+        Firebase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#google-cloud-platform-gcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Google Cloud Platform (GCP)
       
     </span>
   </a>
@@ -1045,10 +1084,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#firebase-gcp" class="md-nav__link">
+  <a href="#firebase" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Firebase / GCP
+        Firebase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#google-cloud-platform-gcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Google Cloud Platform (GCP)
       
     </span>
   </a>
@@ -1200,7 +1250,7 @@
 <li>[ ] VPC - create and assign Droplets/databases to a private network</li>
 <li>[x] Domain: add AAAA, SRV, CAA record types; implement <code>destroy()</code> for domain and records</li>
 </ul>
-<h3 id="firebase-gcp">Firebase / GCP</h3>
+<h3 id="firebase">Firebase</h3>
 <ul>
 <li>[x] Firebase Hosting - deploy a web app from a local build directory; file-level caching via SHA256</li>
 <li>[x] Firebase Functions - deploy Cloud Functions v2 from source; full create/update/delete lifecycle</li>
@@ -1209,8 +1259,15 @@
 <li>[x] Firebase Storage - rules deployment, CORS configuration, lifecycle policies</li>
 <li>[x] Firebase RemoteConfig - typed parameters (string, bool, number, JSON), conditions, and per-condition overrides; ETag-safe PUT</li>
 <li>[x] Firebase App Check - enforce attestation on Hosting, Functions, and Firestore</li>
-<li>[ ] GCP Cloud Run - containerized services; closer to ECS/Fargate parity for teams already on GCP</li>
-<li>[ ] GCP Cloud SQL - managed Postgres / MySQL with private IP and IAM auth</li>
+</ul>
+<h3 id="google-cloud-platform-gcp">Google Cloud Platform (GCP)</h3>
+<ul>
+<li>[x] GCP Cloud Run (<code>GCP.CloudRun</code>) - Deploy containerized services with auto-scaling and public URLs (Fargate parity)</li>
+<li>[x] GCP Cloud SQL (<code>GCP.CloudSQL</code>) - Managed PostgreSQL and MySQL database instances (RDS parity)</li>
+<li>[x] GCP Secret Manager (<code>GCP.Secret</code>) - Manage and inject GCP secrets at deploy-time (SecretsManager parity)</li>
+<li>[x] GCP Pub/Sub (<code>GCP.PubSub</code>) - Topics and subscriptions for decoupled messaging (SQS/SNS parity)</li>
+<li>[x] GCP Cloud DNS (<code>GCP.CloudDNS</code>) - Managed zones, record sets, and DNS routing (Route53 parity)</li>
+<li>[x] GCP IAM (<code>GCP.ServiceAccount</code> / <code>GCP.IAMBinding</code>) - Service accounts, custom roles, and resource-level IAM bindings (IAM parity)</li>
 </ul>
 <hr />
 <h2 id="new-providers">New Providers</h2>

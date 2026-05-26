@@ -4,6 +4,11 @@
 
 [Live Documentation](https://pulsdev.io/) | Discord: **pulsdev.io** ([Join](https://discord.gg/CjgRayuH))
 
+> [!IMPORTANT]
+> **Active Pre-1.0 Development**
+> `pulsdev.io` is currently undergoing **active development**. While the framework features exhaustive 100% test coverage and strict production safety locks (such as dry-run planning and protected resource decorators), APIs and features are actively evolving.
+> We are aggressively rolling out new resources and provider integrations. We welcome your feedback, bug reports, and contributions!
+
 ```typescript
 @Deploy({ proxmox: CONFIG.STAGING })
 class GameInfra extends Stack {
@@ -36,11 +41,14 @@ Running the same stack twice is always safe - existing resources are detected an
 
 ## Providers
 
-| Provider | Resources |
-|----------|-----------|
-| [DigitalOcean](docs/providers/digitalocean.md) | Droplet, Domain, Firewall, Certificate, LoadBalancer |
-| [AWS](docs/providers/aws.md) | Route53, ACM (wildcard SSL), CloudFront, S3 |
-| [Proxmox](docs/providers/proxmox.md) | VM (clone, cloud-init, provision, replace) |
+| Provider | Resources | Status |
+|----------|-----------|--------|
+| [Google Cloud Platform (GCP)](docs/providers/gcp.md) | Cloud Run, Cloud SQL, Secret Manager, Pub/Sub, Cloud DNS, IAM (Service Accounts & Bindings) | **Completed** |
+| [AWS](docs/providers/aws.md) | Route53, ACM (wildcard SSL), CloudFront, S3 | **Completed** |
+| [Firebase](docs/providers/firebase.md) | Hosting, Functions, Firestore (Indexes & Rules), Storage (Rules/CORS), Auth, Remote Config, App Check | **Completed** |
+| [DigitalOcean](docs/providers/digitalocean.md) | Droplet, Domain, Firewall, Certificate, LoadBalancer | **Completed** |
+| [Proxmox](docs/providers/proxmox.md) | VM (clone, cloud-init, provision, cluster-aware node selection, replace) | **Completed** |
+
 
 ---
 

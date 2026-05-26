@@ -26,6 +26,10 @@
     "./firebase": {
       "types": "./dist/providers/firebase/index.d.ts",
       "default": "./dist/providers/firebase/index.js"
+    },
+    "./gcp": {
+      "types": "./dist/providers/gcp/index.d.ts",
+      "default": "./dist/providers/gcp/index.js"
     }
   },
   "files": [
