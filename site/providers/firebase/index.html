@@ -756,6 +756,61 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#app-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        App Check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#firestore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firestore
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Storage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remote-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remote Config
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#full-example" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -896,6 +951,61 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#app-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        App Check
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#firestore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firestore
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Storage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remote-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remote Config
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#full-example" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -972,30 +1082,122 @@
 </ol>
 <p><strong>Idempotency:</strong> Each deploy creates a new release (Firebase's native model). Previous releases remain in the console but are inactive.</p>
 <hr />
+<h2 id="app-check">App Check</h2>
+<p>Declaratively manage App Check attestation enforcement modes for primary backend services.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nx">Firebase</span><span class="p">.</span><span class="nx">AppCheck</span><span class="p">()</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">enforce</span><span class="p">(</span><span class="s2">&quot;firestore&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">unenforced</span><span class="p">(</span><span class="s2">&quot;storage&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">off</span><span class="p">(</span><span class="s2">&quot;auth&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>Supported Services:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Service Name</th>
+<th>API Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>firestore</code></td>
+<td><code>firestore.googleapis.com</code> (Cloud Firestore)</td>
+</tr>
+<tr>
+<td><code>storage</code></td>
+<td><code>firebasestorage.googleapis.com</code> (Cloud Storage)</td>
+</tr>
+<tr>
+<td><code>database</code></td>
+<td><code>firebasedatabase.googleapis.com</code> (Realtime Database)</td>
+</tr>
+<tr>
+<td><code>auth</code></td>
+<td><code>identitytoolkit.googleapis.com</code> (Firebase Authentication)</td>
+</tr>
+</tbody>
+</table>
+<p>On deploy, Puls queries the current enforcement statuses and patches services whose configurations differ. In teardowns (<code>destroy()</code>), Puls automatically reverts all configured services back to <code>"OFF"</code> to leave the environment clean.</p>
+<hr />
+<h2 id="firestore">Firestore</h2>
+<p>Deploy Cloud Firestore security rules and configure composite indexes.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">Firebase</span><span class="p">.</span><span class="nx">Firestore</span><span class="p">()</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">rules</span><span class="p">(</span><span class="s2">&quot;./firestore.rules&quot;</span><span class="p">)</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">indexes</span><span class="p">(</span><span class="s2">&quot;./firestore.indexes.json&quot;</span><span class="p">);</span>
+</code></pre></div>
+<hr />
+<h2 id="storage">Storage</h2>
+<p>Manage Cloud Storage rules and CORS policies.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nx">Firebase</span><span class="p">.</span><span class="nx">Storage</span><span class="p">(</span><span class="s2">&quot;my-bucket&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">rules</span><span class="p">(</span><span class="s2">&quot;./storage.rules&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">cors</span><span class="p">([</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">      </span><span class="nx">origin</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">],</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">      </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;POST&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;PUT&quot;</span><span class="p">],</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">      </span><span class="nx">responseHeader</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">],</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">      </span><span class="nx">maxAgeSeconds</span><span class="o">:</span><span class="w"> </span><span class="kt">3600</span><span class="p">,</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">  </span><span class="p">]);</span>
+</code></pre></div>
+<hr />
+<h2 id="auth">Auth</h2>
+<p>Configure Authentication sign-in providers and authorized domains.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nx">Firebase</span><span class="p">.</span><span class="nx">Auth</span><span class="p">()</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">email</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w">                    </span><span class="c1">// Enable email/password sign-in</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">anonymous</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w">                </span><span class="c1">// Enable anonymous access</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">authorizedDomains</span><span class="p">([</span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;my-app.web.app&quot;</span><span class="p">]);</span>
+</code></pre></div>
+<hr />
+<h2 id="remote-config">Remote Config</h2>
+<p>Declare typed parameters and conditions for Firebase Remote Config templates with ETag-safe PUT operations.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nx">Firebase</span><span class="p">.</span><span class="nx">RemoteConfig</span><span class="p">()</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="p">.</span><span class="kt">string</span><span class="p">(</span><span class="s2">&quot;welcome_message&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Hello, World!&quot;</span><span class="p">)</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">bool</span><span class="p">(</span><span class="s2">&quot;feature_flag_active&quot;</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="p">.</span><span class="kt">number</span><span class="p">(</span><span class="s2">&quot;max_retries&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">3</span><span class="p">)</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">condition</span><span class="p">(</span><span class="s2">&quot;is_android&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;device.os == &#39;android&#39;&quot;</span><span class="p">)</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span><span class="p">.</span><span class="kd">override</span><span class="p">(</span><span class="s2">&quot;welcome_message&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;is_android&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Hello from Android!&quot;</span><span class="p">);</span>
+</code></pre></div>
+<hr />
 <h2 id="full-example">Full example</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;dotenv/config&quot;</span><span class="p">;</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;reflect-metadata&quot;</span><span class="p">;</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Firebase</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/firebase&quot;</span><span class="p">;</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="kd">class</span><span class="w"> </span><span class="nx">DocsSite</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="nx">site</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Firebase</span><span class="p">.</span><span class="nx">Hosting</span><span class="p">(</span><span class="s2">&quot;puls-docs&quot;</span><span class="p">)</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="p">.</span><span class="nx">source</span><span class="p">(</span><span class="s2">&quot;./site&quot;</span><span class="p">)</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="p">.</span><span class="nx">domain</span><span class="p">(</span><span class="s2">&quot;pulsdev.io&quot;</span><span class="p">);</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;dotenv/config&quot;</span><span class="p">;</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;reflect-metadata&quot;</span><span class="p">;</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Firebase</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/firebase&quot;</span><span class="p">;</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="kd">class</span><span class="w"> </span><span class="nx">AppStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">  </span><span class="c1">// Static Hosting</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">  </span><span class="nx">site</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Firebase</span><span class="p">.</span><span class="nx">Hosting</span><span class="p">(</span><span class="s2">&quot;my-app-hosting&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">    </span><span class="p">.</span><span class="nx">source</span><span class="p">(</span><span class="s2">&quot;./dist&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">    </span><span class="p">.</span><span class="nx">domain</span><span class="p">(</span><span class="s2">&quot;myapp.io&quot;</span><span class="p">);</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">  </span><span class="c1">// Backend Security Attestation</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">  </span><span class="nx">appcheck</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Firebase</span><span class="p">.</span><span class="nx">AppCheck</span><span class="p">()</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="w">    </span><span class="p">.</span><span class="nx">enforce</span><span class="p">(</span><span class="s2">&quot;firestore&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="w">    </span><span class="p">.</span><span class="nx">enforce</span><span class="p">(</span><span class="s2">&quot;storage&quot;</span><span class="p">);</span>
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="w">  </span><span class="c1">// Database Rules</span>
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Firebase</span><span class="p">.</span><span class="nx">Firestore</span><span class="p">()</span>
+<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a><span class="w">    </span><span class="p">.</span><span class="nx">rules</span><span class="p">(</span><span class="s2">&quot;./firestore.rules&quot;</span><span class="p">);</span>
+<a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a>
+<a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a><span class="w">  </span><span class="c1">// Storage configuration</span>
+<a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a><span class="w">  </span><span class="nx">bucket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Firebase</span><span class="p">.</span><span class="nx">Storage</span><span class="p">(</span><span class="s2">&quot;my-app-media&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a><span class="w">    </span><span class="p">.</span><span class="nx">rules</span><span class="p">(</span><span class="s2">&quot;./storage.rules&quot;</span><span class="p">);</span>
+<a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a>
+<a id="__codelineno-8-26" name="__codelineno-8-26" href="#__codelineno-8-26"></a><span class="w">  </span><span class="c1">// Authentication configuration</span>
+<a id="__codelineno-8-27" name="__codelineno-8-27" href="#__codelineno-8-27"></a><span class="w">  </span><span class="nx">auth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Firebase</span><span class="p">.</span><span class="nx">Auth</span><span class="p">()</span>
+<a id="__codelineno-8-28" name="__codelineno-8-28" href="#__codelineno-8-28"></a><span class="w">    </span><span class="p">.</span><span class="nx">email</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+<a id="__codelineno-8-29" name="__codelineno-8-29" href="#__codelineno-8-29"></a><span class="w">    </span><span class="p">.</span><span class="nx">authorizedDomains</span><span class="p">([</span><span class="s2">&quot;myapp.io&quot;</span><span class="p">]);</span>
+<a id="__codelineno-8-30" name="__codelineno-8-30" href="#__codelineno-8-30"></a><span class="p">}</span>
 </code></pre></div>
 <p>Build your site first, then deploy:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># MkDocs example</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>pip<span class="w"> </span>install<span class="w"> </span>mkdocs-material
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>mkdocs<span class="w"> </span>build<span class="w">              </span><span class="c1"># outputs to ./site</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>npx<span class="w"> </span>tsx<span class="w"> </span>examples/docs-blog.ts
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Web application build example</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>npm<span class="w"> </span>run<span class="w"> </span>build<span class="w">              </span><span class="c1"># outputs static assets to ./dist</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>npx<span class="w"> </span>tsx<span class="w"> </span>examples/deploy.ts
 </code></pre></div>
 <hr />
 <h2 id="service-account-permissions">Service account permissions</h2>
-<p>The service account needs the <strong>Firebase Hosting Admin</strong> role. In the Firebase console:</p>
-<p><strong>Project settings → Service accounts → Manage service account permissions</strong></p>
-<p>Or via IAM: grant <code>roles/firebasehosting.admin</code> to the service account email.</p>
+<p>The service account needs the <strong>Firebase Hosting Admin</strong>, <strong>App Check Admin</strong>, <strong>Cloud Datastore Owner</strong>, and <strong>App Engine Admin</strong> roles depending on which features you use.</p>
+<p>Ensure these roles are granted via IAM to the service account email in your GCP Console under <strong>IAM &amp; Admin → IAM</strong>.</p>
 
 
 

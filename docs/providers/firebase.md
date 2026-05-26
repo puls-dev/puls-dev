@@ -48,6 +48,89 @@ The site ID is the Firebase Hosting site name - by default it matches your proje
 
 ---
 
+## App Check
+
+Declaratively manage App Check attestation enforcement modes for primary backend services.
+
+```typescript
+Firebase.AppCheck()
+  .enforce("firestore")
+  .unenforced("storage")
+  .off("auth");
+```
+
+**Supported Services:**
+
+| Service Name | API Target |
+|--------------|------------|
+| `firestore` | `firestore.googleapis.com` (Cloud Firestore) |
+| `storage` | `firebasestorage.googleapis.com` (Cloud Storage) |
+| `database` | `firebasedatabase.googleapis.com` (Realtime Database) |
+| `auth` | `identitytoolkit.googleapis.com` (Firebase Authentication) |
+
+On deploy, Puls queries the current enforcement statuses and patches services whose configurations differ. In teardowns (`destroy()`), Puls automatically reverts all configured services back to `"OFF"` to leave the environment clean.
+
+---
+
+## Firestore
+
+Deploy Cloud Firestore security rules and configure composite indexes.
+
+```typescript
+Firebase.Firestore()
+  .rules("./firestore.rules")
+  .indexes("./firestore.indexes.json");
+```
+
+---
+
+## Storage
+
+Manage Cloud Storage rules and CORS policies.
+
+```typescript
+Firebase.Storage("my-bucket")
+  .rules("./storage.rules")
+  .cors([
+    {
+      origin: ["*"],
+      method: ["GET", "POST", "PUT"],
+      responseHeader: ["Content-Type"],
+      maxAgeSeconds: 3600,
+    },
+  ]);
+```
+
+---
+
+## Auth
+
+Configure Authentication sign-in providers and authorized domains.
+
+```typescript
+Firebase.Auth()
+  .email(true)                    // Enable email/password sign-in
+  .anonymous(true)                // Enable anonymous access
+  .authorizedDomains(["example.com", "my-app.web.app"]);
+```
+
+---
+
+## Remote Config
+
+Declare typed parameters and conditions for Firebase Remote Config templates with ETag-safe PUT operations.
+
+```typescript
+Firebase.RemoteConfig()
+  .string("welcome_message", "Hello, World!")
+  .bool("feature_flag_active", true)
+  .number("max_retries", 3)
+  .condition("is_android", "device.os == 'android'")
+  .override("welcome_message", "is_android", "Hello from Android!");
+```
+
+---
+
 ## Full example
 
 ```typescript
@@ -57,28 +140,44 @@ import { Stack, Deploy } from "puls-dev";
 import { Firebase } from "puls-dev/firebase";
 
 @Deploy({ dryRun: false })
-class DocsSite extends Stack {
-  site = Firebase.Hosting("puls-docs")
-    .source("./site")
-    .domain("pulsdev.io");
+class AppStack extends Stack {
+  // Static Hosting
+  site = Firebase.Hosting("my-app-hosting")
+    .source("./dist")
+    .domain("myapp.io");
+
+  // Backend Security Attestation
+  appcheck = Firebase.AppCheck()
+    .enforce("firestore")
+    .enforce("storage");
+
+  // Database Rules
+  db = Firebase.Firestore()
+    .rules("./firestore.rules");
+
+  // Storage configuration
+  bucket = Firebase.Storage("my-app-media")
+    .rules("./storage.rules");
+
+  // Authentication configuration
+  auth = Firebase.Auth()
+    .email(true)
+    .authorizedDomains(["myapp.io"]);
 }
 ```
 
 Build your site first, then deploy:
 
 ```bash
-# MkDocs example
-pip install mkdocs-material
-mkdocs build              # outputs to ./site
-npx tsx examples/docs-blog.ts
+# Web application build example
+npm run build              # outputs static assets to ./dist
+npx tsx examples/deploy.ts
 ```
 
 ---
 
 ## Service account permissions
 
-The service account needs the **Firebase Hosting Admin** role. In the Firebase console:
+The service account needs the **Firebase Hosting Admin**, **App Check Admin**, **Cloud Datastore Owner**, and **App Engine Admin** roles depending on which features you use.
 
-**Project settings → Service accounts → Manage service account permissions**
-
-Or via IAM: grant `roles/firebasehosting.admin` to the service account email.
+Ensure these roles are granted via IAM to the service account email in your GCP Console under **IAM & Admin → IAM**.

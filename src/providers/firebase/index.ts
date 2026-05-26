@@ -4,6 +4,7 @@ import { FirebaseFirestoreBuilder } from './firestore.js';
 import { FirebaseStorageBuilder } from './storage.js';
 import { FirebaseAuthBuilder } from './auth.js';
 import { FirebaseRemoteConfigBuilder } from './remoteconfig.js';
+import { FirebaseAppCheckBuilder } from './appcheck.js';
 
 export { FUNCTIONS_RUNTIME };
 
@@ -14,4 +15,5 @@ export const Firebase = {
   Storage:      (bucket?: string) => new FirebaseStorageBuilder(bucket),
   Auth:         () => new FirebaseAuthBuilder(),
   RemoteConfig: () => new FirebaseRemoteConfigBuilder(),
+  AppCheck:     () => new FirebaseAppCheckBuilder(),
 };

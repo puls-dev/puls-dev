@@ -56,7 +56,7 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 - [x] Firebase Auth - email/password, anonymous, phone, and OAuth providers (Google, GitHub, Facebook, Twitter, Apple, Microsoft); authorized domains
 - [x] Firebase Storage - rules deployment, CORS configuration, lifecycle policies
 - [x] Firebase RemoteConfig - typed parameters (string, bool, number, JSON), conditions, and per-condition overrides; ETag-safe PUT
-- [ ] Firebase App Check - enforce attestation on Hosting, Functions, and Firestore
+- [x] Firebase App Check - enforce attestation on Hosting, Functions, and Firestore
 - [ ] GCP Cloud Run - containerized services; closer to ECS/Fargate parity for teams already on GCP
 - [ ] GCP Cloud SQL - managed Postgres / MySQL with private IP and IAM auth
 
