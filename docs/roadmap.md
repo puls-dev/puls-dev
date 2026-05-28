@@ -124,7 +124,9 @@ Enterprise CDN/edge - complex enough to warrant a dedicated maintainer; communit
 - [x] **Inventory / `@Check`** - read-only discovery across all configured providers; prints counts, status, and DO cost estimates
 - [x] **Dry run** - `dryRun: true` or `@DryRun` prints a full plan without any API writes
 - [x] **`@Protected`** - marks a resource so it is never modified or destroyed
+- [x] **Idempotent Configuration State Tracking** — Store applied playbook and file hashes directly in VM metadata (e.g. Proxmox notes/tags) to support stateless, change-aware Ansible configuration updates on already created servers
 - [ ] **Hooks** - `beforeDeploy` / `afterDeploy` callbacks on `Stack` for custom side effects (notify Slack, run migrations, etc.)
 - [ ] **Multi-region** - run the same stack across N regions in parallel; `@Deploy({ regions: [REGION.EU_CENTRAL_1, REGION.US_EAST_1] })`
 - [ ] **Parallel resource deployment** - resources within a stack that have no declared dependency could deploy concurrently instead of sequentially
 - [ ] **Secrets at deploy time** - pull credentials from AWS SSM Parameter Store or HashiCorp Vault instead of requiring them as env vars upfront
+

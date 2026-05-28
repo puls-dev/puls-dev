@@ -86,7 +86,7 @@ class AppStack extends Stack {
 
 ## Community
 
-Have questions or want to contribute? Join the conversation on Discord: **pulsdev.io** ([Join](https://discord.gg/9PcwyjADZj))
+Have questions or want to contribute? Join the conversation on Gitter|Matrix: **pulsdev.io** ([Join](https://matrix.to/#/#pulsdevio:gitter.im))
 
 ---
 

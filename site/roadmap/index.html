@@ -1317,6 +1317,7 @@
 <li>[x] <strong>Inventory / <code>@Check</code></strong> - read-only discovery across all configured providers; prints counts, status, and DO cost estimates</li>
 <li>[x] <strong>Dry run</strong> - <code>dryRun: true</code> or <code>@DryRun</code> prints a full plan without any API writes</li>
 <li>[x] <strong><code>@Protected</code></strong> - marks a resource so it is never modified or destroyed</li>
+<li>[x] <strong>Idempotent Configuration State Tracking</strong> — Store applied playbook and file hashes directly in VM metadata (e.g. Proxmox notes/tags) to support stateless, change-aware Ansible configuration updates on already created servers</li>
 <li>[ ] <strong>Hooks</strong> - <code>beforeDeploy</code> / <code>afterDeploy</code> callbacks on <code>Stack</code> for custom side effects (notify Slack, run migrations, etc.)</li>
 <li>[ ] <strong>Multi-region</strong> - run the same stack across N regions in parallel; <code>@Deploy({ regions: [REGION.EU_CENTRAL_1, REGION.US_EAST_1] })</code></li>
 <li>[ ] <strong>Parallel resource deployment</strong> - resources within a stack that have no declared dependency could deploy concurrently instead of sequentially</li>

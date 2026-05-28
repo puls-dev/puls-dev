@@ -62,4 +62,4 @@ If yes - it probably belongs here. If not - simplify the interface until it does
 
 ---
 
-**Questions?** Join us on Discord: **pulsdev.io**
+**Questions?** Join us on Gitter: **pulsdev.io**([Join](https://matrix.to/#/#pulsdevio:gitter.im))

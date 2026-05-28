@@ -3,6 +3,7 @@ import assert from "node:assert";
 import { ProxmoxApiClient } from "./api.js";
 import { VMBuilder } from "./vm.js";
 import { Config } from "../../core/config.js";
+import { getFileHash, parseProvisionMetadata, mergeProvisionMetadata } from "./hash.js";
 
 describe("Proxmox VMBuilder Unit Tests", () => {
   let originalGet: any;
@@ -180,5 +181,193 @@ describe("Proxmox VMBuilder Unit Tests", () => {
     // In Proxmox, VM deletion is handled via BaseBuilder default or custom VMBuilder destroy.
     // Let's verify we logged or called the delete path or returned safely.
     assert.ok(destroyResult.destroyed);
+  });
+
+  test("deploys new VM and writes playbook hashes to VM notes", async () => {
+    mockGetResponses["/cluster/resources?type=vm"] = [];
+    mockGetResponses["/cluster/nextid"] = 105;
+    mockGetResponses["/nodes"] = [
+      { node: "pve1", status: "online", maxmem: 32 * 1024 * 1024 * 1024, mem: 12 * 1024 * 1024 * 1024 }
+    ];
+
+    const builder = new VMBuilder("prov-new-vm")
+      .cores(2)
+      .memory(2048)
+      .ip("10.8.10.90")
+      .provision("playbooks/nginx.yaml", "playbooks/db.yaml");
+
+    const provisionCalls: Array<{ ip: string; script: string }> = [];
+
+    // Overrides
+    (builder as any).waitFor = async (label: string, condition: () => Promise<boolean>) => {
+      return await condition();
+    };
+    (builder as any).checkPort = async () => true;
+    (builder as any).checkCloudInit = async () => true;
+    (builder as any).runProvisioner = async (ip: string, script: string) => {
+      provisionCalls.push({ ip, script });
+    };
+
+    const deployResult = await builder.deploy();
+    assert.strictEqual(deployResult.vmid, 105);
+
+    // Verify playbooks were executed
+    assert.strictEqual(provisionCalls.length, 2);
+    assert.strictEqual(provisionCalls[0].script, "playbooks/nginx.yaml");
+    assert.strictEqual(provisionCalls[1].script, "playbooks/db.yaml");
+
+    // Verify VM configuration was updated with playbooks hash
+    const configCall = clientCalls.find(
+      (c) => c.method === "POST" && c.path === "/nodes/pve1/qemu/105/config" && c.body?.description
+    );
+    assert.ok(configCall);
+    const expectedDescription = mergeProvisionMetadata("", {
+      "nginx.yaml": getFileHash("playbooks/nginx.yaml"),
+      "db.yaml": getFileHash("playbooks/db.yaml"),
+    });
+    assert.strictEqual(configCall.body.description, expectedDescription);
+  });
+
+  test("skips playbook execution on existing VM if hashes match (Idempotence)", async () => {
+    const nginxHash = getFileHash("playbooks/nginx.yaml");
+    const dbHash = getFileHash("playbooks/db.yaml");
+
+    const descriptionNotes = mergeProvisionMetadata("User customized notes here", {
+      "nginx.yaml": nginxHash,
+      "db.yaml": dbHash,
+    });
+
+    mockGetResponses["/cluster/resources?type=vm"] = [
+      { name: "my-existing-vm", vmid: 200, node: "pve1", template: 0, status: "running" },
+    ];
+    mockGetResponses["/nodes/pve1/qemu/200/config"] = {
+      description: descriptionNotes,
+    };
+
+    const builder = new VMBuilder("my-existing-vm")
+      .ip("10.8.10.95")
+      .provision("playbooks/nginx.yaml", "playbooks/db.yaml");
+
+    const provisionCalls: Array<{ ip: string; script: string }> = [];
+
+    // Overrides
+    (builder as any).waitFor = async (label: string, condition: () => Promise<boolean>) => {
+      return await condition();
+    };
+    (builder as any).checkPort = async () => true;
+    (builder as any).checkCloudInit = async () => true;
+    (builder as any).runProvisioner = async (ip: string, script: string) => {
+      provisionCalls.push({ ip, script });
+    };
+
+    const deployResult = await builder.deploy();
+    assert.strictEqual(deployResult.vmid, 200);
+
+    // Verify NO playbooks were executed
+    assert.strictEqual(provisionCalls.length, 0);
+
+    // Verify VM configuration was NOT posted to update notes
+    const updateConfigCall = clientCalls.find(
+      (c) => c.method === "POST" && c.path === "/nodes/pve1/qemu/200/config"
+    );
+    assert.ok(!updateConfigCall);
+  });
+
+  test("executes only new/changed playbooks on existing VM and merges notes metadata (Incremental)", async () => {
+    const nginxHash = getFileHash("playbooks/nginx.yaml");
+    const dbHash = getFileHash("playbooks/db.yaml");
+
+    const descriptionNotes = mergeProvisionMetadata("User notes preserved", {
+      "nginx.yaml": nginxHash,
+    });
+
+    mockGetResponses["/cluster/resources?type=vm"] = [
+      { name: "my-existing-vm", vmid: 200, node: "pve1", template: 0, status: "running" },
+    ];
+    mockGetResponses["/nodes/pve1/qemu/200/config"] = {
+      description: descriptionNotes,
+    };
+
+    const builder = new VMBuilder("my-existing-vm")
+      .ip("10.8.10.95")
+      .provision("playbooks/nginx.yaml", "playbooks/db.yaml");
+
+    const provisionCalls: Array<{ ip: string; script: string }> = [];
+
+    // Overrides
+    (builder as any).waitFor = async (label: string, condition: () => Promise<boolean>) => {
+      return await condition();
+    };
+    (builder as any).checkPort = async () => true;
+    (builder as any).checkCloudInit = async () => true;
+    (builder as any).runProvisioner = async (ip: string, script: string) => {
+      provisionCalls.push({ ip, script });
+    };
+
+    const deployResult = await builder.deploy();
+    assert.strictEqual(deployResult.vmid, 200);
+
+    // Verify ONLY db.yaml was executed (nginx.yaml was skipped!)
+    assert.strictEqual(provisionCalls.length, 1);
+    assert.strictEqual(provisionCalls[0].script, "playbooks/db.yaml");
+
+    // Verify VM configuration was updated with BOTH hashes and preserved user notes
+    const updateConfigCall = clientCalls.find(
+      (c) => c.method === "POST" && c.path === "/nodes/pve1/qemu/200/config"
+    );
+    assert.ok(updateConfigCall);
+
+    const expectedDescription = mergeProvisionMetadata("User notes preserved", {
+      "nginx.yaml": nginxHash,
+      "db.yaml": dbHash,
+    });
+    assert.strictEqual(updateConfigCall.body.description, expectedDescription);
+    assert.ok(expectedDescription.startsWith("User notes preserved"));
+  });
+});
+
+describe("Proxmox Provision Hash & Metadata Utilities", () => {
+  test("parseProvisionMetadata parses valid, invalid, and empty strings", () => {
+    assert.deepStrictEqual(parseProvisionMetadata(""), {});
+    assert.deepStrictEqual(parseProvisionMetadata("Plain text note without tag"), {});
+    assert.deepStrictEqual(parseProvisionMetadata("User description\n\n[puls-provision: a=123,b=456]"), {
+      a: "123",
+      b: "456",
+    });
+    assert.deepStrictEqual(parseProvisionMetadata("[puls-provision:  nginx.yaml = abc123def456 , db.yaml=789 ]"), {
+      "nginx.yaml": "abc123def456",
+      "db.yaml": "789",
+    });
+  });
+
+  test("mergeProvisionMetadata merges tags into notes without corrupting user descriptions", () => {
+    const meta = { "nginx.yaml": "abc", "db.yaml": "def" };
+    const expectedBlock = "[puls-provision: nginx.yaml=abc,db.yaml=def]";
+
+    // Case 1: Empty note
+    assert.strictEqual(mergeProvisionMetadata("", meta), expectedBlock);
+
+    // Case 2: Existing note without tags
+    assert.strictEqual(
+      mergeProvisionMetadata("My server description", meta),
+      `My server description\n\n${expectedBlock}`
+    );
+
+    // Case 3: Existing note with existing tags (should replace them)
+    const existing = `Some description\n\n[puls-provision: nginx.yaml=old]\nMore details`;
+    const merged = mergeProvisionMetadata(existing, meta);
+    assert.ok(merged.includes(expectedBlock));
+    assert.ok(merged.includes("Some description"));
+    assert.ok(!merged.includes("nginx.yaml=old"));
+  });
+
+  test("getFileHash returns stable fallback hash for virtual playbooks", () => {
+    const hash1 = getFileHash("virtual-playbook-path-1.yaml");
+    const hash2 = getFileHash("virtual-playbook-path-1.yaml");
+    const hash3 = getFileHash("virtual-playbook-path-2.yaml");
+
+    assert.strictEqual(hash1.length, 12);
+    assert.strictEqual(hash1, hash2);
+    assert.notStrictEqual(hash1, hash3);
   });
 });

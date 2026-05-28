@@ -98,6 +98,28 @@ After a VM starts, Puls runs these steps for each provisioner provided to `.prov
 | `.yaml` / `.yml` | `ansible-playbook -i "IP," -u root --private-key ...` |
 | `.pp` | `scp manifest.pp /tmp/` then `ssh 'puppet apply /tmp/manifest.pp'` |
 
+### Idempotent & Incremental Provisioning
+
+Puls implements **Idempotent Configuration State Tracking** to unify infrastructure provisioning and configuration management into a single, change-aware GitOps pipeline.
+
+#### How It Works
+Puls is completely stateless, meaning it does not rely on a local or remote state file. Instead, it securely stores applied playbook metadata directly in the Proxmox VM's **Notes** (Description) field using a non-destructive, regex-bounded block:
+```
+[puls-provision: playbook1.yaml=hash1,playbook2.yaml=hash2]
+```
+This metadata tracks the short SHA-256 hash of each applied playbook.
+
+#### Key Features:
+1. **Incremental Rollouts**: If you add a new playbook or modify an existing one (causing its hash to change), Puls detects the drift and executes **only the changed or new playbooks**.
+2. **Zero-Drift Skips**: If no playbooks have changed and their hashes match the VM description metadata, Puls skips SSH connectivity probes and provisioning entirely, enabling lightning-fast deploys.
+3. **Notes Preservation**: Any custom, human-written VM notes in the Proxmox Description field are fully preserved. Puls only parses and updates its own `[puls-provision: ...]` block, appending it to the end of your notes if not present.
+4. **Dynamic Append Chaining**: Playbooks can be chained fluently. Calling `.provision(...)` multiple times or passing arrays will build a sequenced playbook execution chain:
+   ```typescript
+   Proxmox.VM("ix-sto1-app01")
+     .provision("playbooks/nginx.yaml")
+     .provision(["playbooks/db.yaml", "playbooks/app.yaml"])
+   ```
+
 ### Ansible example (`config/default.yaml`)
 
 ```yaml
