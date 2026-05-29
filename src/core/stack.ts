@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { BaseBuilder } from "./resource.js";
 
-const _registry = new Map<Function, Stack>();
+const _registry = new Map<Function | string, Stack>();
 
 type OutputEntry = {
   primary: string;
@@ -77,7 +77,10 @@ function printOutputs(stackName: string, outputs: Record<string, any>) {
 
 export abstract class Stack {
   /** @internal - called by @Deploy to register the instance for cross-stack references. */
-  static _register(cls: Function, instance: Stack): void {
+  static _register(cls: Function, instance: Stack, region?: string): void {
+    if (region) {
+      _registry.set(`${cls.name}:${region}`, instance);
+    }
     _registry.set(cls, instance);
   }
 
@@ -86,24 +89,32 @@ export abstract class Stack {
    * its resource Output fields before deployment completes.
    *
    * The target stack must be decorated with @Deploy and imported before this call.
+   * An optional region parameter can be supplied for multi-region configurations.
    *
    * @example
    * class DNSStack extends Stack {
-   *   private infra = Stack.from(InfraStack);
+   *   private infra = Stack.from(InfraStack, REGION.US_EAST_1);
    *   dns = DO.Domain("example.com").pointer("app", this.infra.app.ip);
    * }
    */
-  static from<T extends Stack>(cls: new (...args: any[]) => T): T {
-    const instance = _registry.get(cls);
+  static from<T extends Stack>(cls: new (...args: any[]) => T, region?: string): T {
+    const key = region ? `${cls.name}:${region}` : cls;
+    const instance = _registry.get(key);
     if (!instance)
       throw new Error(
-        `Stack "${cls.name}" is not registered. Make sure it is decorated with @Deploy and its module is imported before referencing it.`,
+        `Stack "${cls.name}" ${region ? `for region "${region}" ` : ""}is not registered. Make sure it is decorated with @Deploy and its module is imported before referencing it.`,
       );
     return instance as T;
   }
 
   async deploy(): Promise<Record<string, any>> {
     console.log(`\n🏗️  Deploying Stack: ${this.constructor.name}`);
+
+    // Stack-level beforeDeploy hook
+    if (typeof (this as any).beforeDeploy === "function") {
+      console.log(`   ⚡ Running Stack-level beforeDeploy hook...`);
+      await (this as any).beforeDeploy();
+    }
 
     const props = Object.getOwnPropertyNames(this);
     const outputs: Record<string, any> = {};
@@ -117,19 +128,44 @@ export abstract class Stack {
 
         if (isProtected) resource.protect();
 
-        outputs[prop] = isDestroyed
-          ? await resource.destroy()
-          : await resource.deploy();
+        const forceConfigCheck = Reflect.getMetadata("forceConfigCheck", this, prop);
+        if (forceConfigCheck && typeof (resource as any).forceConfigCheck === "function") {
+          (resource as any).forceConfigCheck();
+        }
+
+        let res: any;
+        if (isDestroyed) {
+          await (resource as any)._runBeforeDestroy();
+          res = await resource.destroy();
+          await (resource as any)._runAfterDestroy(res);
+        } else {
+          await (resource as any)._runBeforeDeploy();
+          res = await resource.deploy();
+          await (resource as any)._runAfterDeploy(res);
+        }
+        outputs[prop] = res;
       }
     }
 
     printOutputs(this.constructor.name, outputs);
+
+    // Stack-level afterDeploy hook
+    if (typeof (this as any).afterDeploy === "function") {
+      console.log(`   ⚡ Running Stack-level afterDeploy hook...`);
+      await (this as any).afterDeploy(outputs);
+    }
 
     return outputs;
   }
 
   async destroy(): Promise<Record<string, any>> {
     console.log(`\n💥 Tearing down Stack: ${this.constructor.name}`);
+
+    // Stack-level beforeDestroy hook
+    if (typeof (this as any).beforeDestroy === "function") {
+      console.log(`   ⚡ Running Stack-level beforeDestroy hook...`);
+      await (this as any).beforeDestroy();
+    }
 
     const props = Object.getOwnPropertyNames(this).reverse();
     const outputs: Record<string, any> = {};
@@ -141,11 +177,20 @@ export abstract class Stack {
           console.log(`   🔒 Skipping protected resource "${prop}"`);
           continue;
         }
-        outputs[prop] = await resource.destroy();
+        await (resource as any)._runBeforeDestroy();
+        const res = await resource.destroy();
+        await (resource as any)._runAfterDestroy(res);
+        outputs[prop] = res;
       }
     }
 
     printOutputs(this.constructor.name, outputs);
+
+    // Stack-level afterDestroy hook
+    if (typeof (this as any).afterDestroy === "function") {
+      console.log(`   ⚡ Running Stack-level afterDestroy hook...`);
+      await (this as any).afterDestroy(outputs);
+    }
 
     return outputs;
   }

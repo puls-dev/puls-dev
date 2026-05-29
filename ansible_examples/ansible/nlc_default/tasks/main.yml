@@ -1,0 +1,23 @@
+---
+# Main entry point for nlc_default role
+
+# Include security configurations
+- name: Include sudo configurations
+  ansible.builtin.import_tasks: security/sudoers.yml
+  tags: nlc_default
+
+# - name: Include user configurations
+#   ansible.builtin.import_tasks: security/users.yml
+#   tags: nlc_default
+
+- name: Include system configuration files
+  ansible.builtin.import_tasks: system/systemd.yml
+  tags: nlc_default
+
+- name: Include network configuration files
+  ansible.builtin.import_tasks: system/sshd.yml
+  tags: nlc_default
+
+- name: Include firewall configuration files
+  ansible.builtin.import_tasks: system/ntp.yml
+  tags: nlc_default

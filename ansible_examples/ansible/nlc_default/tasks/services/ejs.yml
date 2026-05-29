@@ -1,0 +1,15 @@
+- name: Create /etc/ejs directory
+  ansible.builtin.file:
+    path: /etc/ejs
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: Create /etc/ejs/dckey file
+  ansible.builtin.copy:
+    src: "files/dckey"
+    dest: /etc/ejs/dckey
+    owner: "root"
+    group: "nlc"
+    mode: "0640"

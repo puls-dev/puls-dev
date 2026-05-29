@@ -1,6 +1,7 @@
 import { BaseBuilder } from "../../core/resource.js";
 import { Output } from "../../core/output.js";
 import { gcpFetch, getProjectId } from "./api.js";
+import { loadRecordsFromFile } from "../../core/parser.js";
 
 const DNS_BASE = "https://dns.googleapis.com";
 
@@ -74,13 +75,32 @@ export class GCPCloudDNSZoneBuilder extends BaseBuilder {
     }
   }
 
+  record(filePath: string): this;
   record(
     name: string,
     type: "A" | "AAAA" | "CNAME" | "MX" | "TXT" | "NS" | "PTR" | "SRV" | "CAA" | "SPF",
     value: string,
+    ttl?: number
+  ): this;
+  record(
+    nameOrPath: string,
+    type?: "A" | "AAAA" | "CNAME" | "MX" | "TXT" | "NS" | "PTR" | "SRV" | "CAA" | "SPF",
+    value?: string,
     ttl: number = 300
   ) {
-    this.records.push({ name, type, value, ttl });
+    if (arguments.length === 1 && typeof nameOrPath === "string" && (nameOrPath.endsWith(".yaml") || nameOrPath.endsWith(".yml") || nameOrPath.endsWith(".json"))) {
+      const loaded = loadRecordsFromFile(nameOrPath);
+      for (const r of loaded) {
+        this.records.push({
+          name: r.name,
+          type: r.type,
+          value: r.value,
+          ttl: r.ttl ?? 300,
+        });
+      }
+      return this;
+    }
+    this.records.push({ name: nameOrPath, type: type!, value: value!, ttl });
     return this;
   }
 

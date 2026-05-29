@@ -16,6 +16,7 @@ import { Output } from "../../core/output.js";
 import { ACMCertificateBuilder } from "./acm.js";
 import { getR53Client, getR53DomainsClient } from "./api.js";
 import type { RegistrantContact } from "../../types/aws.js";
+import { loadRecordsFromFile } from "../../core/parser.js";
 
 export class Route53Builder extends BaseBuilder {
   readonly out = {
@@ -86,6 +87,7 @@ export class Route53Builder extends BaseBuilder {
     return this;
   }
 
+  record(filePath: string): this;
   record(
     name: string,
     type:
@@ -101,9 +103,38 @@ export class Route53Builder extends BaseBuilder {
       | "NAPTR"
       | "SPF",
     value: string,
+    ttl?: number,
+  ): this;
+  record(
+    nameOrPath: string,
+    type?:
+      | "A"
+      | "AAAA"
+      | "CNAME"
+      | "MX"
+      | "TXT"
+      | "NS"
+      | "PTR"
+      | "SRV"
+      | "CAA"
+      | "NAPTR"
+      | "SPF",
+    value?: string,
     ttl: number = 300,
   ) {
-    this.records.push({ name, type, value, ttl });
+    if (arguments.length === 1 && typeof nameOrPath === "string" && (nameOrPath.endsWith(".yaml") || nameOrPath.endsWith(".yml") || nameOrPath.endsWith(".json"))) {
+      const loaded = loadRecordsFromFile(nameOrPath);
+      for (const r of loaded) {
+        this.records.push({
+          name: r.name,
+          type: r.type,
+          value: r.value,
+          ttl: r.ttl ?? 300,
+        });
+      }
+      return this;
+    }
+    this.records.push({ name: nameOrPath, type: type!, value: value!, ttl });
     return this;
   }
 

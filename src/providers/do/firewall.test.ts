@@ -1,5 +1,7 @@
 import { test, describe, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert';
+import fs from 'node:fs';
+import path from 'node:path';
 import { FirewallBuilder } from './firewall.js';
 import { Config } from '../../core/config.js';
 
@@ -202,5 +204,60 @@ describe('FirewallBuilder Unit Tests', () => {
       outbound_rules: [],
       droplet_ids: [111]
     });
+  });
+
+  test('loads rules from a configuration file (YAML) successfully', async () => {
+    mockResponses['GET /firewalls'] = {
+      status: 200,
+      body: { firewalls: [] }
+    };
+    mockResponses['GET /droplets?name=app-vm-1'] = {
+      status: 200,
+      body: { droplets: [{ id: 111, name: 'app-vm-1' }] }
+    };
+    mockResponses['POST /firewalls'] = {
+      status: 201,
+      body: { firewall: { id: 'fw-789', name: 'my-fw' } }
+    };
+
+    // Mock YAML file creation
+    const tempYamlPath = path.resolve(process.cwd(), "temp-firewall-rules.yaml");
+    const yamlContent = `
+- type: ingress
+  protocol: tcp
+  port: 80
+  sources:
+    - 0.0.0.0/0
+- type: egress
+  protocol: tcp
+  port: all
+  destinations:
+    - 0.0.0.0/0
+`;
+    fs.writeFileSync(tempYamlPath, yamlContent, "utf-8");
+
+    try {
+      const builder = new FirewallBuilder('my-fw')
+        .rules("temp-firewall-rules.yaml")
+        .attachTo('app-vm-1');
+
+      const result = await builder.deploy();
+      assert.ok(result);
+
+      const postCall = fetchCalls.find(c => c.method === 'POST');
+      assert.ok(postCall);
+      assert.deepStrictEqual(postCall.body, {
+        name: 'my-fw',
+        inbound_rules: [
+          { protocol: 'tcp', ports: '80', sources: { addresses: ['0.0.0.0/0'] } }
+        ],
+        outbound_rules: [
+          { protocol: 'tcp', ports: 'all', destinations: { addresses: ['0.0.0.0/0'] } }
+        ],
+        droplet_ids: [111]
+      });
+    } finally {
+      if (fs.existsSync(tempYamlPath)) fs.unlinkSync(tempYamlPath);
+    }
   });
 });

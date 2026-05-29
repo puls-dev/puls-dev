@@ -4,6 +4,8 @@ import { ProxmoxApiClient } from "./api.js";
 import { VMBuilder } from "./vm.js";
 import { Config } from "../../core/config.js";
 import { getFileHash, parseProvisionMetadata, mergeProvisionMetadata } from "./hash.js";
+import { Stack } from "../../core/stack.js";
+import { ForceConfigCheck } from "../../core/decorators.js";
 
 describe("Proxmox VMBuilder Unit Tests", () => {
   let originalGet: any;
@@ -323,6 +325,85 @@ describe("Proxmox VMBuilder Unit Tests", () => {
     });
     assert.strictEqual(updateConfigCall.body.description, expectedDescription);
     assert.ok(expectedDescription.startsWith("User notes preserved"));
+  });
+
+  test("forceConfigCheck() builder method forces playbook execution even if hashes match", async () => {
+    const nginxHash = getFileHash("playbooks/nginx.yaml");
+
+    const descriptionNotes = mergeProvisionMetadata("User notes", {
+      "nginx.yaml": nginxHash,
+    });
+
+    mockGetResponses["/cluster/resources?type=vm"] = [
+      { name: "force-vm", vmid: 200, node: "pve1", template: 0, status: "running" },
+    ];
+    mockGetResponses["/nodes/pve1/qemu/200/config"] = {
+      description: descriptionNotes,
+    };
+
+    const builder = new VMBuilder("force-vm")
+      .ip("10.8.10.95")
+      .provision("playbooks/nginx.yaml")
+      .forceConfigCheck();
+
+    const provisionCalls: Array<{ ip: string; script: string }> = [];
+
+    // Overrides
+    (builder as any).waitFor = async (label: string, condition: () => Promise<boolean>) => {
+      return await condition();
+    };
+    (builder as any).checkPort = async () => true;
+    (builder as any).checkCloudInit = async () => true;
+    (builder as any).runProvisioner = async (ip: string, script: string) => {
+      provisionCalls.push({ ip, script });
+    };
+
+    const deployResult = await builder.deploy();
+    assert.strictEqual(deployResult.vmid, 200);
+
+    // Verify playbook WAS executed because of forceConfigCheck()
+    assert.strictEqual(provisionCalls.length, 1);
+    assert.strictEqual(provisionCalls[0].script, "playbooks/nginx.yaml");
+  });
+
+  test("ForceConfigCheck decorator forces playbook execution even if hashes match", async () => {
+    const nginxHash = getFileHash("playbooks/nginx.yaml");
+
+    const descriptionNotes = mergeProvisionMetadata("User notes", {
+      "nginx.yaml": nginxHash,
+    });
+
+    mockGetResponses["/cluster/resources?type=vm"] = [
+      { name: "force-dec-vm", vmid: 200, node: "pve1", template: 0, status: "running" },
+    ];
+    mockGetResponses["/nodes/pve1/qemu/200/config"] = {
+      description: descriptionNotes,
+    };
+
+    const provisionCalls: Array<{ ip: string; script: string }> = [];
+
+    class TestStack extends Stack {
+      @ForceConfigCheck
+      server = new VMBuilder("force-dec-vm")
+        .ip("10.8.10.95")
+        .provision("playbooks/nginx.yaml");
+    }
+
+    const stack = new TestStack();
+    (stack.server as any).waitFor = async (label: string, condition: () => Promise<boolean>) => {
+      return await condition();
+    };
+    (stack.server as any).checkPort = async () => true;
+    (stack.server as any).checkCloudInit = async () => true;
+    (stack.server as any).runProvisioner = async (ip: string, script: string) => {
+      provisionCalls.push({ ip, script });
+    };
+
+    await stack.deploy();
+
+    // Verify playbook WAS executed because of @ForceConfigCheck decorator
+    assert.strictEqual(provisionCalls.length, 1);
+    assert.strictEqual(provisionCalls[0].script, "playbooks/nginx.yaml");
   });
 });
 

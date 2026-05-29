@@ -1,0 +1,3 @@
+- name: Include tasks for IPA Client
+  ansible.builtin.import_tasks: ipaclient.yml
+  tags: nlc_ipaclient

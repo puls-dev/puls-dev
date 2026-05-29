@@ -1,0 +1,6 @@
+---
+- name: Setup default configuration role
+  hosts: all
+  become: true
+  roles:
+    - nlc_default

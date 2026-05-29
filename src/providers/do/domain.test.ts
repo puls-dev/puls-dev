@@ -1,5 +1,7 @@
 import { test, describe, beforeEach, afterEach } from "node:test";
 import assert from "node:assert";
+import fs from "node:fs";
+import path from "node:path";
 import { DomainBuilder } from "./domain.js";
 import { Config } from "../../core/config.js";
 
@@ -235,5 +237,57 @@ describe("DomainBuilder Unit Tests", () => {
     const deleteCall = fetchCalls.find(c => c.method === "DELETE");
     assert.ok(deleteCall);
     assert.ok(deleteCall.url.endsWith("/domains/destroy.com"));
+  });
+
+  test("loads records from a configuration file (YAML) successfully", async () => {
+    mockResponses["GET /domains/file-do.com"] = {
+      status: 200,
+      body: { domain: { name: "file-do.com" } }
+    };
+    mockResponses["GET /domains/file-do.com/records?per_page=200"] = {
+      status: 200,
+      body: { domain_records: [] }
+    };
+    mockResponses["POST /domains/file-do.com/records"] = {
+      status: 201,
+      body: { domain_record: { id: 201 } }
+    };
+
+    // Mock YAML file creation
+    const tempYamlPath = path.resolve(process.cwd(), "temp-do-records.yaml");
+    const yamlContent = `
+- name: www
+  type: CNAME
+  value: lb.google.com
+- name: mail
+  type: A
+  value: 1.2.3.4
+`;
+    fs.writeFileSync(tempYamlPath, yamlContent, "utf-8");
+
+    try {
+      const builder = new DomainBuilder("file-do.com")
+        .record("temp-do-records.yaml")
+        .record("api", "A", "10.0.0.9"); // Hybrid programmatic record!
+
+      const result = await builder.deploy();
+      assert.strictEqual(result.records.length, 3);
+
+      const wwwRec = result.records.find((r) => r.name === "www");
+      assert.ok(wwwRec);
+      assert.strictEqual(wwwRec.type, "CNAME");
+      assert.strictEqual(wwwRec.value, "lb.google.com");
+
+      const mailRec = result.records.find((r) => r.name === "mail");
+      assert.ok(mailRec);
+      assert.strictEqual(mailRec.type, "A");
+      assert.strictEqual(mailRec.value, "1.2.3.4");
+
+      const apiRec = result.records.find((r) => r.name === "api");
+      assert.ok(apiRec);
+      assert.strictEqual(apiRec.value, "10.0.0.9");
+    } finally {
+      if (fs.existsSync(tempYamlPath)) fs.unlinkSync(tempYamlPath);
+    }
   });
 });

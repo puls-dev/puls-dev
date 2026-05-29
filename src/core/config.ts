@@ -4,6 +4,8 @@ export interface GlobalConfig {
     do?: {
       token: string;
       defaultRegion?: string;
+      spacesAccessKey?: string;
+      spacesSecretKey?: string;
     };
     aws?: {
       region: string;

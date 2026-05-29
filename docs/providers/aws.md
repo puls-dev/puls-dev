@@ -131,6 +131,37 @@ DB_SIZE.LARGE   // db.r6g.large
 
 ---
 
+## EC2
+
+Provision virtual machine instances with elastic IP binding and universal playbook configurations.
+
+```typescript
+AWS.EC2("my-server")
+  .ami("ami-0c55b159cbfafe1f0")     // standard AMI (Ubuntu default)
+  .instanceType("t3.small")         // default: t3.micro
+  .keyName("my-ssh-keypair")        // AWS SSH key pair
+  .subnetId("subnet-12345")         // optional VPC subnet
+  .securityGroupIds(["sg-987"])     // security groups
+  .userData("#!/bin/bash\necho boot")
+  .sshPrivateKey("~/.ssh/id_rsa")   // private key to connect for playbooks
+  .provision("config/setup.yaml")   // run Ansible playbook on creation/hash mismatch
+```
+
+**Drift-Free Provisioning State:**
+Puls stores applied playbook hashes directly in the EC2 instance tags (`puls-provision`). If you modify a playbook, Puls compares hashes and applies *only* updated playbooks on subsequent runs.
+
+**Automatic Resizing:**
+If you change `.instanceType()`, Puls automatically handles stopping the VM, modifying the instance type attribute, starting the VM, and waiting for it to reboot.
+
+**Outputs**
+
+| Field      | Type             | Description               |
+|------------|------------------|---------------------------|
+| `.out.id`  | `Output<string>` | The AWS InstanceId        |
+| `.out.ip`  | `Output<string>` | The public or private IP  |
+
+---
+
 ## SQS
 
 Standard and FIFO queues with optional dead-letter queue.
@@ -193,19 +224,35 @@ AWS.Route53().randomDomain().register(DOMAIN_REGISTER)  // register a new random
 
 **Adding records**
 
+You can add records individually, bulk-load them from local configuration files (YAML/JSON), or chain them in a hybrid fashion:
+
 ```typescript
 AWS.Route53("example.com")
-  .record("@",    "A",     "203.0.113.10")
+  .record("config/records.yaml")                  // Bulk load static records from a YAML or JSON file!
+  .record("api",  "A",     "203.0.113.10", 120)   // Programmatic hybrid record!
   .record("www",  "CNAME", "example.com")
-  .record("@",    "MX",    "10 mail.example.com")   // MX: "priority hostname"
   .record("@",    "TXT",   "v=spf1 include:_spf.google.com ~all")  // quotes added automatically
-  .record("mail", "AAAA",  "2001:db8::1")
-  .record("_dmarc", "TXT", "v=DMARC1; p=reject", 600)  // optional custom TTL (default 300)
 ```
 
-Supported types: `A`, `AAAA`, `CNAME`, `MX`, `TXT`, `NS`, `PTR`, `SRV`, `CAA`, `NAPTR`, `SPF`
+The configuration file (e.g. `config/records.yaml`) should contain a list of records matching this format:
 
-TXT and SPF values are automatically wrapped in double quotes if not already quoted.
+```yaml
+# config/records.yaml
+- name: "@"
+  type: TXT
+  value: "v=spf1 include:_spf.google.com ~all"
+- name: mail
+  type: A
+  value: 1.2.3.4
+  ttl: 600
+- name: www
+  type: CNAME
+  value: lb.google.com
+```
+
+Supported types: `A`, `AAAA`, `CNAME`, `MX`, `TXT`, `NS`, `PTR`, `SRV`, `CAA`, `NAPTR`, `SPF`. 
+
+When loading from a file (e.g. `record("path/to/file.yaml")`), records are parsed relative to `process.cwd()` and appended to the zone. TXT and SPF values are automatically wrapped in double quotes if not already quoted.
 
 **Alias pointer**
 

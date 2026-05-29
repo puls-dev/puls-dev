@@ -30,6 +30,7 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 - [x] Cluster-aware node selection - pick the node with the most free RAM via `/nodes` API instead of always using the first configured node
 - [x] `.machine()` builder method - let users override machine type (i440fx vs q35) per VM rather than the hardcoded default
 - [x] `CONFIG.PRODUCTION` entry in `src/types/proxmox.ts`
+- [ ] **Golden Image / VM Templates (`Proxmox.Template`)** — Declare pre-baked templates with fluent OS base images and playbook provisioning (Packer-like behavior). Clone VMs from these templates to drop VM deployment time from minutes to seconds.
 
 ### AWS
 - [x] CloudFront cache invalidation - `.invalidate(paths[])` on a CloudFront builder
@@ -38,15 +39,15 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 - [x] S3 static site hosting - `.staticSite()` sets index/error documents and public-read policy
 - [x] IAM - role and inline/managed policy management; useful for cross-service wiring without manual console steps
 - [x] CloudWatch alarms - CPU/memory thresholds on Fargate and RDS with SNS notification target
-- [ ] EC2 - lower priority; Proxmox already covers the raw-VM use case, and EC2 needs VPC/SG/keypair support to be useful
+- [x] EC2 - Provision EC2 virtual machines with VPC/SG support and stateless tag-based playbook provisioning.
 
 ### DigitalOcean
 - [x] Droplet, Domain, Firewall, Certificate, LoadBalancer
 - [x] `LoadBalancerBuilder` overhaul - extend `BaseBuilder`, add `.region()`, `.healthCheck()`, `.stickySession()`, configurable forwarding rules and SSL termination
-- [ ] Spaces - S3-compatible object storage; `.bucket()`, `.cors()`, `.acl()`
-- [ ] Managed databases - Postgres, MySQL, Redis; analogous to AWS RDS
-- [ ] App Platform - deploy from a GitHub repo or container image without managing Droplets
-- [ ] VPC - create and assign Droplets/databases to a private network
+- [x] Spaces - S3-compatible object storage; `.bucket()`, `.cors()`, `.acl()`
+- [x] Managed databases - Postgres, MySQL, Redis; analogous to AWS RDS
+- [x] App Platform - deploy from a GitHub repo or container image without managing Droplets
+- [x] VPC - create and assign Droplets/databases to a private network
 - [x] Domain: add AAAA, SRV, CAA record types; implement `destroy()` for domain and records
 
 ### Firebase
@@ -100,6 +101,15 @@ Popular self-hosting alternative to DigitalOcean - similar API shape, easy to ad
 - [ ] **Load Balancer** - HTTP/HTTPS with health checks
 - [ ] **Volume** - persistent block storage attached to servers
 
+### Microsoft Azure
+Enterprise cloud provider - critical for corporate environments. Needs resource group management, VM provisioning, and active directory support.
+
+- [ ] **Resource Groups** - basic resource lifecycle boundary
+- [ ] **Azure App Service (`Azure.AppService`)** - PaaS web app provisioning with slots support
+- [ ] **Azure Virtual Machines (`Azure.VM`)** - Compute instances with private virtual network support and universal playbook provisioning
+- [ ] **Azure SQL Database (`Azure.SQL`)** - Managed databases with automated failover groups
+- [ ] **Azure Blob Storage (`Azure.BlobStorage`)** - Massively scalable object storage
+
 ### Akamai
 Enterprise CDN/edge - complex enough to warrant a dedicated maintainer; community-driven.
 
@@ -125,8 +135,11 @@ Enterprise CDN/edge - complex enough to warrant a dedicated maintainer; communit
 - [x] **Dry run** - `dryRun: true` or `@DryRun` prints a full plan without any API writes
 - [x] **`@Protected`** - marks a resource so it is never modified or destroyed
 - [x] **Idempotent Configuration State Tracking** — Store applied playbook and file hashes directly in VM metadata (e.g. Proxmox notes/tags) to support stateless, change-aware Ansible configuration updates on already created servers
-- [ ] **Hooks** - `beforeDeploy` / `afterDeploy` callbacks on `Stack` for custom side effects (notify Slack, run migrations, etc.)
+- [x] **Hooks** - `beforeDeploy` / `afterDeploy` callbacks on `Stack` for custom side effects (notify Slack, run migrations, etc.)
 - [ ] **Multi-region** - run the same stack across N regions in parallel; `@Deploy({ regions: [REGION.EU_CENTRAL_1, REGION.US_EAST_1] })`
 - [ ] **Parallel resource deployment** - resources within a stack that have no declared dependency could deploy concurrently instead of sequentially
 - [ ] **Secrets at deploy time** - pull credentials from AWS SSM Parameter Store or HashiCorp Vault instead of requiring them as env vars upfront
+- [x] **Hybrid Resource Configuration (YAML)** — Support loading bulk static configuration sets (like DNS records, firewall rules, or security group rules) directly from a `.yaml` or `.json` file within builder methods while retaining the flexibility to chain programmatic methods for dynamic resource parameters.
+- [x] **Opt-in Infrastructure Blueprint Documentation (`Config.blueprint`)** — Generate version-controlled markdown blueprints (`docs/architecture.md`) of live system resources, auto-calculating monthly costs, formatting live endpoints, and rendering Mermaid.js dynamic dependency/topology graphs on local runs.
+
 

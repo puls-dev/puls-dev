@@ -39,10 +39,11 @@ export class DoApiClient {
     return res.json() as Promise<T>;
   }
 
-  async delete(path: string): Promise<void> {
+  async delete(path: string, body?: unknown): Promise<void> {
     const res = await fetch(`${DoApiClient.BASE}${path}`, {
       method: 'DELETE',
       headers: this.authHeaders,
+      ...(body !== undefined && { body: JSON.stringify(body) }),
     });
     if (!res.ok && res.status !== 404) {
       throw new Error(`DO API DELETE ${path}: ${res.status} ${await res.text()}`);

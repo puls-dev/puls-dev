@@ -1,0 +1,16 @@
+---
+- name: Setup default configuration
+  hosts: all
+  become: true
+  tasks:
+    - name: Import security configuration tasks
+      ansible.builtin.import_tasks: tasks/security.yaml
+
+    - name: Import IPA client configuration tasks
+      ansible.builtin.import_tasks: tasks/ipa_client.yaml
+
+    - name: Import system configuration tasks
+      ansible.builtin.import_tasks: tasks/system.yaml
+
+    - name: Import service user configuration tasks
+      ansible.builtin.import_tasks: tasks/service_user.yaml

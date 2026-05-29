@@ -156,22 +156,76 @@ No additional configurations are required to deploy a basic Pub/Sub topic contai
 
 ## Cloud DNS
 
-Provision and manage Google Cloud DNS Hosted Zones and record sets with 100% parity to AWS Route53 and DigitalOcean Domain. Features auto-trailing-dot formatting, uppercase alphanumeric zone ID conversions, transactional record updates (deleting the old set and adding the new one in a single request), and dynamic cross-resource target resolving.
+Provision and manage Google Cloud DNS Hosted Zones and record sets with 100% parity to AWS Route53 and DigitalOcean Domain. Features auto-trailing-dot formatting, uppercase alphanumeric zone ID conversions, transactional record updates (deleting the old set and adding the new one in a single request), dynamic cross-resource target resolving, and **hybrid configuration loading** from local files.
 
 ```typescript
 GCP.CloudDNS("mycompany.com")
-  .record("www", "CNAME", "lb.google.com")
-  .record("mail", "A", "1.2.3.4", 600)
-  .record("@", "TXT", "v=spf1 include:_spf.google.com ~all")
-  .pointer("api", apiService) // Point directly to a Cloud Run or VM instance
+  .record("config/records.yaml")       // Bulk load static records from a YAML or JSON file!
+  .record("api", "A", "10.0.0.9", 120)  // Programmatic hybrid chaining!
+  .pointer("www", apiService)          // Point directly to a Cloud Run or VM instance
+```
+
+The configuration file (e.g. `config/records.yaml`) should contain a sequence of records matching this structure:
+
+```yaml
+# config/records.yaml
+- name: "@"
+  type: TXT
+  value: "v=spf1 include:_spf.google.com ~all"
+- name: mail
+  type: A
+  value: 1.2.3.4
+  ttl: 600
+- name: www
+  type: CNAME
+  value: lb.google.com
 ```
 
 ### Cloud DNS API Reference
 
 | Method | Type | Description | Default |
 |--------|------|-------------|---------|
-| `.record(name, type, value, ttl?)` | `string, string, string, number` | Adds a custom DNS record set to the zone. Target names and values are automatically appended with trailing dots, and `TXT`/`SPF` records are auto-quoted matching standard formats. | - |
+| `.record(filePath)` | `string` | Bulk loads and appends a list of DNS records from a local `.yaml`, `.yml`, or `.json` file. | - |
+| `.record(name, type, value, ttl?)` | `string, string, string, number` | Adds a single custom DNS record set to the zone. Target names and values are automatically appended with trailing dots, and `TXT`/`SPF` records are auto-quoted. | - |
 | `.pointer(name, target)` | `string, BaseBuilder \| Output<string> \| string` | Resolves a cross-resource target endpoint (e.g. Cloud Run service URL or VM IP) at deploy-time, automatically converting `A` records to `CNAME` and stripping protocol headers for external domain integrations. | - |
+---
+
+## Compute Engine VM
+
+Provision and manage VM instances on Google Cloud Compute Engine with seamless OS booting, custom network configuration, public SSH key deployment, and **universal playbook provisioning**.
+
+```typescript
+GCP.VM("my-app-server")
+  .machineType("e2-medium")
+  .zone("us-central1-a")
+  .image("projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts")
+  .network("global/networks/default")
+  .sshKey("~/.ssh/id_ed25519.pub")
+  .provision("config/docker.yaml", "config/nginx.yaml")
+```
+
+### Compute Engine VM API Reference
+
+| Method | Type | Description | Default |
+|--------|------|-------------|---------|
+| `.machineType(type)` | `string` | Machine tier to provision (e.g. `"e2-micro"`, `"e2-medium"`, `"n2-standard-2"`). | `"e2-micro"` |
+| `.image(img)` | `string` | Boot image URI or family name. | `"projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts"` |
+| `.zone(z)` | `string` | GCP availability zone where the VM instance resides. | `"us-central1-a"` |
+| `.network(netPath)` | `string` | Virtual Private Cloud network resource path. | `"global/networks/default"` |
+| `.sshKey(keys)` | `string \| string[]` | Public SSH key strings, or local paths to public keys (e.g. `"~/.ssh/id_rsa.pub"`) to inject into the `root` user for SSH access. | `[]` |
+| `.provision(...playbooks)` | `string[]` | Ordered list of playbook configuration YAML files to execute on the VM post-boot. | `[]` |
+| `.forceConfigCheck()` | `void` | Forces Puls to ignore previously cached playbook hashes and re-run all provision playbooks. | - |
+
+### Outputs
+
+* `ip` (`Output<string>`): The resolved public/external IPv4 address assigned to the VM.
+* `id` (`Output<string>`): The unique GCP Compute Engine instance identifier.
+
+### How Provisioning Works
+
+1. **Stateless Configuration Caching**: Puls keeps track of applied playbooks by storing their hashes under the instance's custom metadata key `puls-provision`. This keeps configuration caching stateless and cloud-native, avoiding any separate database.
+2. **Idempotency**: During deployment, Puls checks if the hashes of your local playbooks match the hashes in the VM metadata. If they match, playbook execution is safely skipped.
+3. **Dynamic Stops and Resizes**: If the `machineType` configuration is modified, Puls will automatically stop the VM instance, apply the new sizing configuration (`setSize`), and restart the VM, returning it to a running state.
 
 ---
 

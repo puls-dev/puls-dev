@@ -46,6 +46,7 @@ Proxmox.VM("ix-sto1-app01")
   .machine("i440fx")          // machine type ("q35" or "i440fx", default "q35")
   .provision("config/default.yaml")   // single script or playbook
   .provision(["common.yml", "app.yml"]) // or multiple files run in order
+  .forceConfigCheck()                 // force playbooks to run even if hashes match
   .replace("ix-sto1-app01-old")       // destroy old VM after new one is up
 ```
 
@@ -119,6 +120,19 @@ This metadata tracks the short SHA-256 hash of each applied playbook.
      .provision("playbooks/nginx.yaml")
      .provision(["playbooks/db.yaml", "playbooks/app.yaml"])
    ```
+5. **Force Re-provisioning (`@ForceConfigCheck` / `.forceConfigCheck()`)**: If you have manually altered a VM or want to ensure a clean slate, you can override state tracking to force all playbooks to run regardless of whether their hashes match.
+   * **Fluent Method**:
+     ```typescript
+     Proxmox.VM("ix-sto1-game01")
+       .provision("config/docker.yaml")
+       .forceConfigCheck(); // <-- Forces playbooks to run
+     ```
+   * **Decorator**:
+     ```typescript
+     @ForceConfigCheck
+     server = Proxmox.VM("ix-sto1-game01")
+       .provision("config/docker.yaml");
+     ```
 
 ### Ansible example (`config/default.yaml`)
 

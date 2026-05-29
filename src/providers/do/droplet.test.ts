@@ -1,8 +1,10 @@
 import { test, describe, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs';
-import { DropletBuilder } from './droplet.js';
+import { DropletBuilder, generateDropletTagForProvision } from './droplet.js';
 import { Config } from '../../core/config.js';
+import { Output } from '../../core/output.js';
+import { getFileHash } from '../proxmox/hash.js';
 
 describe('DropletBuilder Unit Tests', () => {
   let originalFetch: typeof globalThis.fetch;
@@ -305,5 +307,261 @@ describe('DropletBuilder Unit Tests', () => {
     const deleteCall = fetchCalls.find(c => c.method === 'DELETE');
     assert.ok(deleteCall);
     assert.ok(deleteCall.url.endsWith('/droplets/123'));
+  });
+
+  test('creates droplet inside a VPC', async () => {
+    mockResponses['GET /droplets'] = {
+      status: 200,
+      body: { droplets: [] }
+    };
+    mockResponses['POST /droplets'] = {
+      status: 202,
+      body: {
+        droplet: {
+          id: 12345,
+          name: 'vpc-droplet',
+          status: 'active',
+          networks: {
+            v4: [{ ip_address: '10.10.10.5', type: 'public' }]
+          }
+        }
+      }
+    };
+    mockResponses['GET /droplets/12345'] = {
+      status: 200,
+      body: {
+        droplet: {
+          id: 12345,
+          name: 'vpc-droplet',
+          status: 'active',
+          networks: {
+            v4: [{ ip_address: '10.10.10.5', type: 'public' }]
+          }
+        }
+      }
+    };
+
+    const builder = new DropletBuilder('vpc-droplet');
+    builder
+      .region('nyc3')
+      .size('s-1vcpu-1gb')
+      .vpc('my-vpc-uuid-xyz');
+
+    await builder.deploy();
+
+    const dropletCreateCall = fetchCalls.find(c => c.method === 'POST' && c.url.includes('/droplets'));
+    assert.ok(dropletCreateCall);
+    assert.strictEqual(dropletCreateCall.body.vpc_uuid, 'my-vpc-uuid-xyz');
+  });
+
+  test('creates droplet inside a VPC using an Output value', async () => {
+    mockResponses['GET /droplets'] = {
+      status: 200,
+      body: { droplets: [] }
+    };
+    mockResponses['POST /droplets'] = {
+      status: 202,
+      body: {
+        droplet: {
+          id: 12345,
+          name: 'vpc-droplet-output',
+          status: 'active',
+          networks: {
+            v4: [{ ip_address: '10.10.10.6', type: 'public' }]
+          }
+        }
+      }
+    };
+    mockResponses['GET /droplets/12345'] = {
+      status: 200,
+      body: {
+        droplet: {
+          id: 12345,
+          name: 'vpc-droplet-output',
+          status: 'active',
+          networks: {
+            v4: [{ ip_address: '10.10.10.6', type: 'public' }]
+          }
+        }
+      }
+    };
+
+    const vpcIdOutput = new Output<string>();
+    vpcIdOutput.resolve('my-vpc-uuid-abc');
+
+    const builder = new DropletBuilder('vpc-droplet-output');
+    builder
+      .region('nyc3')
+      .size('s-1vcpu-1gb')
+      .vpc(vpcIdOutput);
+
+    await builder.deploy();
+
+    const dropletCreateCall = fetchCalls.find(c => c.method === 'POST' && c.url.includes('/droplets'));
+    assert.ok(dropletCreateCall);
+    assert.strictEqual(dropletCreateCall.body.vpc_uuid, 'my-vpc-uuid-abc');
+  });
+
+  test('deploys new droplet with playbooks and registers initial tags', async () => {
+    mockResponses['GET /droplets'] = {
+      status: 200,
+      body: { droplets: [] }
+    };
+    mockResponses['POST /droplets'] = {
+      status: 202,
+      body: {
+        droplet: {
+          id: 12345,
+          name: 'prov-droplet',
+          status: 'active',
+          networks: {
+            v4: [{ ip_address: '1.2.3.4', type: 'public' }]
+          }
+        }
+      }
+    };
+    mockResponses['GET /droplets/12345'] = {
+      status: 200,
+      body: {
+        droplet: {
+          id: 12345,
+          name: 'prov-droplet',
+          status: 'active',
+          networks: {
+            v4: [{ ip_address: '1.2.3.4', type: 'public' }]
+          }
+        }
+      }
+    };
+
+    const builder = new DropletBuilder('prov-droplet')
+      .provision('playbooks/nginx.yaml', 'playbooks/db.yaml');
+
+    const provisionCalls: string[] = [];
+    (builder as any).waitFor = async (label: string, condition: () => Promise<boolean>) => {
+      return await condition();
+    };
+    (builder as any).checkPort = async () => true;
+    (builder as any).runProvisioner = async (ip: string, script: string) => {
+      provisionCalls.push(script);
+    };
+
+    await builder.deploy();
+
+    // Verify playbooks were executed
+    assert.strictEqual(provisionCalls.length, 2);
+    assert.strictEqual(provisionCalls[0], 'playbooks/nginx.yaml');
+    assert.strictEqual(provisionCalls[1], 'playbooks/db.yaml');
+
+    // Verify initial tags were posted during creation
+    const createCall = fetchCalls.find(c => c.method === 'POST' && c.url.includes('/droplets'));
+    assert.ok(createCall);
+    const expectedTag1 = generateDropletTagForProvision('playbooks/nginx.yaml', getFileHash('playbooks/nginx.yaml'));
+    const expectedTag2 = generateDropletTagForProvision('playbooks/db.yaml', getFileHash('playbooks/db.yaml'));
+    assert.deepStrictEqual(createCall.body.tags, [expectedTag1, expectedTag2]);
+  });
+
+  test('deploys existing droplet and skips playbooks if hashes match', async () => {
+    const nginxTag = generateDropletTagForProvision('playbooks/nginx.yaml', getFileHash('playbooks/nginx.yaml'));
+    
+    mockResponses['GET /droplets'] = {
+      status: 200,
+      body: {
+        droplets: [
+          {
+            id: 12345,
+            name: 'existing-prov-droplet',
+            status: 'active',
+            size_slug: 's-1vcpu-1gb',
+            region: { slug: 'nyc3' },
+            networks: {
+              v4: [{ ip_address: '1.2.3.4', type: 'public' }]
+            },
+            tags: [nginxTag]
+          }
+        ]
+      }
+    };
+
+    const builder = new DropletBuilder('existing-prov-droplet')
+      .provision('playbooks/nginx.yaml');
+
+    const provisionCalls: string[] = [];
+    (builder as any).runProvisioner = async (ip: string, script: string) => {
+      provisionCalls.push(script);
+    };
+
+    await builder.deploy();
+
+    // No playbooks should run
+    assert.strictEqual(provisionCalls.length, 0);
+
+    // No POST/DELETE tags calls
+    const writeCalls = fetchCalls.filter(c => c.method === 'POST' && c.url.includes('/tags'));
+    assert.strictEqual(writeCalls.length, 0);
+  });
+
+  test('deploys existing droplet and runs playbooks if hash is missing or different, updating tags', async () => {
+    const oldNginxTag = generateDropletTagForProvision('playbooks/nginx.yaml', 'abc123123123');
+
+    mockResponses['GET /droplets'] = {
+      status: 200,
+      body: {
+        droplets: [
+          {
+            id: 12345,
+            name: 'existing-diff-droplet',
+            status: 'active',
+            size_slug: 's-1vcpu-1gb',
+            region: { slug: 'nyc3' },
+            networks: {
+              v4: [{ ip_address: '1.2.3.4', type: 'public' }]
+            },
+            tags: [oldNginxTag]
+          }
+        ]
+      }
+    };
+    mockResponses['POST /tags'] = { status: 201, body: {} };
+    mockResponses['POST /tags/'] = { status: 200, body: {} };
+    mockResponses['DELETE /tags/'] = { status: 204, body: {} };
+
+    const builder = new DropletBuilder('existing-diff-droplet')
+      .provision('playbooks/nginx.yaml');
+
+    const provisionCalls: string[] = [];
+    (builder as any).waitFor = async (label: string, condition: () => Promise<boolean>) => {
+      return await condition();
+    };
+    (builder as any).checkPort = async () => true;
+    (builder as any).runProvisioner = async (ip: string, script: string) => {
+      provisionCalls.push(script);
+    };
+
+    await builder.deploy();
+
+    // Playbook should run
+    assert.strictEqual(provisionCalls.length, 1);
+    assert.strictEqual(provisionCalls[0], 'playbooks/nginx.yaml');
+
+    // Should have deleted old tag
+    const deleteTagCall = fetchCalls.find(c => c.method === 'DELETE' && c.url.includes('/tags/puls-h-nginx-yaml-abc123123123/resources'));
+    assert.ok(deleteTagCall);
+    assert.deepStrictEqual(deleteTagCall.body, {
+      resources: [{ id: '12345', type: 'droplet' }]
+    });
+
+    // Should have ensured new tag exists
+    const createTagCall = fetchCalls.find(c => c.method === 'POST' && c.url.endsWith('/tags') && c.body?.name?.startsWith('puls-h-nginx-yaml-'));
+    assert.ok(createTagCall);
+
+    // Should have tagged the resource
+    const newHash = getFileHash('playbooks/nginx.yaml');
+    const newTag = generateDropletTagForProvision('playbooks/nginx.yaml', newHash);
+    const associateCall = fetchCalls.find(c => c.method === 'POST' && c.url.includes(`/tags/${newTag}/resources`));
+    assert.ok(associateCall);
+    assert.deepStrictEqual(associateCall.body, {
+      resources: [{ id: '12345', type: 'droplet' }]
+    });
   });
 });

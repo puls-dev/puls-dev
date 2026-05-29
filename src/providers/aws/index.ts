@@ -11,6 +11,7 @@ import { SecretsBuilder } from "./secrets.js";
 import { IAMRoleBuilder, IAMPolicyBuilder } from "./iam.js";
 import { SNSTopicBuilder } from "./sns.js";
 import { CloudWatchAlarmBuilder } from "./cloudwatch.js";
+import { EC2VMBuilder } from "./ec2.js";
 
 export const AWS = {
   init: (opts: { region: string }) => {
@@ -34,6 +35,7 @@ export const AWS = {
   IAMPolicy: (name: string) => new IAMPolicyBuilder(name),
   SNS: (name: string) => new SNSTopicBuilder(name),
   Alarm: (name: string) => new CloudWatchAlarmBuilder(name),
+  EC2: (name: string) => new EC2VMBuilder(name),
 };
 
 export * from "../../types/aws.js";

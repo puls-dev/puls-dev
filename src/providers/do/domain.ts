@@ -3,6 +3,7 @@ import { Output } from "../../core/output.js";
 import { DropletBuilder } from "./droplet.js";
 import { CertificateBuilder } from "./certificate.js";
 import { getDoApi } from "./api.js";
+import { loadRecordsFromFile } from "../../core/parser.js";
 
 export interface DNSRecord {
   type: "A" | "CNAME" | "TXT" | "MX" | "AAAA" | "SRV" | "CAA";
@@ -37,6 +38,58 @@ export class DomainBuilder extends BaseBuilder {
   withSSL() {
     const cert = new CertificateBuilder(this.domainName);
     this.sidecars.push(cert);
+    return this;
+  }
+
+  record(filePath: string): this;
+  record(
+    name: string,
+    type: DNSRecord["type"],
+    value: string | DropletBuilder | Output<string>,
+    ttl?: number,
+    priority?: number,
+    port?: number,
+    weight?: number,
+    flags?: number,
+    tag?: string
+  ): this;
+  record(
+    nameOrPath: string,
+    type?: DNSRecord["type"],
+    value?: string | DropletBuilder | Output<string>,
+    ttl?: number,
+    priority?: number,
+    port?: number,
+    weight?: number,
+    flags?: number,
+    tag?: string
+  ) {
+    if (arguments.length === 1 && typeof nameOrPath === "string" && (nameOrPath.endsWith(".yaml") || nameOrPath.endsWith(".yml") || nameOrPath.endsWith(".json"))) {
+      const loaded = loadRecordsFromFile(nameOrPath);
+      for (const r of loaded) {
+        this.records.push({
+          name: r.name,
+          type: r.type,
+          value: r.value,
+          priority: r.priority,
+          port: r.port,
+          weight: r.weight,
+          flags: r.flags,
+          tag: r.tag,
+        });
+      }
+      return this;
+    }
+    this.records.push({
+      name: nameOrPath,
+      type: type!,
+      value: value!,
+      priority,
+      port,
+      weight,
+      flags,
+      tag,
+    });
     return this;
   }
 

@@ -4,6 +4,7 @@ import { GCPSecretBuilder, resolveGCPEnvVars } from './secrets.js';
 import { GCPPubSubTopicBuilder, GCPPubSubSubscriptionBuilder } from './pubsub.js';
 import { GCPCloudDNSZoneBuilder } from './clouddns.js';
 import { GCPServiceAccountBuilder, GCPIAMBindingBuilder } from './iam.js';
+import { GCPVMBuilder } from './vm.js';
 
 export {
   GCPSecretBuilder,
@@ -12,7 +13,8 @@ export {
   GCPPubSubSubscriptionBuilder,
   GCPCloudDNSZoneBuilder,
   GCPServiceAccountBuilder,
-  GCPIAMBindingBuilder
+  GCPIAMBindingBuilder,
+  GCPVMBuilder
 };
 
 export const GCP = {
@@ -26,6 +28,7 @@ export const GCP = {
     Topic: (topicId: string) => new GCPPubSubTopicBuilder(topicId),
     Subscription: (subscriptionId: string) => new GCPPubSubSubscriptionBuilder(subscriptionId),
   },
+  VM: (instanceId: string) => new GCPVMBuilder(instanceId),
 };
 
 

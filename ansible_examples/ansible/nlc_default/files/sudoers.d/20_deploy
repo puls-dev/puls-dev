@@ -1,0 +1,1 @@
+deploy ALL=NOPASSWD: rsync, systemctl list-unit-files, systemctl -q stop, systemctl -q disable

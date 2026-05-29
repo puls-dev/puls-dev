@@ -7,6 +7,7 @@ import { Checker } from "./checker.js";
 type ProviderOpts = {
   token?: string;
   region?: string;
+  regions?: string[];
   dryRun?: boolean;
   firebase?: string; // path to service account JSON file
   proxmox?: {
@@ -54,6 +55,10 @@ export function Protected(target: any, propertyKey: string) {
   Reflect.defineMetadata("protected", true, target, propertyKey);
 }
 
+export function ForceConfigCheck(target: any, propertyKey: string) {
+  Reflect.defineMetadata("forceConfigCheck", true, target, propertyKey);
+}
+
 // Property decorator: @Destroy on a field inside a Stack
 export function Destroy(target: any, propertyKey: string): void;
 // Class decorator without options: @Destroy
@@ -74,26 +79,52 @@ export function Destroy(optsOrTarget: any, propertyKey?: string): any {
     return;
   }
   return function (constructor: any) {
-    applyConfig(optsOrTarget);
-    const instance = new constructor();
-    Stack._register(constructor, instance);
-    Promise.resolve().then(async () => {
-      if (typeof instance.destroy === "function") await instance.destroy();
-    });
+    const regions = optsOrTarget.regions ?? [];
+    if (regions.length > 0) {
+      Promise.resolve().then(async () => {
+        for (const r of regions) {
+          console.log(`\n🌍 [MULTI-REGION] Tearing down stack in region: ${r}`);
+          applyConfig({ ...optsOrTarget, region: r });
+          const instance = new constructor();
+          Stack._register(constructor, instance, r);
+          if (typeof instance.destroy === "function") await instance.destroy();
+        }
+      });
+    } else {
+      applyConfig(optsOrTarget);
+      const instance = new constructor();
+      Stack._register(constructor, instance);
+      Promise.resolve().then(async () => {
+        if (typeof instance.destroy === "function") await instance.destroy();
+      });
+    }
   };
 }
 
 // THE "MAGIC": Auto-executing Stack Decorator
 export function Deploy(opts: ProviderOpts = {}) {
   return function (constructor: any) {
-    applyConfig(opts);
-    // Instantiate synchronously so resource discovery kicks off immediately and
-    // other stacks can call Stack.from(ThisClass) to reference its Output fields.
-    const instance = new constructor();
-    Stack._register(constructor, instance);
-    Promise.resolve().then(async () => {
-      if (typeof instance.deploy === "function") await instance.deploy();
-    });
+    const regions = opts.regions ?? [];
+    if (regions.length > 0) {
+      Promise.resolve().then(async () => {
+        for (const r of regions) {
+          console.log(`\n🌍 [MULTI-REGION] Deploying stack to region: ${r}`);
+          applyConfig({ ...opts, region: r });
+          const instance = new constructor();
+          Stack._register(constructor, instance, r);
+          if (typeof instance.deploy === "function") {
+            await instance.deploy();
+          }
+        }
+      });
+    } else {
+      applyConfig(opts);
+      const instance = new constructor();
+      Stack._register(constructor, instance);
+      Promise.resolve().then(async () => {
+        if (typeof instance.deploy === "function") await instance.deploy();
+      });
+    }
   };
 }
 

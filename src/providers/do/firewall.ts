@@ -1,5 +1,6 @@
 import { BaseBuilder } from '../../core/resource.js';
 import { getDoApi } from './api.js';
+import { loadRecordsFromFile } from '../../core/parser.js';
 
 export interface FirewallRule {
   type: 'ingress' | 'egress';
@@ -10,7 +11,7 @@ export interface FirewallRule {
 }
 
 export class FirewallBuilder extends BaseBuilder {
-  private rules: FirewallRule[] = [];
+  private _rules: FirewallRule[] = [];
   private dropletNames: string[] = [];
 
   constructor(name: string) {
@@ -25,12 +26,26 @@ export class FirewallBuilder extends BaseBuilder {
   }
 
   ingress(protocol: 'tcp' | 'udp' | 'icmp', port: number | string, sources: string[]) {
-    this.rules.push({ type: 'ingress', protocol, port, sources });
+    this._rules.push({ type: 'ingress', protocol, port, sources });
     return this;
   }
 
   egress(protocol: 'tcp' | 'udp' | 'icmp', port: number | string, destinations: string[]) {
-    this.rules.push({ type: 'egress', protocol, port, destinations });
+    this._rules.push({ type: 'egress', protocol, port, destinations });
+    return this;
+  }
+
+  rules(filePath: string) {
+    const loaded = loadRecordsFromFile(filePath);
+    for (const r of loaded) {
+      this._rules.push({
+        type: r.type,
+        protocol: r.protocol,
+        port: r.port,
+        sources: r.sources,
+        destinations: r.destinations,
+      });
+    }
     return this;
   }
 
@@ -50,7 +65,7 @@ export class FirewallBuilder extends BaseBuilder {
   }
 
   private buildApiRules() {
-    const inbound = this.rules
+    const inbound = this._rules
       .filter(r => r.type === 'ingress')
       .map(r => ({
         protocol: r.protocol,
@@ -58,7 +73,7 @@ export class FirewallBuilder extends BaseBuilder {
         sources: { addresses: r.sources ?? [] },
       }));
 
-    const outbound = this.rules
+    const outbound = this._rules
       .filter(r => r.type === 'egress')
       .map(r => ({
         protocol: r.protocol,
@@ -77,12 +92,12 @@ export class FirewallBuilder extends BaseBuilder {
     console.log(`\n🛡️  Finalizing firewall "${this.name}"...`);
 
     if (dryRun) {
-      this.rules.forEach(r => {
+      this._rules.forEach(r => {
         const dir = r.type === 'ingress' ? 'from' : 'to';
         const targets = r.type === 'ingress' ? r.sources : r.destinations;
         console.log(`   📝 [PLAN] ${r.type.toUpperCase()}: ${r.protocol.toUpperCase()} ${r.port} ${dir} [${targets?.join(', ')}]`);
       });
-      return { name: this.name, rules: this.rules };
+      return { name: this.name, rules: this._rules };
     }
 
     const dropletIds = await this.resolveDropletIds(api);
@@ -106,12 +121,12 @@ export class FirewallBuilder extends BaseBuilder {
       console.log(`🚀 Created firewall ${this.name} (id=${result.firewall.id})`);
     }
 
-    this.rules.forEach(r => {
+    this._rules.forEach(r => {
       const dir = r.type === 'ingress' ? 'from' : 'to';
       const targets = r.type === 'ingress' ? r.sources : r.destinations;
       console.log(`   ✅ ${r.type.toUpperCase()}: ${r.protocol.toUpperCase()} ${r.port} ${dir} [${targets?.join(', ')}]`);
     });
 
-    return { name: this.name, rules: this.rules };
+    return { name: this.name, rules: this._rules };
   }
 }

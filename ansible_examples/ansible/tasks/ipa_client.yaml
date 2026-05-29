@@ -1,0 +1,4 @@
+---
+- name: Import nlc_ipaclient role
+  ansible.builtin.import_role:
+    name: nlc_ipaclient

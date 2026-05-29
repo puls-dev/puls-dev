@@ -2,13 +2,13 @@ import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { spawn } from "node:child_process";
 import { dirname } from "node:path";
-import { createConnection } from "node:net";
 import { BaseBuilder } from "../../core/resource.js";
 import { Config } from "../../core/config.js";
 import { Output } from "../../core/output.js";
 import { getPMClient, ProxmoxApiClient } from "./api.js";
 import type { OSImage } from "../../types/proxmox.js";
 import { getFileHash, parseProvisionMetadata, mergeProvisionMetadata } from "./hash.js";
+import { checkPort, runProvisioner } from "../../core/provisioner.js";
 
 export class VMBuilder extends BaseBuilder {
   readonly out = {
@@ -31,6 +31,7 @@ export class VMBuilder extends BaseBuilder {
   private _ip?: string;
   private _sshKeys?: string | string[];
   private _machine: "q35" | "i440fx" = "q35";
+  private _forceConfigCheck: boolean = false;
 
   constructor(name: string) {
     super(name);
@@ -102,6 +103,10 @@ export class VMBuilder extends BaseBuilder {
     this._machine = type;
     return this;
   }
+  forceConfigCheck() {
+    this._forceConfigCheck = true;
+    return this;
+  }
 
   async deploy() {
     const dryRun = this.isDryRunActive();
@@ -128,10 +133,12 @@ export class VMBuilder extends BaseBuilder {
         return { path: p, baseName, hash: getFileHash(p) };
       });
 
-      const playbooksToRun = declaredPlaybooksWithHashes.filter((p) => {
-        const appliedHash = appliedHashes[p.baseName];
-        return !appliedHash || appliedHash !== p.hash;
-      });
+      const playbooksToRun = this._forceConfigCheck
+        ? declaredPlaybooksWithHashes
+        : declaredPlaybooksWithHashes.filter((p) => {
+            const appliedHash = appliedHashes[p.baseName];
+            return !appliedHash || appliedHash !== p.hash;
+          });
 
       if (playbooksToRun.length > 0) {
         console.log(`\n🖥️  Finalizing Proxmox VM "${this.name}"...`);
@@ -596,19 +603,12 @@ export class VMBuilder extends BaseBuilder {
     });
   }
 
-  private checkPort(ip: string, port: number): Promise<boolean> {
-    return new Promise((resolve) => {
-      const socket = createConnection({ host: ip, port, timeout: 3_000 });
-      socket.on("connect", () => {
-        socket.destroy();
-        resolve(true);
-      });
-      socket.on("timeout", () => {
-        socket.destroy();
-        resolve(false);
-      });
-      socket.on("error", () => resolve(false));
-    });
+  protected async checkPort(ip: string, port: number): Promise<boolean> {
+    return checkPort(ip, port);
+  }
+
+  protected async runProvisioner(ip: string, script: string): Promise<void> {
+    return runProvisioner(ip, "root", this._sshKeys, script);
   }
 
   private sshKeyPath(): string {
@@ -623,101 +623,5 @@ export class VMBuilder extends BaseBuilder {
         ? keyInput.replace(/\.pub$/, "")
         : `${homedir()}/.ssh/id_ed25519`
     ).replace(/^~/, homedir());
-  }
-
-  private runProvisioner(ip: string, script: string): Promise<void> {
-    const ext = script.split(".").pop()?.toLowerCase();
-
-    if (ext === "sh") {
-      throw new Error(
-        `Shell script provisioning (.sh) is no longer supported. ` +
-          `Please migrate "${script}" to an Ansible playbook (.yaml/.yml).`,
-      );
-    }
-    if (ext === "pp") return this.runPuppet(ip, script);
-    return this.runAnsible(ip, script); // .yml / .yaml
-  }
-
-  private runPuppet(ip: string, manifest: string): Promise<void> {
-    console.log(`   🔧 Applying Puppet manifest: ${manifest} → ${ip}`);
-    const keyPath = this.sshKeyPath();
-    // Copy manifest then apply it
-    return new Promise((resolve, reject) => {
-      const scp = spawn(
-        "scp",
-        [
-          "-i",
-          keyPath,
-          "-o",
-          "StrictHostKeyChecking=no",
-          manifest,
-          `root@${ip}:/tmp/manifest.pp`,
-        ],
-        { stdio: "inherit" },
-      );
-
-      scp.on("close", (code) => {
-        if (code !== 0) {
-          reject(new Error(`scp exited with code ${code}`));
-          return;
-        }
-        const puppet = spawn(
-          "ssh",
-          [
-            "-i",
-            keyPath,
-            "-o",
-            "StrictHostKeyChecking=no",
-            `root@${ip}`,
-            "puppet apply /tmp/manifest.pp",
-          ],
-          { stdio: "inherit" },
-        );
-        puppet.on("close", (c) => {
-          if (c === 0) {
-            console.log(`   ✅ Provisioning complete`);
-            resolve();
-          } else reject(new Error(`puppet apply exited with code ${c}`));
-        });
-        puppet.on("error", (err) =>
-          reject(new Error(`Failed to run puppet: ${err.message}`)),
-        );
-      });
-      scp.on("error", (err) =>
-        reject(new Error(`Failed to run scp: ${err.message}`)),
-      );
-    });
-  }
-
-  private runAnsible(ip: string, playbook: string): Promise<void> {
-    console.log(`   🔧 Running Ansible: ${playbook} → ${ip}`);
-    const keyPath = this.sshKeyPath();
-    return new Promise((resolve, reject) => {
-      const proc = spawn(
-        "ansible-playbook",
-        [
-          playbook,
-          "-i",
-          `${ip},`,
-          "-u",
-          "root",
-          "--private-key",
-          keyPath,
-          "--ssh-extra-args",
-          "-o StrictHostKeyChecking=no -o ConnectTimeout=30",
-        ],
-        { stdio: "inherit" },
-      );
-      proc.on("close", (code) => {
-        if (code === 0) {
-          console.log(`   ✅ Provisioning complete`);
-          resolve();
-        } else reject(new Error(`ansible-playbook exited with code ${code}`));
-      });
-
-      proc.on("error", (err) =>
-        reject(new Error(`Failed to run ansible-playbook: ${err.message}`)),
-      );
-    });
   }
 }

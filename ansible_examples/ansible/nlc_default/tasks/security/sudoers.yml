@@ -1,0 +1,24 @@
+- name: Add DNS sudoers
+  ansible.builtin.copy:
+    src: files/sudoers.d/{{ item }}
+    dest: /etc/sudoers.d/{{ item }}
+    mode: "0440"
+    owner: root
+    group: root
+  with_items:
+    - 10_dns
+    - 10_admin
+    - 10_sudo
+  when: inventory_hostname == 'ix-sto1-ns01.nolimit.int'
+
+- name: Configure /etc/sudoers.d/
+  ansible.builtin.copy:
+    src: files/sudoers.d/{{ item }}
+    dest: /etc/sudoers.d/{{ item }}
+    mode: "0440"
+    owner: root
+    group: root
+  with_items:
+    - 10_admin
+    - 10_sudo
+  when: inventory_hostname != 'ix-sto1-ns01.nolimit.int'

@@ -14,7 +14,6 @@ theme:
     text: Inter
     code: JetBrains Mono
   features:
-    - navigation.tabs
     - navigation.sections
     - navigation.top
     - content.code.copy
@@ -40,6 +39,9 @@ nav:
   - Getting Started: getting-started.md
   - Concepts: concepts.md
   - Decorators: decorators.md
+  - Lifecycle Hooks: hooks.md
+  - Secrets at Deploy Time: secrets.md
+  - Multi-Region Deployments: multiregion.md
   - Providers:
       - AWS: providers/aws.md
       - Proxmox: providers/proxmox.md

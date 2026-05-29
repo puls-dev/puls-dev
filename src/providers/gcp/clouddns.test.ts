@@ -1,5 +1,7 @@
 import { test, describe, beforeEach, afterEach, mock } from "node:test";
 import assert from "node:assert";
+import fs from "node:fs";
+import path from "node:path";
 import { GoogleAuth } from "google-auth-library";
 import { GCPCloudDNSZoneBuilder } from "./clouddns.js";
 import { Config } from "../../core/config.js";
@@ -303,5 +305,53 @@ describe("GCPCloudDNSZoneBuilder Unit Tests", () => {
     // Verify Zone DELETE
     const deleteCall = fetchCalls.find((c) => c.method === "DELETE" && c.url.endsWith("/managedZones/to-delete-com"));
     assert.ok(deleteCall);
+  });
+
+  test("loads records from a configuration file (YAML) successfully", async () => {
+    // 1. Zone exists
+    mockResponses["GET /managedZones/file-zone-com"] = {
+      status: 200,
+      body: { name: "file-zone-com" },
+    };
+    mockResponses["GET /managedZones/file-zone-com/rrsets"] = { status: 200, body: { rrsets: [] } };
+    mockResponses["POST /managedZones/file-zone-com/changes"] = { status: 200, body: {} };
+
+    // 2. Mock YAML file creation
+    const tempYamlPath = path.resolve(process.cwd(), "temp-dns-records.yaml");
+    const yamlContent = `
+- name: www
+  type: CNAME
+  value: lb.google.com
+- name: mail
+  type: A
+  value: 1.2.3.4
+  ttl: 600
+`;
+    fs.writeFileSync(tempYamlPath, yamlContent, "utf-8");
+
+    try {
+      const builder = new GCPCloudDNSZoneBuilder("file-zone.com")
+        .record("temp-dns-records.yaml")
+        .record("api", "A", "10.0.0.9", 120); // Hybrid programmatic record!
+
+      const result = await builder.deploy();
+      assert.strictEqual(result.records.length, 3);
+
+      const wwwRec = result.records.find((r) => r.name === "www.file-zone.com.");
+      assert.ok(wwwRec);
+      assert.strictEqual(wwwRec.type, "CNAME");
+      assert.deepStrictEqual(wwwRec.rrdatas, ["lb.google.com."]);
+
+      const mailRec = result.records.find((r) => r.name === "mail.file-zone.com.");
+      assert.ok(mailRec);
+      assert.strictEqual(mailRec.type, "A");
+      assert.strictEqual(mailRec.ttl, 600);
+
+      const apiRec = result.records.find((r) => r.name === "api.file-zone.com.");
+      assert.ok(apiRec);
+      assert.strictEqual(apiRec.ttl, 120);
+    } finally {
+      if (fs.existsSync(tempYamlPath)) fs.unlinkSync(tempYamlPath);
+    }
   });
 });

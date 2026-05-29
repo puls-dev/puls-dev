@@ -8,6 +8,8 @@ import { FirewallBuilder } from './firewall.js';
 import { DomainBuilder } from './domain.js';
 import { LoadBalancerBuilder } from './load_balancer.js';
 import { getDoApi, DoApiClient } from './api.js';
+import { checkPort, runProvisioner } from '../../core/provisioner.js';
+import { getFileHash } from '../proxmox/hash.js';
 
 export class DropletBuilder extends BaseBuilder {
   readonly out = {
@@ -24,6 +26,8 @@ export class DropletBuilder extends BaseBuilder {
   private dropletId?: number;
   private resolvedIp?: string;
   private sshKeyPath?: string;
+  private _provision: string[] = [];
+  private _forceConfigCheck: boolean = false;
 
   constructor(name: string) {
     super(name);
@@ -79,6 +83,30 @@ export class DropletBuilder extends BaseBuilder {
     return this;
   }
 
+  vpc(uuid: string | Output<string>) {
+    this.config.vpc_uuid = uuid;
+    return this;
+  }
+
+  provision(...playbookPaths: (string | string[])[]) {
+    this._provision.push(...playbookPaths.flat());
+    return this;
+  }
+
+  forceConfigCheck() {
+    this._forceConfigCheck = true;
+    return this;
+  }
+
+  protected async checkPort(ip: string, port: number): Promise<boolean> {
+    return checkPort(ip, port);
+  }
+
+  protected async runProvisioner(ip: string, script: string): Promise<void> {
+    const keyPath = this.sshKeyPath ? this.sshKeyPath : undefined;
+    return runProvisioner(ip, "root", keyPath, script);
+  }
+
   private async resolveOrRegisterSshKey(api: DoApiClient): Promise<number> {
     const pubPath = this.sshKeyPath!.replace(/\.pub$/, '') + '.pub';
     const pubKey = fs.readFileSync(pubPath, 'utf8').trim();
@@ -104,15 +132,48 @@ export class DropletBuilder extends BaseBuilder {
 
     if (await this.checkProtection(hasChanges)) return null;
 
+    // Provisioning Calculations
+    const appliedHashes = existing ? parseDropletTagsForProvision(existing.tags || []) : {};
+    const declaredPlaybooksWithHashes = this._provision.map((p) => {
+      const baseName = p.split("/").pop() ?? p;
+      const slug = baseName.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+      return { path: p, slug, hash: getFileHash(p) };
+    });
+
+    const playbooksToRun = this._forceConfigCheck
+      ? declaredPlaybooksWithHashes
+      : declaredPlaybooksWithHashes.filter((p) => {
+          const appliedHash = appliedHashes[p.slug];
+          return !appliedHash || appliedHash !== p.hash;
+        });
+
+    const playbookRunRequired = playbooksToRun.length > 0;
+
     if (dryRun) {
       console.log(`\n🔍 [DRY RUN] "${this.name}"...`);
       if (!existing) {
         const keyHint = this.sshKeyPath ? ` + key ${this.sshKeyPath.split('/').pop()}` : '';
-        console.log(`   📝 Plan: Create droplet ${this.name} (${this.config.size} in ${this.config.region}${keyHint})`);
+        let vpcHint = '';
+        if (this.config.vpc_uuid) {
+          const vpcVal = this.config.vpc_uuid instanceof Output ? 'PENDING' : this.config.vpc_uuid;
+          vpcHint = ` in VPC ${vpcVal}`;
+        }
+        console.log(`   📝 Plan: Create droplet ${this.name} (${this.config.size} in ${this.config.region}${vpcHint}${keyHint})`);
+        if (this._provision.length > 0) {
+          console.log(`      └─ Provision: ${this._provision.join(", ")}`);
+        }
         this.out.id.resolve(-1);
         this.out.ip.resolve('0.0.0.0');
-      } else if (hasChanges) {
-        console.log(`   📝 Plan: Resize ${this.name} → ${this.config.size}`);
+      } else if (hasChanges || playbookRunRequired) {
+        if (hasChanges) {
+          console.log(`   📝 Plan: Resize ${this.name} → ${this.config.size}`);
+        }
+        if (playbookRunRequired) {
+          console.log(`   📝 [PLAN] Run ${playbooksToRun.length} playbook changes on existing droplet:`);
+          for (const p of playbooksToRun) {
+            console.log(`      └─ Playbook: ${p.path} (hash: ${p.hash})`);
+          }
+        }
       } else {
         console.log(`   ✅ ${this.name} is up to date.`);
       }
@@ -124,12 +185,25 @@ export class DropletBuilder extends BaseBuilder {
 
     if (!existing) {
       const sshKeyIds = this.sshKeyPath ? [await this.resolveOrRegisterSshKey(api)] : [];
+      let resolvedVpcUuid: string | undefined;
+      if (this.config.vpc_uuid) {
+        resolvedVpcUuid = this.config.vpc_uuid instanceof Output ? await this.config.vpc_uuid.get() : this.config.vpc_uuid;
+      }
+
+      const initialTags: string[] = [];
+      for (const playbook of this._provision) {
+        const hash = getFileHash(playbook);
+        initialTags.push(generateDropletTagForProvision(playbook, hash));
+      }
+
       const result = await api.post<{ droplet: any }>('/droplets', {
         name: this.name,
         region: this.config.region,
         size: this.config.size,
         image: this.config.image,
         ...(sshKeyIds.length && { ssh_keys: sshKeyIds }),
+        ...(resolvedVpcUuid && { vpc_uuid: resolvedVpcUuid }),
+        ...(initialTags.length && { tags: initialTags }),
       });
       this.dropletId = result.droplet.id;
       this.out.id.resolve(this.dropletId!);
@@ -149,11 +223,72 @@ export class DropletBuilder extends BaseBuilder {
         this.out.ip.resolve(this.resolvedIp);
         console.log(`   🌐 Public IP: ${this.resolvedIp}`);
       }
-    } else if (hasChanges) {
-      console.log(`✨ Resizing ${this.name} → ${this.config.size}...`);
-      await api.post(`/droplets/${this.dropletId}/actions`, { type: 'resize', size: this.config.size });
+
+      if (this._provision.length > 0) {
+        const activeIp = this.resolvedIp ?? '0.0.0.0';
+        if (activeIp === '0.0.0.0') {
+          throw new Error(`Failed to resolve IP for new droplet "${this.name}" to run playbooks`);
+        }
+
+        await this.waitFor(
+          `SSH on ${activeIp} to be ready`,
+          () => this.checkPort(activeIp, 22),
+          { intervalMs: 10_000, timeoutMs: 300_000 }
+        );
+
+        for (const playbook of this._provision) {
+          await this.runProvisioner(activeIp, playbook);
+        }
+      }
     } else {
-      console.log(`✅ ${this.name} is up to date.`);
+      if (hasChanges) {
+        console.log(`✨ Resizing ${this.name} → ${this.config.size}...`);
+        await api.post(`/droplets/${this.dropletId}/actions`, { type: 'resize', size: this.config.size });
+      }
+
+      if (playbookRunRequired) {
+        console.log(`   🔄 Running ${playbooksToRun.length} playbook changes...`);
+        const activeIp = this.resolvedIp ?? '0.0.0.0';
+        if (activeIp === '0.0.0.0') {
+          throw new Error(`Failed to resolve IP for existing droplet "${this.name}" to run playbooks`);
+        }
+
+        await this.waitFor(
+          `SSH on ${activeIp} to be ready`,
+          () => this.checkPort(activeIp, 22),
+          { intervalMs: 10_000, timeoutMs: 300_000 }
+        );
+
+        for (const p of playbooksToRun) {
+          await this.runProvisioner(activeIp, p.path);
+
+          // Update tags on DigitalOcean Droplet
+          const oldHash = appliedHashes[p.slug];
+          if (oldHash) {
+            const oldTag = `puls-h-${p.slug}-${oldHash}`;
+            try {
+              await api.delete(`/tags/${encodeURIComponent(oldTag)}/resources`, {
+                resources: [{ id: String(this.dropletId), type: 'droplet' }]
+              });
+            } catch {}
+          }
+
+          const newTag = `puls-h-${p.slug}-${p.hash}`;
+          try {
+            await api.post('/tags', { name: newTag });
+          } catch {}
+          await api.post(`/tags/${encodeURIComponent(newTag)}/resources`, {
+            resources: [{ id: String(this.dropletId), type: 'droplet' }]
+          });
+
+          appliedHashes[p.slug] = p.hash;
+        }
+        console.log(`   ✅ Playbooks applied successfully and metadata updated.`);
+      }
+
+      if (!hasChanges && !playbookRunRequired) {
+        console.log(`✅ ${this.name} is up to date.`);
+      }
     }
 
     for (const sidecar of this.sidecars) await sidecar.deploy();
@@ -196,3 +331,21 @@ export const DO = {
   Domain: (name: string) => new DomainBuilder(name),
   LoadBalancer: (name: string) => new LoadBalancerBuilder(name),
 };
+
+export function parseDropletTagsForProvision(tags: string[]): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const tag of tags) {
+    const match = tag.match(/^puls-h-([a-zA-Z0-9_-]+)-([a-f0-9]{12})$/);
+    if (match) {
+      const [_, playbookName, hash] = match;
+      result[playbookName] = hash;
+    }
+  }
+  return result;
+}
+
+export function generateDropletTagForProvision(playbook: string, hash: string): string {
+  const baseName = playbook.split('/').pop() ?? playbook;
+  const slug = baseName.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+  return `puls-h-${slug}-${hash}`;
+}

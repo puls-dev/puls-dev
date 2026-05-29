@@ -1,5 +1,7 @@
 import { test, describe, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert';
+import fs from 'node:fs';
+import path from 'node:path';
 import { Route53Client } from '@aws-sdk/client-route-53';
 import { Route53DomainsClient } from '@aws-sdk/client-route-53-domains';
 import { Route53Builder } from './route53.js';
@@ -270,5 +272,57 @@ describe('Route53Builder Unit Tests', () => {
     const pollCall = domainsCalls.filter(c => c.commandName === 'GetOperationDetailCommand');
     assert.strictEqual(pollCall.length, 2);
     assert.strictEqual(pollCall[0].input.OperationId, 'op-registration-abc');
+  });
+
+  test("loads records from a configuration file (JSON) successfully", async () => {
+    mockR53Responses['ListHostedZonesByNameCommand'] = {
+      HostedZones: [{ Id: '/hostedzone/Z123', Name: 'example.com.' }]
+    };
+    mockR53Responses['ChangeResourceRecordSetsCommand'] = {};
+
+    // Mock JSON file creation
+    const tempJsonPath = path.resolve(process.cwd(), "temp-route53-records.json");
+    const jsonContent = JSON.stringify([
+      { name: "www", type: "CNAME", value: "lb.com", ttl: 120 },
+      { name: "mail", type: "A", value: "1.1.1.1" }
+    ]);
+    fs.writeFileSync(tempJsonPath, jsonContent, "utf-8");
+
+    try {
+      const builder = new Route53Builder("example.com")
+        .record("temp-route53-records.json")
+        .record("api", "A", "2.2.2.2"); // Hybrid programmatic record!
+
+      await builder.deploy();
+
+      const changeCall = r53Calls.find(c => c.commandName === 'ChangeResourceRecordSetsCommand');
+      assert.ok(changeCall);
+
+      const changes = changeCall.input.ChangeBatch.Changes;
+      assert.strictEqual(changes.length, 3);
+
+      assert.deepStrictEqual(changes[0].ResourceRecordSet, {
+        Name: "www",
+        Type: "CNAME",
+        TTL: 120,
+        ResourceRecords: [{ Value: "lb.com" }]
+      });
+
+      assert.deepStrictEqual(changes[1].ResourceRecordSet, {
+        Name: "mail",
+        Type: "A",
+        TTL: 300, // default
+        ResourceRecords: [{ Value: "1.1.1.1" }]
+      });
+
+      assert.deepStrictEqual(changes[2].ResourceRecordSet, {
+        Name: "api",
+        Type: "A",
+        TTL: 300,
+        ResourceRecords: [{ Value: "2.2.2.2" }]
+      });
+    } finally {
+      if (fs.existsSync(tempJsonPath)) fs.unlinkSync(tempJsonPath);
+    }
   });
 });

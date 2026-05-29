@@ -6,6 +6,11 @@ export abstract class BaseBuilder {
   protected discoveryPromise!: Promise<any>;
   protected sidecars: BaseBuilder[] = [];
 
+  private _beforeDeployHooks: (() => Promise<void> | void)[] = [];
+  private _afterDeployHooks: ((result: any) => Promise<void> | void)[] = [];
+  private _beforeDestroyHooks: (() => Promise<void> | void)[] = [];
+  private _afterDestroyHooks: ((result: any) => Promise<void> | void)[] = [];
+
   constructor(public name: string) {}
 
   protect() {
@@ -16,6 +21,54 @@ export abstract class BaseBuilder {
   dryRun(enabled: boolean = true) {
     this.localDryRun = enabled;
     return this;
+  }
+
+  beforeDeploy(callback: () => Promise<void> | void) {
+    this._beforeDeployHooks.push(callback);
+    return this;
+  }
+
+  afterDeploy(callback: (result: any) => Promise<void> | void) {
+    this._afterDeployHooks.push(callback);
+    return this;
+  }
+
+  beforeDestroy(callback: () => Promise<void> | void) {
+    this._beforeDestroyHooks.push(callback);
+    return this;
+  }
+
+  afterDestroy(callback: (result: any) => Promise<void> | void) {
+    this._afterDestroyHooks.push(callback);
+    return this;
+  }
+
+  /** @internal */
+  async _runBeforeDeploy() {
+    for (const cb of this._beforeDeployHooks) {
+      await cb();
+    }
+  }
+
+  /** @internal */
+  async _runAfterDeploy(result: any) {
+    for (const cb of this._afterDeployHooks) {
+      await cb(result);
+    }
+  }
+
+  /** @internal */
+  async _runBeforeDestroy() {
+    for (const cb of this._beforeDestroyHooks) {
+      await cb();
+    }
+  }
+
+  /** @internal */
+  async _runAfterDestroy(result: any) {
+    for (const cb of this._afterDestroyHooks) {
+      await cb(result);
+    }
   }
 
   protected isDryRunActive(): boolean {

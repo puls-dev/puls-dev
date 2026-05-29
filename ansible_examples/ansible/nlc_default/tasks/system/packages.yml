@@ -1,0 +1,13 @@
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ nlc_default_packages }}"
+  when: nlc_default_packages is defined && ansible_os_family == 'Ubuntu'
+
+- name: Purge packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ nlc_default_purge_packages }}"
+  when: nlc_default_purge_packages is defined && ansible_os_family == 'Ubuntu'

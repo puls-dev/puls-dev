@@ -1,0 +1,2 @@
+Cmnd_Alias BINDRELOAD=/usr/sbin/rndc reload
+svc-dns-deploy ALL=(root) NOPASSWD: BINDRELOAD

@@ -1,0 +1,80 @@
+# Secrets at Deploy Time
+
+In Puls, managing sensitive credentials (like API keys, private tokens, and database passwords) should be secure and friction-free. Rather than hardcoding credentials into committed git files or managing complex, out-of-sync local `.env` files, Puls supports **Secrets at Deploy Time**.
+
+With this feature, you can dynamically retrieve secrets from secure cloud vaults *during the deployment phase* and pass them directly into resource parameters.
+
+---
+
+## 🔐 The `Secret` API
+
+Puls provides a universal `Secret` class that acts as a secure, lazy wrapper. It supports multiple secret stores out of the box:
+
+```typescript
+import { Secret } from "puls-dev";
+
+// 1. Local environment variable (with optional fallback)
+const stripeKey = Secret.env("STRIPE_API_KEY", "fallback-key");
+
+// 2. AWS Secrets Manager
+const dbPassword = Secret.aws("prod/database/password", { region: "us-east-1" });
+
+// 3. AWS SSM Parameter Store
+const apiKey = Secret.ssm("/prod/api/token");
+
+// 4. GCP Secret Manager
+const jwtSecret = Secret.gcp("jwt-private-key");
+```
+
+---
+
+## 🚀 How to Use Secrets in Stacks
+
+You can pass a `Secret` directly into any resource builder input that expects a string, an Output, or a Secret. The framework handles dynamic dependency resolving automatically under the hood.
+
+### Example: Dynamic Database Provisioning
+
+In the following example, the DigitalOcean database password is securely retrieved from GCP Secret Manager at deploy time:
+
+```typescript
+import { Stack, Deploy, Secret } from "puls-dev";
+import { DO } from "puls-dev/do";
+
+@Deploy({ dryRun: false })
+class CloudStack extends Stack {
+  // Pull database password dynamically from GCP Secret Manager
+  db = DO.Database("prod-db-cluster")
+    .engine("pg")
+    .version("15")
+    .size("db-s-1vcpu-1gb");
+    
+  // You can also pass dynamic secrets to environment variables, API endpoints, etc.
+}
+```
+
+---
+
+## 🔍 How Secrets Behave in Dry-Run
+
+Testing your infrastructure shouldn't require configuring real cloud credentials locally. Puls respects your `.dryRun` configurations completely:
+
+* When `dryRun: true` is active, the dynamic secret fetcher **intercepts any API calls** and immediately resolves to a secure placeholder string:
+  ```typescript
+  `[SECRET:name]`
+  ```
+* No network requests are made, no cloud SDKs are initialized, and no billing tokens are consumed. This allows developers to test full stacks in their local terminal with zero friction:
+
+```bash
+🔍 [DRY RUN] Finalizing GCP VM "my-gcp-vm"...
+   └─ Environment:
+      └─ STRIPE_API_KEY: [SECRET:STRIPE_API_KEY]
+      └─ DB_PASSWORD: [SECRET:prod/database/password]
+```
+
+---
+
+## 🛠️ Zero-Dependency Architecture
+
+To keep the Puls core package ultra-lightweight and prevent startup crashes, **dynamic imports are used under the hood**. 
+
+The heavy AWS SDK or GCP credentials library is *only* imported if and when you explicitly call `Secret.aws()`, `Secret.ssm()`, or `Secret.gcp()`. If you are only deploying to DigitalOcean or Proxmox, you do not need to install AWS or Google packages!
