@@ -4,7 +4,7 @@ Puls provides a robust, asynchronous **Lifecycle Hooks** engine that allows deve
 
 ---
 
-## ⚡ Resource-Level Hooks
+## Resource-Level Hooks
 
 Every resource builder in the Puls framework natively inherits four fluent lifecycle chain methods:
 * `.beforeDeploy(callback)`: Executes *before* the resource's `deploy()` API call.
@@ -31,7 +31,7 @@ class AppStack extends Stack {
 
 ---
 
-## 🏗️ Stack-Level Hooks
+## Stack-Level Hooks
 
 A Puls `Stack` can declare class methods that run at the boundaries of the stack's deployment or teardown lifecycles.
 * `beforeDeploy()`: Runs *before* any resource in the stack is deployed.
@@ -61,7 +61,7 @@ class StagingStack extends Stack {
 
 ---
 
-## 💬 Built-in SLACK Notifications
+## Built-in SLACK Notifications
 
 Puls ships with a ready-to-use **Slack Notifier** helper (`SLACK.notify(webhookUrl)`) that formats structured messages and posts them to your team channels.
 * **Status formatting**: Automatically displays a rocket 🚀 emoji on successful deploys and a trashcan 🗑️ emoji on resource destructions.
@@ -83,7 +83,7 @@ class ProdStack extends Stack {
 
 ---
 
-## 👾 Built-in DISCORD Embed Alerts
+## Built-in DISCORD Embed Alerts
 
 Puls also supports **Discord Webhook** alerts (`DISCORD.notify(webhookUrl)`) styled as highly visual, rich embeds:
 * **Themed Colors**: Displays a green border stripe on deployments and a red border stripe on teardowns.
@@ -107,7 +107,7 @@ class AppStack extends Stack {
 
 ---
 
-## 🔍 How Notifiers Behave in Dry-Run
+## How Notifiers Behave in Dry-Run
 
 Puls respects your `.dryRun` configurations completely:
 * In dry-run mode, resource deploy/destroy calls resolve to placeholder values (`PENDING` or `0.0.0.0`), which are then safely passed to your hooks.

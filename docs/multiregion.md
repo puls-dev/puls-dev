@@ -4,7 +4,7 @@ Puls supports first-class **Multi-Region Deployments** natively in the deploymen
 
 ---
 
-## 🌍 Configuring Multi-Region Stacks
+## Configuring Multi-Region Stacks
 
 You can configure multi-region deployments simply by passing a `regions` array parameter to the class-level `@Deploy` or `@Destroy` decorators:
 
@@ -34,7 +34,7 @@ To prevent configuration race conditions on the global config context and to sta
 
 ---
 
-## 🔍 Referencing Regional Stack Outputs
+## Referencing Regional Stack Outputs
 
 When a stack is deployed across multiple regions, Puls generates a distinct stack instance for each region and indexes them inside the global stack registry under a regional key:
 ```typescript
@@ -68,7 +68,7 @@ class GlobalDashboard extends Stack {
 
 ---
 
-## 💥 Multi-Region Teardown
+## Multi-Region Teardown
 
 Teardowns are declared symmetrically using the `@Destroy` decorator. When `@Destroy` is triggered with multiple regions, Puls cleanly walks the regions list in sequence, setting the correct config region, instantiating the resource mappings, and tearing them down:
 

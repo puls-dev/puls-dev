@@ -6,7 +6,7 @@ With this feature, you can dynamically retrieve secrets from secure cloud vaults
 
 ---
 
-## 🔐 The `Secret` API
+## The `Secret` API
 
 Puls provides a universal `Secret` class that acts as a secure, lazy wrapper. It supports multiple secret stores out of the box:
 
@@ -28,7 +28,7 @@ const jwtSecret = Secret.gcp("jwt-private-key");
 
 ---
 
-## 🚀 How to Use Secrets in Stacks
+## How to Use Secrets in Stacks
 
 You can pass a `Secret` directly into any resource builder input that expects a string, an Output, or a Secret. The framework handles dynamic dependency resolving automatically under the hood.
 
@@ -54,7 +54,7 @@ class CloudStack extends Stack {
 
 ---
 
-## 🔍 How Secrets Behave in Dry-Run
+## How Secrets Behave in Dry-Run
 
 Testing your infrastructure shouldn't require configuring real cloud credentials locally. Puls respects your `.dryRun` configurations completely:
 
@@ -73,7 +73,7 @@ Testing your infrastructure shouldn't require configuring real cloud credentials
 
 ---
 
-## 🛠️ Zero-Dependency Architecture
+## Zero-Dependency Architecture
 
 To keep the Puls core package ultra-lightweight and prevent startup crashes, **dynamic imports are used under the hood**. 
 

@@ -486,12 +486,12 @@
   <a href="#configuring-multi-region-stacks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🌍 Configuring Multi-Region Stacks
+        Configuring Multi-Region Stacks
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="🌍 Configuring Multi-Region Stacks">
+    <nav class="md-nav" aria-label="Configuring Multi-Region Stacks">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -514,7 +514,7 @@
   <a href="#referencing-regional-stack-outputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🔍 Referencing Regional Stack Outputs
+        Referencing Regional Stack Outputs
       
     </span>
   </a>
@@ -525,7 +525,7 @@
   <a href="#multi-region-teardown" class="md-nav__link">
     <span class="md-ellipsis">
       
-        💥 Multi-Region Teardown
+        Multi-Region Teardown
       
     </span>
   </a>
@@ -823,12 +823,12 @@
   <a href="#configuring-multi-region-stacks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🌍 Configuring Multi-Region Stacks
+        Configuring Multi-Region Stacks
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="🌍 Configuring Multi-Region Stacks">
+    <nav class="md-nav" aria-label="Configuring Multi-Region Stacks">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -851,7 +851,7 @@
   <a href="#referencing-regional-stack-outputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🔍 Referencing Regional Stack Outputs
+        Referencing Regional Stack Outputs
       
     </span>
   </a>
@@ -862,7 +862,7 @@
   <a href="#multi-region-teardown" class="md-nav__link">
     <span class="md-ellipsis">
       
-        💥 Multi-Region Teardown
+        Multi-Region Teardown
       
     </span>
   </a>
@@ -892,7 +892,7 @@
 <h1 id="multi-region-deployments">Multi-Region Deployments</h1>
 <p>Puls supports first-class <strong>Multi-Region Deployments</strong> natively in the deployment engine. You can declare that a single stack configuration should be deployed across multiple cloud regions (e.g. AWS or GCP) with dynamic context isolation and clean, rate-limit friendly sequential execution.</p>
 <hr />
-<h2 id="configuring-multi-region-stacks">🌍 Configuring Multi-Region Stacks</h2>
+<h2 id="configuring-multi-region-stacks">Configuring Multi-Region Stacks</h2>
 <p>You can configure multi-region deployments simply by passing a <code>regions</code> array parameter to the class-level <code>@Deploy</code> or <code>@Destroy</code> decorators:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="p">,</span><span class="w"> </span><span class="nx">REGION</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">AWS</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/aws&quot;</span><span class="p">;</span>
@@ -916,7 +916,7 @@
 3. It instantiates the Stack constructor (which triggers eagerness boundaries inside resources with the correct region set).
 4. Runs <code>deploy()</code> and logs terminal outputs inside a visually distinct regional console block.</p>
 <hr />
-<h2 id="referencing-regional-stack-outputs">🔍 Referencing Regional Stack Outputs</h2>
+<h2 id="referencing-regional-stack-outputs">Referencing Regional Stack Outputs</h2>
 <p>When a stack is deployed across multiple regions, Puls generates a distinct stack instance for each region and indexes them inside the global stack registry under a regional key:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="s2">&quot;RegionalAppStack:us-east-1&quot;</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="s2">&quot;RegionalAppStack:eu-central-1&quot;</span>
@@ -943,7 +943,7 @@
 <a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="p">}</span>
 </code></pre></div>
 <hr />
-<h2 id="multi-region-teardown">💥 Multi-Region Teardown</h2>
+<h2 id="multi-region-teardown">Multi-Region Teardown</h2>
 <p>Teardowns are declared symmetrically using the <code>@Destroy</code> decorator. When <code>@Destroy</code> is triggered with multiple regions, Puls cleanly walks the regions list in sequence, setting the correct config region, instantiating the resource mappings, and tearing them down:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">@Destroy</span><span class="p">({</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nx">regions</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">REGION</span><span class="p">.</span><span class="nx">US_EAST_1</span><span class="p">,</span><span class="w"> </span><span class="nx">REGION</span><span class="p">.</span><span class="nx">EU_CENTRAL_1</span><span class="p">]</span>
