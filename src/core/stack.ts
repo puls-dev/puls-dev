@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { BaseBuilder } from "./resource.js";
+import { Config } from "./config.js";
 
 const _registry = new Map<Function | string, Stack>();
 
@@ -118,21 +119,62 @@ export abstract class Stack {
 
     const props = Object.getOwnPropertyNames(this);
     const outputs: Record<string, any> = {};
+    const isParallel = Config.isParallelActive();
 
+    // 1. Gather all resources
+    const resources: { prop: string; resource: BaseBuilder }[] = [];
     for (const prop of props) {
-      const resource = (this as Record<string, unknown>)[prop];
+      const val = (this as Record<string, unknown>)[prop];
+      if (val instanceof BaseBuilder) {
+        resources.push({ prop, resource: val });
 
-      if (resource instanceof BaseBuilder) {
+        // Apply metadata properties eagerly
         const isProtected = Reflect.getMetadata("protected", this, prop);
-        const isDestroyed = Reflect.getMetadata("destroy", this, prop);
-
-        if (isProtected) resource.protect();
+        if (isProtected) val.protect();
 
         const forceConfigCheck = Reflect.getMetadata("forceConfigCheck", this, prop);
-        if (forceConfigCheck && typeof (resource as any).forceConfigCheck === "function") {
-          (resource as any).forceConfigCheck();
+        if (forceConfigCheck && typeof (val as any).forceConfigCheck === "function") {
+          (val as any).forceConfigCheck();
         }
+      }
+    }
 
+    // 2. Schedule execution
+    if (isParallel) {
+      const startPromise = Promise.resolve();
+      const promises = resources.map(({ prop, resource }) => {
+        resource._deployPromise = (async () => {
+          await startPromise;
+          // Wait for explicit dependencies
+          for (const dep of resource._dependencies) {
+            if (dep._deployPromise) {
+              await dep._deployPromise;
+            }
+          }
+
+          // Execute hooks and deploy
+          const isDestroyed = Reflect.getMetadata("destroy", this, prop);
+          let res: any;
+          if (isDestroyed) {
+            await (resource as any)._runBeforeDestroy();
+            res = await resource.destroy();
+            await (resource as any)._runAfterDestroy(res);
+          } else {
+            await (resource as any)._runBeforeDeploy();
+            res = await resource.deploy();
+            await (resource as any)._runAfterDeploy(res);
+          }
+          outputs[prop] = res;
+          return res;
+        })();
+        return resource._deployPromise;
+      });
+
+      await Promise.all(promises);
+    } else {
+      // Sequential mode (original logic)
+      for (const { prop, resource } of resources) {
+        const isDestroyed = Reflect.getMetadata("destroy", this, prop);
         let res: any;
         if (isDestroyed) {
           await (resource as any)._runBeforeDestroy();
@@ -169,14 +211,50 @@ export abstract class Stack {
 
     const props = Object.getOwnPropertyNames(this).reverse();
     const outputs: Record<string, any> = {};
+    const isParallel = Config.isParallelActive();
 
+    // 1. Gather all resources
+    const resources: { prop: string; resource: BaseBuilder }[] = [];
     for (const prop of props) {
-      const resource = (this as Record<string, unknown>)[prop];
-      if (resource instanceof BaseBuilder) {
+      const val = (this as Record<string, unknown>)[prop];
+      if (val instanceof BaseBuilder) {
         if (Reflect.getMetadata("protected", this, prop)) {
           console.log(`   🔒 Skipping protected resource "${prop}"`);
           continue;
         }
+        resources.push({ prop, resource: val });
+      }
+    }
+
+    // 2. Schedule execution
+    if (isParallel) {
+      const startPromise = Promise.resolve();
+      // In parallel destroy, await all dependents (reverse dependencies) first
+      const promises = resources.map(({ prop, resource }) => {
+        (resource as any)._destroyPromise = (async () => {
+          await startPromise;
+          // Wait for all resources that explicitly declare this one as a dependency
+          const dependents = resources.filter(r => r.resource._dependencies.includes(resource));
+          for (const dep of dependents) {
+            if ((dep.resource as any)._destroyPromise) {
+              await (dep.resource as any)._destroyPromise;
+            }
+          }
+
+          // Execute teardown
+          await (resource as any)._runBeforeDestroy();
+          const res = await resource.destroy();
+          await (resource as any)._runAfterDestroy(res);
+          outputs[prop] = res;
+          return res;
+        })();
+        return (resource as any)._destroyPromise;
+      });
+
+      await Promise.all(promises);
+    } else {
+      // Sequential mode (original logic)
+      for (const { prop, resource } of resources) {
         await (resource as any)._runBeforeDestroy();
         const res = await resource.destroy();
         await (resource as any)._runAfterDestroy(res);

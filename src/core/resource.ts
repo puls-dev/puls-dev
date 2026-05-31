@@ -5,6 +5,11 @@ export abstract class BaseBuilder {
   protected localDryRun: boolean | null = null;
   protected discoveryPromise!: Promise<any>;
   protected sidecars: BaseBuilder[] = [];
+  
+  /** @internal */
+  _deployPromise!: Promise<any>;
+  /** @internal */
+  _dependencies: BaseBuilder[] = [];
 
   private _beforeDeployHooks: (() => Promise<void> | void)[] = [];
   private _afterDeployHooks: ((result: any) => Promise<void> | void)[] = [];
@@ -12,6 +17,11 @@ export abstract class BaseBuilder {
   private _afterDestroyHooks: ((result: any) => Promise<void> | void)[] = [];
 
   constructor(public name: string) {}
+
+  dependsOn(resource: BaseBuilder) {
+    this._dependencies.push(resource);
+    return this;
+  }
 
   protect() {
     this.isProtected = true;

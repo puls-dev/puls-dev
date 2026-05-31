@@ -9,6 +9,7 @@ type ProviderOpts = {
   region?: string;
   regions?: string[];
   dryRun?: boolean;
+  parallel?: boolean;
   firebase?: string; // path to service account JSON file
   proxmox?: {
     url: string;
@@ -25,6 +26,7 @@ type ProviderOpts = {
 
 function applyConfig(opts: ProviderOpts) {
   if (opts.dryRun !== undefined) Config.set({ dryRun: opts.dryRun });
+  if (opts.parallel !== undefined) Config.set({ parallel: opts.parallel });
   if (opts.token)
     Config.set({
       providers: { ...Config.get().providers, do: { token: opts.token } },

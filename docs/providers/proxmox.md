@@ -50,6 +50,49 @@ Proxmox.VM("ix-sto1-app01")
   .replace("ix-sto1-app01-old")       // destroy old VM after new one is up
 ```
 
+## Golden Image / VM Templates
+
+Puls supports declaring pre-baked virtual machine templates, analogous to HashiCorp Packer's workflow. This allows developers to configure a golden template image (with pre-installed packages, Docker, libraries, or security policies), bake it once, and then spin up actual VMs from it in seconds.
+
+### `Proxmox.Template`
+
+Define a golden image template using the `Proxmox.Template()` helper:
+
+```typescript
+const dockerBaseTemplate = Proxmox.Template("ubuntu-docker-base")
+  .baseImage(OS.UBUNTU_24_04)
+  .cores(4)
+  .memory(4096)
+  .sshKey(KEYS)
+  .provision("playbooks/docker.yaml", "playbooks/security-hardening.yaml");
+```
+
+**Template Lifecycle**:
+
+1. **Idempotent Baking**: Puls checks if a template with this name already exists in the cluster. If it does and the provision playbooks match (via applied notes hashes), creation is skipped.
+2. **Purge & Rebuild**: Because Proxmox templates are read-only and cannot be altered, if playbooks or configurations change, Puls will automatically stop, purge, and rebuild the template from the `baseImage`.
+3. **Immutability Conversion**: After successful VM booting, SSH checks, and playbook execution, Puls will stop the VM and issue a Proxmox Template conversion request, transforming it into a read-only template in the cluster.
+
+### VM Cloning from Template (`.fromTemplate()`)
+
+Use the fluent `.fromTemplate()` builder method on `Proxmox.VM()` to spin up a server directly from a pre-baked template:
+
+```typescript
+@Deploy({ parallel: true, proxmox: CONFIG.STAGING })
+class ProductionApp extends Stack {
+  // 1. Declare the template resource
+  dockerBase = Proxmox.Template("ubuntu-docker-base")
+    .baseImage(OS.UBUNTU_24_04)
+    .provision("playbooks/docker.yaml");
+
+  // 2. Clone servers from the template concurrently in seconds
+  server1 = Proxmox.VM("prod-game-01").fromTemplate(this.dockerBase).cores(4);
+  server2 = Proxmox.VM("prod-game-02").fromTemplate(this.dockerBase).cores(4);
+}
+```
+
+* **Dynamic DAG Dependencies**: Calling `.fromTemplate(template)` automatically registers an implicit dependency. The parallel scheduling engine ensures that the template is fully baked before the VMs attempt concurrent cloning.
+
 ## Templates (OS constants)
 
 Templates are matched by VMID (numeric string) or name substring:

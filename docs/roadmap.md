@@ -30,7 +30,7 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 - [x] Cluster-aware node selection - pick the node with the most free RAM via `/nodes` API instead of always using the first configured node
 - [x] `.machine()` builder method - let users override machine type (i440fx vs q35) per VM rather than the hardcoded default
 - [x] `CONFIG.PRODUCTION` entry in `src/types/proxmox.ts`
-- [ ] **Golden Image / VM Templates (`Proxmox.Template`)** — Declare pre-baked templates with fluent OS base images and playbook provisioning (Packer-like behavior). Clone VMs from these templates to drop VM deployment time from minutes to seconds.
+- [x] **Golden Image / VM Templates (`Proxmox.Template`)** — Declare pre-baked templates with fluent OS base images and playbook provisioning (Packer-like behavior). Clone VMs from these templates to drop VM deployment time from minutes to seconds.
 
 ### AWS
 - [x] CloudFront cache invalidation - `.invalidate(paths[])` on a CloudFront builder
@@ -40,6 +40,7 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 - [x] IAM - role and inline/managed policy management; useful for cross-service wiring without manual console steps
 - [x] CloudWatch alarms - CPU/memory thresholds on Fargate and RDS with SNS notification target
 - [x] EC2 - Provision EC2 virtual machines with VPC/SG support and stateless tag-based playbook provisioning.
+- [x] **Golden Image / VM Templates (`AWS.Template`)** — Declare pre-baked custom AMIs with fluent OS base images and playbook provisioning (Packer-like behavior). Clone EC2 instances from these templates to drop VM deployment time from minutes to seconds.
 
 ### DigitalOcean
 - [x] Droplet, Domain, Firewall, Certificate, LoadBalancer
@@ -66,6 +67,8 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 - [x] GCP Pub/Sub (`GCP.PubSub`) - Topics and subscriptions for decoupled messaging (SQS/SNS parity)
 - [x] GCP Cloud DNS (`GCP.CloudDNS`) - Managed zones, record sets, and DNS routing (Route53 parity)
 - [x] GCP IAM (`GCP.ServiceAccount` / `GCP.IAMBinding`) - Service accounts, custom roles, and resource-level IAM bindings (IAM parity)
+- [x] GCP Compute VM (`GCP.VM`) - Compute instances with external IP NAT and universal playbook provisioning (EC2/Proxmox parity)
+- [x] **Golden Image / VM Templates (`GCP.Template`)** — Declare pre-baked GCP custom images with fluent OS base images and playbook provisioning (Packer-like behavior). Clone Compute VMs from these templates to drop VM deployment time from minutes to seconds.
 
 
 
@@ -136,9 +139,9 @@ Enterprise CDN/edge - complex enough to warrant a dedicated maintainer; communit
 - [x] **`@Protected`** - marks a resource so it is never modified or destroyed
 - [x] **Idempotent Configuration State Tracking** — Store applied playbook and file hashes directly in VM metadata (e.g. Proxmox notes/tags) to support stateless, change-aware Ansible configuration updates on already created servers
 - [x] **Hooks** - `beforeDeploy` / `afterDeploy` callbacks on `Stack` for custom side effects (notify Slack, run migrations, etc.)
-- [ ] **Multi-region** - run the same stack across N regions in parallel; `@Deploy({ regions: [REGION.EU_CENTRAL_1, REGION.US_EAST_1] })`
-- [ ] **Parallel resource deployment** - resources within a stack that have no declared dependency could deploy concurrently instead of sequentially
-- [ ] **Secrets at deploy time** - pull credentials from AWS SSM Parameter Store or HashiCorp Vault instead of requiring them as env vars upfront
+- [x] **Multi-region** - run the same stack across N regions in parallel; `@Deploy({ regions: [REGION.EU_CENTRAL_1, REGION.US_EAST_1] })`
+- [x] **Parallel resource deployment** - resources within a stack that have no declared dependency could deploy concurrently instead of sequentially
+- [x] **Secrets at deploy time** - pull credentials from AWS SSM Parameter Store or HashiCorp Vault instead of requiring them as env vars upfront
 - [x] **Hybrid Resource Configuration (YAML)** — Support loading bulk static configuration sets (like DNS records, firewall rules, or security group rules) directly from a `.yaml` or `.json` file within builder methods while retaining the flexibility to chain programmatic methods for dynamic resource parameters.
 - [x] **Opt-in Infrastructure Blueprint Documentation (`Config.blueprint`)** — Generate version-controlled markdown blueprints (`docs/architecture.md`) of live system resources, auto-calculating monthly costs, formatting live endpoints, and rendering Mermaid.js dynamic dependency/topology graphs on local runs.
 

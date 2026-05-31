@@ -9,6 +9,7 @@ import { getPMClient, ProxmoxApiClient } from "./api.js";
 import type { OSImage } from "../../types/proxmox.js";
 import { getFileHash, parseProvisionMetadata, mergeProvisionMetadata } from "./hash.js";
 import { checkPort, runProvisioner } from "../../core/provisioner.js";
+import { TemplateBuilder } from "./template.js";
 
 export class VMBuilder extends BaseBuilder {
   readonly out = {
@@ -21,6 +22,7 @@ export class VMBuilder extends BaseBuilder {
   resolvedIp: string | null = null;
 
   private _image?: OSImage;
+  private _templateSource?: TemplateBuilder;
   private _cores: number = 2;
   private _memory: number = 2048;
   private _provision: string[] = [];
@@ -60,6 +62,11 @@ export class VMBuilder extends BaseBuilder {
 
   image(os: OSImage) {
     this._image = os;
+    return this;
+  }
+  fromTemplate(template: TemplateBuilder) {
+    this._templateSource = template;
+    this.dependsOn(template);
     return this;
   }
   cores(n: number) {
@@ -205,6 +212,7 @@ export class VMBuilder extends BaseBuilder {
     if (dryRun) {
       console.log(`   📝 [PLAN] Create VM "${this.name}"`);
       if (this._image) console.log(`      └─ Image: ${this._image}`);
+      if (this._templateSource) console.log(`      └─ Template: ${this._templateSource.name}`);
       console.log(`      └─ Cores: ${this._cores}  Memory: ${this._memory} MB  Machine: ${this._machine}`);
       if (this._vlan) console.log(`      └─ VLAN: ${this._vlan}`);
       if (this._provision.length > 0) {
@@ -218,24 +226,32 @@ export class VMBuilder extends BaseBuilder {
     }
 
     // Find the template - match by VMID (numeric string) or name substring
+    let sourceVmid: string | undefined;
+    if (this._templateSource) {
+      const v = await this._templateSource.out.vmid.get();
+      sourceVmid = String(v);
+    } else if (this._image) {
+      sourceVmid = String(this._image);
+    }
+
     const resources = await pm.get<any[]>("/cluster/resources?type=vm");
-    const isVmid = this._image && /^\d+$/.test(this._image);
-    const template = this._image
+    const isVmid = sourceVmid && /^\d+$/.test(sourceVmid);
+    const template = sourceVmid
       ? (resources ?? []).find(
           (r) =>
             r.template === 1 &&
             (isVmid
-              ? String(r.vmid) === this._image
-              : r.name?.includes(this._image)),
+              ? String(r.vmid) === sourceVmid
+              : r.name?.includes(sourceVmid)),
         )
       : null;
 
-    if (this._image && !template) {
+    if (sourceVmid && !template) {
       throw new Error(
-        `No Proxmox template found matching "${this._image}". ` +
+        `No Proxmox template found matching "${sourceVmid}". ` +
           (isVmid
-            ? `Check that VMID ${this._image} exists and is marked as a template.`
-            : `Create a template whose name contains "${this._image}".`),
+            ? `Check that VMID ${sourceVmid} exists and is marked as a template.`
+            : `Create a template whose name contains "${sourceVmid}".`),
       );
     }
 

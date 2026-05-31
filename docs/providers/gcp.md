@@ -227,6 +227,49 @@ GCP.VM("my-app-server")
 2. **Idempotency**: During deployment, Puls checks if the hashes of your local playbooks match the hashes in the VM metadata. If they match, playbook execution is safely skipped.
 3. **Dynamic Stops and Resizes**: If the `machineType` configuration is modified, Puls will automatically stop the VM instance, apply the new sizing configuration (`setSize`), and restart the VM, returning it to a running state.
 
+### Golden Image & VM Templates
+
+Puls supports declaring pre-baked Google Compute custom images, analogous to HashiCorp Packer's workflow. This allows developers to configure a custom golden image (with pre-installed packages, Docker, libraries, or security policies), bake it once, and then spin up actual GCP VMs from it in seconds.
+
+#### `GCP.Template`
+
+Define a custom GCP image template using the `GCP.Template()` helper:
+
+```typescript
+const dockerBaseTemplate = GCP.Template("ubuntu-docker-base")
+  .baseImage("projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts") // base image
+  .machineType("e2-medium")
+  .zone("us-central1-a")
+  .sshKey("~/.ssh/id_ed25519.pub")
+  .provision("playbooks/docker.yaml", "playbooks/security-hardening.yaml");
+```
+
+**Baking Lifecycle**:
+1. **Idempotent Baking**: Puls checks if a custom image with this name already exists in your GCP project. If it does and the provision playbooks match (via the applied hashes saved inside the image's description field), image baking is skipped.
+2. **Delete & Rebuild**: Because GCP images are read-only and immutable, if playbooks or configurations change, Puls will automatically delete the old custom image (`DELETE /compute/v1/projects/.../global/images/{name}`) before rebuilding.
+3. **Automated VM Lifecycle**: Puls creates a temporary instance (`puls-bake-temp-{name}`), waits for SSH, runs the Ansible playbooks, stops the instance, creates a new custom image from the stopped instance's boot disk, writes the playbook hashes into the image's description field, waits until the image status is `READY`, and deletes the temporary provisioning VM instance.
+
+#### VM Cloning from Template (`.fromTemplate()`)
+
+Use the fluent `.fromTemplate()` builder method on `GCP.VM()` to spin up a server directly from a pre-baked custom image:
+
+```typescript
+@Deploy({ parallel: true })
+class ProductionCluster extends Stack {
+  // 1. Declare the template resource
+  dockerBase = GCP.Template("ubuntu-docker-base")
+    .baseImage("projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts")
+    .sshKey("~/.ssh/id_ed25519.pub")
+    .provision("playbooks/docker.yaml");
+
+  // 2. Clone GCP VMs from the custom image concurrently in seconds
+  server1 = GCP.VM("prod-game-01").fromTemplate(this.dockerBase).machineType("e2-medium");
+  server2 = GCP.VM("prod-game-02").fromTemplate(this.dockerBase).machineType("e2-medium");
+}
+```
+
+* **Dynamic DAG Dependencies**: Calling `.fromTemplate(template)` automatically registers an implicit dependency. The parallel scheduling engine ensures that the custom image is fully baked and available before the GCP VM instances start spawning concurrently.
+
 ---
 
 ## IAM (Service Accounts & Bindings)

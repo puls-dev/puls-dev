@@ -447,6 +447,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../../parallel-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parallel Deployments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -465,10 +492,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
             
   
   
@@ -486,8 +513,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -907,6 +934,45 @@
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#golden-image-vm-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Golden Image &amp; VM Templates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Golden Image &amp; VM Templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gcptemplate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GCP.Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vm-cloning-from-template-fromtemplate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VM Cloning from Template (.fromTemplate())
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1338,6 +1404,45 @@
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#golden-image-vm-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Golden Image &amp; VM Templates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Golden Image &amp; VM Templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gcptemplate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GCP.Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vm-cloning-from-template-fromtemplate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VM Cloning from Template (.fromTemplate())
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1861,14 +1966,47 @@
 <li><strong>Idempotency</strong>: During deployment, Puls checks if the hashes of your local playbooks match the hashes in the VM metadata. If they match, playbook execution is safely skipped.</li>
 <li><strong>Dynamic Stops and Resizes</strong>: If the <code>machineType</code> configuration is modified, Puls will automatically stop the VM instance, apply the new sizing configuration (<code>setSize</code>), and restart the VM, returning it to a running state.</li>
 </ol>
+<h3 id="golden-image-vm-templates">Golden Image &amp; VM Templates</h3>
+<p>Puls supports declaring pre-baked Google Compute custom images, analogous to HashiCorp Packer's workflow. This allows developers to configure a custom golden image (with pre-installed packages, Docker, libraries, or security policies), bake it once, and then spin up actual GCP VMs from it in seconds.</p>
+<h4 id="gcptemplate"><code>GCP.Template</code></h4>
+<p>Define a custom GCP image template using the <code>GCP.Template()</code> helper:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">dockerBaseTemplate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">Template</span><span class="p">(</span><span class="s2">&quot;ubuntu-docker-base&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">baseImage</span><span class="p">(</span><span class="s2">&quot;projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// base image</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">machineType</span><span class="p">(</span><span class="s2">&quot;e2-medium&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">zone</span><span class="p">(</span><span class="s2">&quot;us-central1-a&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="s2">&quot;~/.ssh/id_ed25519.pub&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;playbooks/docker.yaml&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;playbooks/security-hardening.yaml&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>Baking Lifecycle</strong>:
+1. <strong>Idempotent Baking</strong>: Puls checks if a custom image with this name already exists in your GCP project. If it does and the provision playbooks match (via the applied hashes saved inside the image's description field), image baking is skipped.
+2. <strong>Delete &amp; Rebuild</strong>: Because GCP images are read-only and immutable, if playbooks or configurations change, Puls will automatically delete the old custom image (<code>DELETE /compute/v1/projects/.../global/images/{name}</code>) before rebuilding.
+3. <strong>Automated VM Lifecycle</strong>: Puls creates a temporary instance (<code>puls-bake-temp-{name}</code>), waits for SSH, runs the Ansible playbooks, stops the instance, creates a new custom image from the stopped instance's boot disk, writes the playbook hashes into the image's description field, waits until the image status is <code>READY</code>, and deletes the temporary provisioning VM instance.</p>
+<h4 id="vm-cloning-from-template-fromtemplate">VM Cloning from Template (<code>.fromTemplate()</code>)</h4>
+<p>Use the fluent <code>.fromTemplate()</code> builder method on <code>GCP.VM()</code> to spin up a server directly from a pre-baked custom image:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">parallel</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kd">class</span><span class="w"> </span><span class="nx">ProductionCluster</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="c1">// 1. Declare the template resource</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="nx">dockerBase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">Template</span><span class="p">(</span><span class="s2">&quot;ubuntu-docker-base&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="p">.</span><span class="nx">baseImage</span><span class="p">(</span><span class="s2">&quot;projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="s2">&quot;~/.ssh/id_ed25519.pub&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;playbooks/docker.yaml&quot;</span><span class="p">);</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="c1">// 2. Clone GCP VMs from the custom image concurrently in seconds</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">  </span><span class="nx">server1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;prod-game-01&quot;</span><span class="p">).</span><span class="nx">fromTemplate</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">dockerBase</span><span class="p">).</span><span class="nx">machineType</span><span class="p">(</span><span class="s2">&quot;e2-medium&quot;</span><span class="p">);</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">  </span><span class="nx">server2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;prod-game-02&quot;</span><span class="p">).</span><span class="nx">fromTemplate</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">dockerBase</span><span class="p">).</span><span class="nx">machineType</span><span class="p">(</span><span class="s2">&quot;e2-medium&quot;</span><span class="p">);</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><strong>Dynamic DAG Dependencies</strong>: Calling <code>.fromTemplate(template)</code> automatically registers an implicit dependency. The parallel scheduling engine ensures that the custom image is fully baked and available before the GCP VM instances start spawning concurrently.</li>
+</ul>
 <hr />
 <h2 id="iam-service-accounts-bindings">IAM (Service Accounts &amp; Bindings)</h2>
 <p>Provision and manage custom Google Cloud Service Accounts (<code>GCP.ServiceAccount</code>) and project-level IAM bindings (<code>GCP.IAMBinding</code>) to automate secure credentials setup.</p>
 <h3 id="service-account">Service Account</h3>
 <p>Create a new Service Account cleanly.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">mySA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">ServiceAccount</span><span class="p">(</span><span class="s2">&quot;backup-agent&quot;</span><span class="p">)</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">displayName</span><span class="p">(</span><span class="s2">&quot;Backup Agent Service Account&quot;</span><span class="p">)</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">description</span><span class="p">(</span><span class="s2">&quot;Used for nightly database backup jobs&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">mySA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">ServiceAccount</span><span class="p">(</span><span class="s2">&quot;backup-agent&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">displayName</span><span class="p">(</span><span class="s2">&quot;Backup Agent Service Account&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">description</span><span class="p">(</span><span class="s2">&quot;Used for nightly database backup jobs&quot;</span><span class="p">);</span>
 </code></pre></div>
 <h4 id="service-account-api-reference">Service Account API Reference</h4>
 <table>
@@ -1901,10 +2039,10 @@
 <hr />
 <h3 id="iam-binding">IAM Binding</h3>
 <p>Bind members safely to project-level roles with Optimistic Concurrency Control (ETag lock) and non-destructive merges.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nx">GCP</span><span class="p">.</span><span class="nx">IAMBinding</span><span class="p">(</span><span class="s2">&quot;storage-admin-binding&quot;</span><span class="p">)</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">role</span><span class="p">(</span><span class="s2">&quot;roles/storage.admin&quot;</span><span class="p">)</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">member</span><span class="p">(</span><span class="nx">mySA</span><span class="p">)</span><span class="w"> </span><span class="c1">// Wire Service Account builder directly!</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">member</span><span class="p">(</span><span class="s2">&quot;user:bob@gmail.com&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nx">GCP</span><span class="p">.</span><span class="nx">IAMBinding</span><span class="p">(</span><span class="s2">&quot;storage-admin-binding&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">role</span><span class="p">(</span><span class="s2">&quot;roles/storage.admin&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">member</span><span class="p">(</span><span class="nx">mySA</span><span class="p">)</span><span class="w"> </span><span class="c1">// Wire Service Account builder directly!</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">member</span><span class="p">(</span><span class="s2">&quot;user:bob@gmail.com&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="iam-binding-api-reference">IAM Binding API Reference</h4>
 <table>
@@ -1940,80 +2078,80 @@
 <hr />
 <h2 id="complete-example">Complete Example</h2>
 <p>This example demonstrates deploying a secure stack consisting of a Cloud SQL database, a Secret Manager secret containing the database credentials, a Pub/Sub topic + push subscription, a Cloud Run API service, a custom Service Account with publisher rights, and a Cloud DNS zone that points a CNAME to the API service.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;dotenv/config&quot;</span><span class="p">;</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;reflect-metadata&quot;</span><span class="p">;</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="p">,</span><span class="w"> </span><span class="nx">Config</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">GCP</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/gcp&quot;</span><span class="p">;</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="nx">Config</span><span class="p">.</span><span class="nx">set</span><span class="p">({</span>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">  </span><span class="nx">providers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">    </span><span class="nx">gcp</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">      </span><span class="nx">projectId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;prod-stack-101&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">      </span><span class="nx">serviceAccountPath</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;./gcp-key.json&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">      </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;us-east1&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">    </span><span class="p">},</span>
-<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="p">});</span>
-<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>
-<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a><span class="kd">class</span><span class="w"> </span><span class="nx">CloudStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="w">  </span><span class="c1">// 1. Pub/Sub Topic for background tasks</span>
-<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a><span class="w">  </span><span class="nx">eventsTopic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">PubSub</span><span class="p">.</span><span class="nx">Topic</span><span class="p">(</span><span class="s2">&quot;background-tasks&quot;</span><span class="p">);</span>
-<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a>
-<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a><span class="w">  </span><span class="c1">// 2. Secret Credentials</span>
-<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a><span class="w">  </span><span class="nx">dbPassword</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">Secret</span><span class="p">(</span><span class="s2">&quot;app-db-password&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a><span class="w">    </span><span class="p">.</span><span class="nx">plainText</span><span class="p">(</span><span class="s2">&quot;supersecurepassword123&quot;</span><span class="p">);</span>
-<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a>
-<a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a><span class="w">  </span><span class="c1">// 3. Private Postgres Database</span>
-<a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">CloudSQL</span><span class="p">(</span><span class="s2">&quot;app-db&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a><span class="w">    </span><span class="p">.</span><span class="nx">engine</span><span class="p">({</span><span class="w"> </span><span class="nx">engine</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;postgres&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">version</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;16&quot;</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a><span class="w">    </span><span class="p">.</span><span class="nx">size</span><span class="p">(</span><span class="s2">&quot;db-f1-micro&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a><span class="w">    </span><span class="p">.</span><span class="nx">storage</span><span class="p">(</span><span class="mf">20</span><span class="p">)</span>
-<a id="__codelineno-10-30" name="__codelineno-10-30" href="#__codelineno-10-30"></a><span class="w">    </span><span class="p">.</span><span class="nx">credentials</span><span class="p">(</span><span class="s2">&quot;app_user&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">dbPassword</span><span class="p">.</span><span class="nx">resolvedValue</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="s2">&quot;fallbackpwd&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-31" name="__codelineno-10-31" href="#__codelineno-10-31"></a><span class="w">    </span><span class="p">.</span><span class="nx">database</span><span class="p">(</span><span class="s2">&quot;production_db&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-32" name="__codelineno-10-32" href="#__codelineno-10-32"></a><span class="w">    </span><span class="p">.</span><span class="nx">publicAccess</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
-<a id="__codelineno-10-33" name="__codelineno-10-33" href="#__codelineno-10-33"></a>
-<a id="__codelineno-10-34" name="__codelineno-10-34" href="#__codelineno-10-34"></a><span class="w">  </span><span class="c1">// 4. Public API Service</span>
-<a id="__codelineno-10-35" name="__codelineno-10-35" href="#__codelineno-10-35"></a><span class="w">  </span><span class="nx">web</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">CloudRun</span><span class="p">(</span><span class="s2">&quot;api-service&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-36" name="__codelineno-10-36" href="#__codelineno-10-36"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="s2">&quot;us-east1-docker.pkg.dev/prod-stack-101/images/api:latest&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-37" name="__codelineno-10-37" href="#__codelineno-10-37"></a><span class="w">    </span><span class="p">.</span><span class="nx">port</span><span class="p">(</span><span class="mf">3000</span><span class="p">)</span>
-<a id="__codelineno-10-38" name="__codelineno-10-38" href="#__codelineno-10-38"></a><span class="w">    </span><span class="p">.</span><span class="nx">cpu</span><span class="p">(</span><span class="mf">1</span><span class="p">)</span>
-<a id="__codelineno-10-39" name="__codelineno-10-39" href="#__codelineno-10-39"></a><span class="w">    </span><span class="p">.</span><span class="nx">memory</span><span class="p">(</span><span class="mf">512</span><span class="p">)</span>
-<a id="__codelineno-10-40" name="__codelineno-10-40" href="#__codelineno-10-40"></a><span class="w">    </span><span class="p">.</span><span class="nx">env</span><span class="p">({</span>
-<a id="__codelineno-10-41" name="__codelineno-10-41" href="#__codelineno-10-41"></a><span class="w">      </span><span class="nx">NODE_ENV</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-42" name="__codelineno-10-42" href="#__codelineno-10-42"></a><span class="w">      </span><span class="nx">DATABASE_HOST</span><span class="o">:</span><span class="w"> </span><span class="kt">this.db.endpoint</span><span class="p">,</span>
-<a id="__codelineno-10-43" name="__codelineno-10-43" href="#__codelineno-10-43"></a><span class="w">      </span><span class="nx">DATABASE_PORT</span><span class="o">:</span><span class="w"> </span><span class="kt">this.db.port</span><span class="p">,</span>
-<a id="__codelineno-10-44" name="__codelineno-10-44" href="#__codelineno-10-44"></a><span class="w">      </span><span class="nx">DATABASE_NAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;production_db&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-45" name="__codelineno-10-45" href="#__codelineno-10-45"></a><span class="w">      </span><span class="nx">DATABASE_USER</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;app_user&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-46" name="__codelineno-10-46" href="#__codelineno-10-46"></a><span class="w">      </span><span class="nx">DATABASE_PASS</span><span class="o">:</span><span class="w"> </span><span class="kt">this.dbPassword</span><span class="p">,</span>
-<a id="__codelineno-10-47" name="__codelineno-10-47" href="#__codelineno-10-47"></a><span class="w">      </span><span class="nx">TOPIC_NAME</span><span class="o">:</span><span class="w"> </span><span class="kt">this.eventsTopic.resolvedTopicName</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="s2">&quot;unknown-topic&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-48" name="__codelineno-10-48" href="#__codelineno-10-48"></a><span class="w">    </span><span class="p">})</span>
-<a id="__codelineno-10-49" name="__codelineno-10-49" href="#__codelineno-10-49"></a><span class="w">    </span><span class="p">.</span><span class="k">public</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-<a id="__codelineno-10-50" name="__codelineno-10-50" href="#__codelineno-10-50"></a>
-<a id="__codelineno-10-51" name="__codelineno-10-51" href="#__codelineno-10-51"></a><span class="w">  </span><span class="c1">// 5. Push Subscription sending Topic events directly back to API handler</span>
-<a id="__codelineno-10-52" name="__codelineno-10-52" href="#__codelineno-10-52"></a><span class="w">  </span><span class="nx">pushSub</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">PubSub</span><span class="p">.</span><span class="nx">Subscription</span><span class="p">(</span><span class="s2">&quot;tasks-push&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-53" name="__codelineno-10-53" href="#__codelineno-10-53"></a><span class="w">    </span><span class="p">.</span><span class="nx">topic</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">eventsTopic</span><span class="p">)</span>
-<a id="__codelineno-10-54" name="__codelineno-10-54" href="#__codelineno-10-54"></a><span class="w">    </span><span class="p">.</span><span class="nx">pushEndpoint</span><span class="p">(</span><span class="s2">&quot;https://api-service-xyz.run.app/tasks/webhook&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-55" name="__codelineno-10-55" href="#__codelineno-10-55"></a><span class="w">    </span><span class="p">.</span><span class="nx">ackDeadline</span><span class="p">(</span><span class="mf">15</span><span class="p">);</span>
-<a id="__codelineno-10-56" name="__codelineno-10-56" href="#__codelineno-10-56"></a>
-<a id="__codelineno-10-57" name="__codelineno-10-57" href="#__codelineno-10-57"></a><span class="w">  </span><span class="c1">// 6. Custom Service Account for background workers</span>
-<a id="__codelineno-10-58" name="__codelineno-10-58" href="#__codelineno-10-58"></a><span class="w">  </span><span class="nx">workerSA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">ServiceAccount</span><span class="p">(</span><span class="s2">&quot;background-worker&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-59" name="__codelineno-10-59" href="#__codelineno-10-59"></a><span class="w">    </span><span class="p">.</span><span class="nx">displayName</span><span class="p">(</span><span class="s2">&quot;Background Worker&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-60" name="__codelineno-10-60" href="#__codelineno-10-60"></a><span class="w">    </span><span class="p">.</span><span class="nx">description</span><span class="p">(</span><span class="s2">&quot;Service account with publisher permissions&quot;</span><span class="p">);</span>
-<a id="__codelineno-10-61" name="__codelineno-10-61" href="#__codelineno-10-61"></a>
-<a id="__codelineno-10-62" name="__codelineno-10-62" href="#__codelineno-10-62"></a><span class="w">  </span><span class="c1">// 7. IAM Binding giving the Service Account publisher rights</span>
-<a id="__codelineno-10-63" name="__codelineno-10-63" href="#__codelineno-10-63"></a><span class="w">  </span><span class="nx">pubBinding</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">IAMBinding</span><span class="p">(</span><span class="s2">&quot;worker-pub-rights&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-64" name="__codelineno-10-64" href="#__codelineno-10-64"></a><span class="w">    </span><span class="p">.</span><span class="nx">role</span><span class="p">(</span><span class="s2">&quot;roles/pubsub.publisher&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-65" name="__codelineno-10-65" href="#__codelineno-10-65"></a><span class="w">    </span><span class="p">.</span><span class="nx">member</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">workerSA</span><span class="p">);</span>
-<a id="__codelineno-10-66" name="__codelineno-10-66" href="#__codelineno-10-66"></a>
-<a id="__codelineno-10-67" name="__codelineno-10-67" href="#__codelineno-10-67"></a><span class="w">  </span><span class="c1">// 8. Cloud DNS Zone pointing to the API service CNAME</span>
-<a id="__codelineno-10-68" name="__codelineno-10-68" href="#__codelineno-10-68"></a><span class="w">  </span><span class="nx">dns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">CloudDNS</span><span class="p">(</span><span class="s2">&quot;mycompany.com&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-69" name="__codelineno-10-69" href="#__codelineno-10-69"></a><span class="w">    </span><span class="p">.</span><span class="nx">record</span><span class="p">(</span><span class="s2">&quot;www&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;CNAME&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;lb.google.com&quot;</span><span class="p">)</span>
-<a id="__codelineno-10-70" name="__codelineno-10-70" href="#__codelineno-10-70"></a><span class="w">    </span><span class="p">.</span><span class="nx">pointer</span><span class="p">(</span><span class="s2">&quot;api&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">web</span><span class="p">);</span>
-<a id="__codelineno-10-71" name="__codelineno-10-71" href="#__codelineno-10-71"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;dotenv/config&quot;</span><span class="p">;</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;reflect-metadata&quot;</span><span class="p">;</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="p">,</span><span class="w"> </span><span class="nx">Config</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">GCP</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/gcp&quot;</span><span class="p">;</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="nx">Config</span><span class="p">.</span><span class="nx">set</span><span class="p">({</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">  </span><span class="nx">providers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span><span class="nx">gcp</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">      </span><span class="nx">projectId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;prod-stack-101&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">      </span><span class="nx">serviceAccountPath</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;./gcp-key.json&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">      </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;us-east1&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="p">});</span>
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>
+<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="kd">class</span><span class="w"> </span><span class="nx">CloudStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="w">  </span><span class="c1">// 1. Pub/Sub Topic for background tasks</span>
+<a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a><span class="w">  </span><span class="nx">eventsTopic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">PubSub</span><span class="p">.</span><span class="nx">Topic</span><span class="p">(</span><span class="s2">&quot;background-tasks&quot;</span><span class="p">);</span>
+<a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a>
+<a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a><span class="w">  </span><span class="c1">// 2. Secret Credentials</span>
+<a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a><span class="w">  </span><span class="nx">dbPassword</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">Secret</span><span class="p">(</span><span class="s2">&quot;app-db-password&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a><span class="w">    </span><span class="p">.</span><span class="nx">plainText</span><span class="p">(</span><span class="s2">&quot;supersecurepassword123&quot;</span><span class="p">);</span>
+<a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a>
+<a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a><span class="w">  </span><span class="c1">// 3. Private Postgres Database</span>
+<a id="__codelineno-12-26" name="__codelineno-12-26" href="#__codelineno-12-26"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">CloudSQL</span><span class="p">(</span><span class="s2">&quot;app-db&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-27" name="__codelineno-12-27" href="#__codelineno-12-27"></a><span class="w">    </span><span class="p">.</span><span class="nx">engine</span><span class="p">({</span><span class="w"> </span><span class="nx">engine</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;postgres&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">version</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;16&quot;</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-12-28" name="__codelineno-12-28" href="#__codelineno-12-28"></a><span class="w">    </span><span class="p">.</span><span class="nx">size</span><span class="p">(</span><span class="s2">&quot;db-f1-micro&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-29" name="__codelineno-12-29" href="#__codelineno-12-29"></a><span class="w">    </span><span class="p">.</span><span class="nx">storage</span><span class="p">(</span><span class="mf">20</span><span class="p">)</span>
+<a id="__codelineno-12-30" name="__codelineno-12-30" href="#__codelineno-12-30"></a><span class="w">    </span><span class="p">.</span><span class="nx">credentials</span><span class="p">(</span><span class="s2">&quot;app_user&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">dbPassword</span><span class="p">.</span><span class="nx">resolvedValue</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="s2">&quot;fallbackpwd&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-31" name="__codelineno-12-31" href="#__codelineno-12-31"></a><span class="w">    </span><span class="p">.</span><span class="nx">database</span><span class="p">(</span><span class="s2">&quot;production_db&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-32" name="__codelineno-12-32" href="#__codelineno-12-32"></a><span class="w">    </span><span class="p">.</span><span class="nx">publicAccess</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+<a id="__codelineno-12-33" name="__codelineno-12-33" href="#__codelineno-12-33"></a>
+<a id="__codelineno-12-34" name="__codelineno-12-34" href="#__codelineno-12-34"></a><span class="w">  </span><span class="c1">// 4. Public API Service</span>
+<a id="__codelineno-12-35" name="__codelineno-12-35" href="#__codelineno-12-35"></a><span class="w">  </span><span class="nx">web</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">CloudRun</span><span class="p">(</span><span class="s2">&quot;api-service&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-36" name="__codelineno-12-36" href="#__codelineno-12-36"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="s2">&quot;us-east1-docker.pkg.dev/prod-stack-101/images/api:latest&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-37" name="__codelineno-12-37" href="#__codelineno-12-37"></a><span class="w">    </span><span class="p">.</span><span class="nx">port</span><span class="p">(</span><span class="mf">3000</span><span class="p">)</span>
+<a id="__codelineno-12-38" name="__codelineno-12-38" href="#__codelineno-12-38"></a><span class="w">    </span><span class="p">.</span><span class="nx">cpu</span><span class="p">(</span><span class="mf">1</span><span class="p">)</span>
+<a id="__codelineno-12-39" name="__codelineno-12-39" href="#__codelineno-12-39"></a><span class="w">    </span><span class="p">.</span><span class="nx">memory</span><span class="p">(</span><span class="mf">512</span><span class="p">)</span>
+<a id="__codelineno-12-40" name="__codelineno-12-40" href="#__codelineno-12-40"></a><span class="w">    </span><span class="p">.</span><span class="nx">env</span><span class="p">({</span>
+<a id="__codelineno-12-41" name="__codelineno-12-41" href="#__codelineno-12-41"></a><span class="w">      </span><span class="nx">NODE_ENV</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-42" name="__codelineno-12-42" href="#__codelineno-12-42"></a><span class="w">      </span><span class="nx">DATABASE_HOST</span><span class="o">:</span><span class="w"> </span><span class="kt">this.db.endpoint</span><span class="p">,</span>
+<a id="__codelineno-12-43" name="__codelineno-12-43" href="#__codelineno-12-43"></a><span class="w">      </span><span class="nx">DATABASE_PORT</span><span class="o">:</span><span class="w"> </span><span class="kt">this.db.port</span><span class="p">,</span>
+<a id="__codelineno-12-44" name="__codelineno-12-44" href="#__codelineno-12-44"></a><span class="w">      </span><span class="nx">DATABASE_NAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;production_db&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-45" name="__codelineno-12-45" href="#__codelineno-12-45"></a><span class="w">      </span><span class="nx">DATABASE_USER</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;app_user&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-46" name="__codelineno-12-46" href="#__codelineno-12-46"></a><span class="w">      </span><span class="nx">DATABASE_PASS</span><span class="o">:</span><span class="w"> </span><span class="kt">this.dbPassword</span><span class="p">,</span>
+<a id="__codelineno-12-47" name="__codelineno-12-47" href="#__codelineno-12-47"></a><span class="w">      </span><span class="nx">TOPIC_NAME</span><span class="o">:</span><span class="w"> </span><span class="kt">this.eventsTopic.resolvedTopicName</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="s2">&quot;unknown-topic&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-48" name="__codelineno-12-48" href="#__codelineno-12-48"></a><span class="w">    </span><span class="p">})</span>
+<a id="__codelineno-12-49" name="__codelineno-12-49" href="#__codelineno-12-49"></a><span class="w">    </span><span class="p">.</span><span class="k">public</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+<a id="__codelineno-12-50" name="__codelineno-12-50" href="#__codelineno-12-50"></a>
+<a id="__codelineno-12-51" name="__codelineno-12-51" href="#__codelineno-12-51"></a><span class="w">  </span><span class="c1">// 5. Push Subscription sending Topic events directly back to API handler</span>
+<a id="__codelineno-12-52" name="__codelineno-12-52" href="#__codelineno-12-52"></a><span class="w">  </span><span class="nx">pushSub</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">PubSub</span><span class="p">.</span><span class="nx">Subscription</span><span class="p">(</span><span class="s2">&quot;tasks-push&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-53" name="__codelineno-12-53" href="#__codelineno-12-53"></a><span class="w">    </span><span class="p">.</span><span class="nx">topic</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">eventsTopic</span><span class="p">)</span>
+<a id="__codelineno-12-54" name="__codelineno-12-54" href="#__codelineno-12-54"></a><span class="w">    </span><span class="p">.</span><span class="nx">pushEndpoint</span><span class="p">(</span><span class="s2">&quot;https://api-service-xyz.run.app/tasks/webhook&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-55" name="__codelineno-12-55" href="#__codelineno-12-55"></a><span class="w">    </span><span class="p">.</span><span class="nx">ackDeadline</span><span class="p">(</span><span class="mf">15</span><span class="p">);</span>
+<a id="__codelineno-12-56" name="__codelineno-12-56" href="#__codelineno-12-56"></a>
+<a id="__codelineno-12-57" name="__codelineno-12-57" href="#__codelineno-12-57"></a><span class="w">  </span><span class="c1">// 6. Custom Service Account for background workers</span>
+<a id="__codelineno-12-58" name="__codelineno-12-58" href="#__codelineno-12-58"></a><span class="w">  </span><span class="nx">workerSA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">ServiceAccount</span><span class="p">(</span><span class="s2">&quot;background-worker&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-59" name="__codelineno-12-59" href="#__codelineno-12-59"></a><span class="w">    </span><span class="p">.</span><span class="nx">displayName</span><span class="p">(</span><span class="s2">&quot;Background Worker&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-60" name="__codelineno-12-60" href="#__codelineno-12-60"></a><span class="w">    </span><span class="p">.</span><span class="nx">description</span><span class="p">(</span><span class="s2">&quot;Service account with publisher permissions&quot;</span><span class="p">);</span>
+<a id="__codelineno-12-61" name="__codelineno-12-61" href="#__codelineno-12-61"></a>
+<a id="__codelineno-12-62" name="__codelineno-12-62" href="#__codelineno-12-62"></a><span class="w">  </span><span class="c1">// 7. IAM Binding giving the Service Account publisher rights</span>
+<a id="__codelineno-12-63" name="__codelineno-12-63" href="#__codelineno-12-63"></a><span class="w">  </span><span class="nx">pubBinding</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">IAMBinding</span><span class="p">(</span><span class="s2">&quot;worker-pub-rights&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-64" name="__codelineno-12-64" href="#__codelineno-12-64"></a><span class="w">    </span><span class="p">.</span><span class="nx">role</span><span class="p">(</span><span class="s2">&quot;roles/pubsub.publisher&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-65" name="__codelineno-12-65" href="#__codelineno-12-65"></a><span class="w">    </span><span class="p">.</span><span class="nx">member</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">workerSA</span><span class="p">);</span>
+<a id="__codelineno-12-66" name="__codelineno-12-66" href="#__codelineno-12-66"></a>
+<a id="__codelineno-12-67" name="__codelineno-12-67" href="#__codelineno-12-67"></a><span class="w">  </span><span class="c1">// 8. Cloud DNS Zone pointing to the API service CNAME</span>
+<a id="__codelineno-12-68" name="__codelineno-12-68" href="#__codelineno-12-68"></a><span class="w">  </span><span class="nx">dns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">GCP</span><span class="p">.</span><span class="nx">CloudDNS</span><span class="p">(</span><span class="s2">&quot;mycompany.com&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-69" name="__codelineno-12-69" href="#__codelineno-12-69"></a><span class="w">    </span><span class="p">.</span><span class="nx">record</span><span class="p">(</span><span class="s2">&quot;www&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;CNAME&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;lb.google.com&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-70" name="__codelineno-12-70" href="#__codelineno-12-70"></a><span class="w">    </span><span class="p">.</span><span class="nx">pointer</span><span class="p">(</span><span class="s2">&quot;api&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">web</span><span class="p">);</span>
+<a id="__codelineno-12-71" name="__codelineno-12-71" href="#__codelineno-12-71"></a><span class="p">}</span>
 </code></pre></div>
 <p>Deploy your stack with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>npx<span class="w"> </span>tsx<span class="w"> </span>examples/deploy.ts
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>npx<span class="w"> </span>tsx<span class="w"> </span>examples/deploy.ts
 </code></pre></div>
 <hr />
 <h2 id="required-permissions">Required Permissions</h2>

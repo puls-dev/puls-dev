@@ -160,6 +160,49 @@ If you change `.instanceType()`, Puls automatically handles stopping the VM, mod
 | `.out.id`  | `Output<string>` | The AWS InstanceId        |
 | `.out.ip`  | `Output<string>` | The public or private IP  |
 
+### Golden Image & AMI Templates
+
+Puls supports declaring pre-baked Amazon Machine Images (AMIs), analogous to HashiCorp Packer's workflow. This allows developers to configure a custom golden AMI (with pre-installed packages, Docker, libraries, or security policies), bake it once, and then spin up actual EC2 instances from it in seconds.
+
+#### `AWS.Template`
+
+Define a custom AMI template using the `AWS.Template()` helper:
+
+```typescript
+const dockerBaseTemplate = AWS.Template("ubuntu-docker-base")
+  .baseImage("ami-0c55b159cbfafe1f0") // standard Ubuntu base AMI
+  .instanceType("t3.micro")
+  .keyName("my-ssh-keypair")
+  .sshPrivateKey("~/.ssh/id_rsa")
+  .provision("playbooks/docker.yaml", "playbooks/security-hardening.yaml");
+```
+
+**Baking Lifecycle**:
+1. **Idempotent Baking**: Puls checks if a custom AMI with this name already exists in your AWS account. If it does and the provision playbooks match (via tags hashes under the `puls-provision` key), baking is skipped.
+2. **Deregister & Rebuild**: Because AMIs are read-only and immutable, if playbooks or configurations change, Puls will automatically deregister the old AMI (`DeregisterImage`) and delete its associated EBS snapshots (`DeleteSnapshot`) before rebuilding.
+3. **Automated VM Lifecycle**: Puls creates a temporary instance (`puls-bake-temp-{name}`), waits for SSH, runs the Ansible playbooks, stops the instance, issues a `CreateImage` command, waits for the custom AMI to become `available`, tags it with the Name and `puls-provision` playbook hashes, and terminates the temporary provisioning instance automatically.
+
+#### EC2 Cloning from Template (`.fromTemplate()`)
+
+Use the fluent `.fromTemplate()` builder method on `AWS.EC2()` to spin up a server directly from a pre-baked custom template:
+
+```typescript
+@Deploy({ parallel: true, region: REGION.US_EAST_1 })
+class ProductionCluster extends Stack {
+  // 1. Declare the template resource
+  dockerBase = AWS.Template("ubuntu-docker-base")
+    .baseImage("ami-0c55b159cbfafe1f0")
+    .sshPrivateKey("~/.ssh/id_rsa")
+    .provision("playbooks/docker.yaml");
+
+  // 2. Clone EC2 servers from the custom AMI concurrently in seconds
+  server1 = AWS.EC2("prod-game-01").fromTemplate(this.dockerBase).instanceType("t3.small");
+  server2 = AWS.EC2("prod-game-02").fromTemplate(this.dockerBase).instanceType("t3.small");
+}
+```
+
+* **Dynamic DAG Dependencies**: Calling `.fromTemplate(template)` automatically registers an implicit dependency. The parallel scheduling engine ensures that the custom AMI is fully baked and available before the EC2 instances start spawning concurrently.
+
 ---
 
 ## SQS

@@ -27,6 +27,7 @@ class RegionalAppStack extends Stack {
 
 ### Under the Hood: Region Context Isolation
 To prevent configuration race conditions on the global config context and to stay within strict cloud provider API rate limits:
+
 1. Puls loops through each declared region **sequentially**.
 2. Before instantiating each stack instance, it swaps the active provider region (e.g. `providers.aws.region = activeRegion`).
 3. It instantiates the Stack constructor (which triggers eagerness boundaries inside resources with the correct region set).

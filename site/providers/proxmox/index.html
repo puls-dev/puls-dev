@@ -447,6 +447,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../../parallel-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parallel Deployments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -465,10 +492,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
             
   
   
@@ -486,8 +513,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -610,6 +637,45 @@
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#golden-image-vm-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Golden Image / VM Templates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Golden Image / VM Templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proxmoxtemplate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proxmox.Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vm-cloning-from-template-fromtemplate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VM Cloning from Template (.fromTemplate())
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -938,6 +1004,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#golden-image-vm-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Golden Image / VM Templates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Golden Image / VM Templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proxmoxtemplate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proxmox.Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vm-cloning-from-template-fromtemplate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VM Cloning from Template (.fromTemplate())
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#templates-os-constants" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1119,26 +1224,60 @@
 <a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">  </span><span class="p">.</span><span class="nx">forceConfigCheck</span><span class="p">()</span><span class="w">                 </span><span class="c1">// force playbooks to run even if hashes match</span>
 <a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01-old&quot;</span><span class="p">)</span><span class="w">       </span><span class="c1">// destroy old VM after new one is up</span>
 </code></pre></div>
+<h2 id="golden-image-vm-templates">Golden Image / VM Templates</h2>
+<p>Puls supports declaring pre-baked virtual machine templates, analogous to HashiCorp Packer's workflow. This allows developers to configure a golden template image (with pre-installed packages, Docker, libraries, or security policies), bake it once, and then spin up actual VMs from it in seconds.</p>
+<h3 id="proxmoxtemplate"><code>Proxmox.Template</code></h3>
+<p>Define a golden image template using the <code>Proxmox.Template()</code> helper:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">dockerBaseTemplate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">Template</span><span class="p">(</span><span class="s2">&quot;ubuntu-docker-base&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">baseImage</span><span class="p">(</span><span class="nx">OS</span><span class="p">.</span><span class="nx">UBUNTU_24_04</span><span class="p">)</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">cores</span><span class="p">(</span><span class="mf">4</span><span class="p">)</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">memory</span><span class="p">(</span><span class="mf">4096</span><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">)</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;playbooks/docker.yaml&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;playbooks/security-hardening.yaml&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>Template Lifecycle</strong>:</p>
+<ol>
+<li><strong>Idempotent Baking</strong>: Puls checks if a template with this name already exists in the cluster. If it does and the provision playbooks match (via applied notes hashes), creation is skipped.</li>
+<li><strong>Purge &amp; Rebuild</strong>: Because Proxmox templates are read-only and cannot be altered, if playbooks or configurations change, Puls will automatically stop, purge, and rebuild the template from the <code>baseImage</code>.</li>
+<li><strong>Immutability Conversion</strong>: After successful VM booting, SSH checks, and playbook execution, Puls will stop the VM and issue a Proxmox Template conversion request, transforming it into a read-only template in the cluster.</li>
+</ol>
+<h3 id="vm-cloning-from-template-fromtemplate">VM Cloning from Template (<code>.fromTemplate()</code>)</h3>
+<p>Use the fluent <code>.fromTemplate()</code> builder method on <code>Proxmox.VM()</code> to spin up a server directly from a pre-baked template:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">parallel</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.STAGING</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kd">class</span><span class="w"> </span><span class="nx">ProductionApp</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="c1">// 1. Declare the template resource</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nx">dockerBase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">Template</span><span class="p">(</span><span class="s2">&quot;ubuntu-docker-base&quot;</span><span class="p">)</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="p">.</span><span class="nx">baseImage</span><span class="p">(</span><span class="nx">OS</span><span class="p">.</span><span class="nx">UBUNTU_24_04</span><span class="p">)</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;playbooks/docker.yaml&quot;</span><span class="p">);</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="c1">// 2. Clone servers from the template concurrently in seconds</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">  </span><span class="nx">server1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;prod-game-01&quot;</span><span class="p">).</span><span class="nx">fromTemplate</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">dockerBase</span><span class="p">).</span><span class="nx">cores</span><span class="p">(</span><span class="mf">4</span><span class="p">);</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">  </span><span class="nx">server2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;prod-game-02&quot;</span><span class="p">).</span><span class="nx">fromTemplate</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">dockerBase</span><span class="p">).</span><span class="nx">cores</span><span class="p">(</span><span class="mf">4</span><span class="p">);</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><strong>Dynamic DAG Dependencies</strong>: Calling <code>.fromTemplate(template)</code> automatically registers an implicit dependency. The parallel scheduling engine ensures that the template is fully baked before the VMs attempt concurrent cloning.</li>
+</ul>
 <h2 id="templates-os-constants">Templates (OS constants)</h2>
 <p>Templates are matched by VMID (numeric string) or name substring:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">OS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nx">UBUNTU_22_04</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ubuntu-22.04&quot;</span><span class="p">,</span><span class="w">   </span><span class="c1">// name substring match</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nx">UBUNTU_24_04</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;9017&quot;</span><span class="p">,</span><span class="w">           </span><span class="c1">// VMID match - use when name is ambiguous</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nx">DEBIAN_11</span><span class="o">:</span><span class="w">    </span><span class="s2">&quot;debian-11&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nx">DEBIAN_12</span><span class="o">:</span><span class="w">    </span><span class="s2">&quot;debian-12&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="p">}</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">OS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nx">UBUNTU_22_04</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ubuntu-22.04&quot;</span><span class="p">,</span><span class="w">   </span><span class="c1">// name substring match</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nx">UBUNTU_24_04</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;9017&quot;</span><span class="p">,</span><span class="w">           </span><span class="c1">// VMID match - use when name is ambiguous</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nx">DEBIAN_11</span><span class="o">:</span><span class="w">    </span><span class="s2">&quot;debian-11&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="nx">DEBIAN_12</span><span class="o">:</span><span class="w">    </span><span class="s2">&quot;debian-12&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">}</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">;</span>
 </code></pre></div>
 <h2 id="ssh-keys-keys-constant">SSH keys (KEYS constant)</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">KEYS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="s2">&quot;ssh-ed25519 AAAA... bia@nolimitcity.com&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">]</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">KEYS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="s2">&quot;ssh-ed25519 AAAA... bia@nolimitcity.com&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="p">]</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">;</span>
 </code></pre></div>
 <p>Pass via <code>.sshKey(KEYS)</code> - injected into cloud-init so every VM has your team's keys from first boot.</p>
 <h2 id="ip-resolution">IP resolution</h2>
 <p>Static IP via <code>.ip("10.8.10.83")</code> - sets cloud-init <code>ipconfig0</code> with gateway derived from the first three octets (<code>10.8.10.1</code>).</p>
 <p>If no <code>.ip()</code> is set, Puls tries DNS first:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>dns.resolve4(&quot;vm-name.nolimit.int&quot;)  →  uses resolved IP as static
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                                     →  falls back to DHCP if not in DNS
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>dns.resolve4(&quot;vm-name.nolimit.int&quot;)  →  uses resolved IP as static
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>                                     →  falls back to DHCP if not in DNS
 </code></pre></div>
 <p>Configure <code>dnsDomain</code> in <code>CONFIG</code> to enable this.</p>
 <h2 id="provisioning-pipeline">Provisioning pipeline</h2>
@@ -1170,7 +1309,7 @@
 <p>Puls implements <strong>Idempotent Configuration State Tracking</strong> to unify infrastructure provisioning and configuration management into a single, change-aware GitOps pipeline.</p>
 <h4 id="how-it-works">How It Works</h4>
 <p>Puls is completely stateless, meaning it does not rely on a local or remote state file. Instead, it securely stores applied playbook metadata directly in the Proxmox VM's <strong>Notes</strong> (Description) field using a non-destructive, regex-bounded block:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>[puls-provision: playbook1.yaml=hash1,playbook2.yaml=hash2]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>[puls-provision: playbook1.yaml=hash1,playbook2.yaml=hash2]
 </code></pre></div>
 This metadata tracks the short SHA-256 hash of each applied playbook.</p>
 <h4 id="key-features">Key Features:</h4>
@@ -1179,99 +1318,99 @@ This metadata tracks the short SHA-256 hash of each applied playbook.</p>
 <li><strong>Zero-Drift Skips</strong>: If no playbooks have changed and their hashes match the VM description metadata, Puls skips SSH connectivity probes and provisioning entirely, enabling lightning-fast deploys.</li>
 <li><strong>Notes Preservation</strong>: Any custom, human-written VM notes in the Proxmox Description field are fully preserved. Puls only parses and updates its own <code>[puls-provision: ...]</code> block, appending it to the end of your notes if not present.</li>
 <li><strong>Dynamic Append Chaining</strong>: Playbooks can be chained fluently. Calling <code>.provision(...)</code> multiple times or passing arrays will build a sequenced playbook execution chain:
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01&quot;</span><span class="p">)</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;playbooks/nginx.yaml&quot;</span><span class="p">)</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">([</span><span class="s2">&quot;playbooks/db.yaml&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;playbooks/app.yaml&quot;</span><span class="p">])</span>
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;playbooks/nginx.yaml&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">([</span><span class="s2">&quot;playbooks/db.yaml&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;playbooks/app.yaml&quot;</span><span class="p">])</span>
 </code></pre></div></li>
 <li><strong>Force Re-provisioning (<code>@ForceConfigCheck</code> / <code>.forceConfigCheck()</code>)</strong>: If you have manually altered a VM or want to ensure a clean slate, you can override state tracking to force all playbooks to run regardless of whether their hashes match.</li>
 <li><strong>Fluent Method</strong>:
-     <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-game01&quot;</span><span class="p">)</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/docker.yaml&quot;</span><span class="p">)</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">forceConfigCheck</span><span class="p">();</span><span class="w"> </span><span class="c1">// &lt;-- Forces playbooks to run</span>
+     <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-game01&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/docker.yaml&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">forceConfigCheck</span><span class="p">();</span><span class="w"> </span><span class="c1">// &lt;-- Forces playbooks to run</span>
 </code></pre></div></li>
 <li><strong>Decorator</strong>:
-     <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">@ForceConfigCheck</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nx">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-game01&quot;</span><span class="p">)</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/docker.yaml&quot;</span><span class="p">);</span>
+     <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">@ForceConfigCheck</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nx">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-game01&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/docker.yaml&quot;</span><span class="p">);</span>
 </code></pre></div></li>
 </ol>
 <h3 id="ansible-example-configdefaultyaml">Ansible example (<code>config/default.yaml</code>)</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nn">---</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install Puppet 8</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="nt">hosts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span><span class="nt">become</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">  </span><span class="nt">vars</span><span class="p">:</span>
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">    </span><span class="nt">puppet_server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ix-sto1-puppet01</span>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">  </span><span class="nt">tasks</span><span class="p">:</span>
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Copy Puppet Labs keyring</span>
-<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">      </span><span class="nt">ansible.builtin.copy</span><span class="p">:</span>
-<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">        </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">puppetlabs-keyring.gpg</span>
-<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">        </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/apt/keyrings/puppetlabs-keyring.gpg</span>
-<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0644&quot;</span>
-<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>
-<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Add Puppet 8 apt repository</span>
-<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="w">      </span><span class="nt">ansible.builtin.apt_repository</span><span class="p">:</span>
-<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a><span class="w">        </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;deb</span><span class="nv"> </span><span class="s">[signed-by=/etc/apt/keyrings/puppetlabs-keyring.gpg]</span><span class="nv"> </span><span class="s">http://apt.puppet.com</span><span class="nv"> </span><span class="s">noble</span><span class="nv"> </span><span class="s">puppet8&quot;</span>
-<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a><span class="w">        </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
-<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="w">        </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">puppetlabs</span>
-<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>
-<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install Puppet</span>
-<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a><span class="w">      </span><span class="nt">ansible.builtin.apt</span><span class="p">:</span>
-<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">puppet</span>
-<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a><span class="w">        </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
-<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a><span class="w">        </span><span class="nt">update_cache</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a>
-<a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Configure puppet.conf</span>
-<a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a><span class="w">      </span><span class="nt">ansible.builtin.copy</span><span class="p">:</span>
-<a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a><span class="w">        </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/puppetlabs/puppet/puppet.conf</span>
-<a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a><span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0644&quot;</span>
-<a id="__codelineno-10-30" name="__codelineno-10-30" href="#__codelineno-10-30"></a><span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<a id="__codelineno-10-31" name="__codelineno-10-31" href="#__codelineno-10-31"></a><span class="w">          </span><span class="no">[main]</span>
-<a id="__codelineno-10-32" name="__codelineno-10-32" href="#__codelineno-10-32"></a><span class="w">          </span><span class="no">certname = {{ ansible_facts[&#39;hostname&#39;] }}</span>
-<a id="__codelineno-10-33" name="__codelineno-10-33" href="#__codelineno-10-33"></a><span class="w">          </span><span class="no">environment = production</span>
-<a id="__codelineno-10-34" name="__codelineno-10-34" href="#__codelineno-10-34"></a><span class="w">          </span><span class="no">server = {{ puppet_server }}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nn">---</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install Puppet 8</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="nt">hosts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span><span class="nt">become</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">  </span><span class="nt">vars</span><span class="p">:</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">    </span><span class="nt">puppet_server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ix-sto1-puppet01</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">  </span><span class="nt">tasks</span><span class="p">:</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Copy Puppet Labs keyring</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">      </span><span class="nt">ansible.builtin.copy</span><span class="p">:</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">        </span><span class="nt">src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">puppetlabs-keyring.gpg</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">        </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/apt/keyrings/puppetlabs-keyring.gpg</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0644&quot;</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Add Puppet 8 apt repository</span>
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="w">      </span><span class="nt">ansible.builtin.apt_repository</span><span class="p">:</span>
+<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="w">        </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;deb</span><span class="nv"> </span><span class="s">[signed-by=/etc/apt/keyrings/puppetlabs-keyring.gpg]</span><span class="nv"> </span><span class="s">http://apt.puppet.com</span><span class="nv"> </span><span class="s">noble</span><span class="nv"> </span><span class="s">puppet8&quot;</span>
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="w">        </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="w">        </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">puppetlabs</span>
+<a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a>
+<a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install Puppet</span>
+<a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a><span class="w">      </span><span class="nt">ansible.builtin.apt</span><span class="p">:</span>
+<a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">puppet</span>
+<a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a><span class="w">        </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+<a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a><span class="w">        </span><span class="nt">update_cache</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a>
+<a id="__codelineno-12-26" name="__codelineno-12-26" href="#__codelineno-12-26"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Configure puppet.conf</span>
+<a id="__codelineno-12-27" name="__codelineno-12-27" href="#__codelineno-12-27"></a><span class="w">      </span><span class="nt">ansible.builtin.copy</span><span class="p">:</span>
+<a id="__codelineno-12-28" name="__codelineno-12-28" href="#__codelineno-12-28"></a><span class="w">        </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/puppetlabs/puppet/puppet.conf</span>
+<a id="__codelineno-12-29" name="__codelineno-12-29" href="#__codelineno-12-29"></a><span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0644&quot;</span>
+<a id="__codelineno-12-30" name="__codelineno-12-30" href="#__codelineno-12-30"></a><span class="w">        </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<a id="__codelineno-12-31" name="__codelineno-12-31" href="#__codelineno-12-31"></a><span class="w">          </span><span class="no">[main]</span>
+<a id="__codelineno-12-32" name="__codelineno-12-32" href="#__codelineno-12-32"></a><span class="w">          </span><span class="no">certname = {{ ansible_facts[&#39;hostname&#39;] }}</span>
+<a id="__codelineno-12-33" name="__codelineno-12-33" href="#__codelineno-12-33"></a><span class="w">          </span><span class="no">environment = production</span>
+<a id="__codelineno-12-34" name="__codelineno-12-34" href="#__codelineno-12-34"></a><span class="w">          </span><span class="no">server = {{ puppet_server }}</span>
 </code></pre></div>
 <h2 id="destroy">Destroy</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1">// Tear down the whole stack</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="kd">@Destroy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.STAGING</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="kd">class</span><span class="w"> </span><span class="nx">StagingInfra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="c1">// Destroy one resource during a deploy (replace pattern)</span>
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.STAGING</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="kd">class</span><span class="w"> </span><span class="nx">StagingInfra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">  </span><span class="ow">new</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app02&quot;</span><span class="p">)...;</span>
-<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>
-<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">  </span><span class="kd">@Destroy</span>
-<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">  </span><span class="nx">old</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01&quot;</span><span class="p">);</span>
-<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1">// Tear down the whole stack</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="kd">@Destroy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.STAGING</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="kd">class</span><span class="w"> </span><span class="nx">StagingInfra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="c1">// Destroy one resource during a deploy (replace pattern)</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.STAGING</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="kd">class</span><span class="w"> </span><span class="nx">StagingInfra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">  </span><span class="ow">new</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app02&quot;</span><span class="p">)...;</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">  </span><span class="kd">@Destroy</span>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">  </span><span class="nx">old</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01&quot;</span><span class="p">);</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="p">}</span>
 </code></pre></div>
 <p>Or use <code>.replace()</code> for an atomic swap - new VM is fully provisioned before the old one is removed:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app02&quot;</span><span class="p">)</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="p">...</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app02&quot;</span><span class="p">)</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">  </span><span class="p">...</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>Destroy stops the VM gracefully, then deletes it with <code>purge=1&amp;destroy-unreferenced-disks=1</code>.</p>
 <p>Provisioning is <strong>skipped</strong> during destroy - only discovery and deletion run.</p>
 <h2 id="full-example">Full example</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="p">,</span><span class="w"> </span><span class="nx">Destroy</span><span class="p">,</span><span class="w"> </span><span class="nx">Protected</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">,</span><span class="w"> </span><span class="nx">CONFIG</span><span class="p">,</span><span class="w"> </span><span class="nx">OS</span><span class="p">,</span><span class="w"> </span><span class="nx">KEYS</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/proxmox&quot;</span><span class="p">;</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.STAGING</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="kd">class</span><span class="w"> </span><span class="nx">StagingInfra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">  </span><span class="kd">@Protected</span>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-db01&quot;</span><span class="p">)</span>
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="nx">OS</span><span class="p">.</span><span class="nx">UBUNTU_24_04</span><span class="p">)</span>
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">    </span><span class="p">.</span><span class="nx">cores</span><span class="p">(</span><span class="mf">2</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">4096</span><span class="p">)</span>
-<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">    </span><span class="p">.</span><span class="nx">ip</span><span class="p">(</span><span class="s2">&quot;10.8.10.50&quot;</span><span class="p">).</span><span class="nx">vlan</span><span class="p">(</span><span class="mf">2010</span><span class="p">)</span>
-<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">    </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">);</span>
-<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>
-<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="w">  </span><span class="nx">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01&quot;</span><span class="p">)</span>
-<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="nx">OS</span><span class="p">.</span><span class="nx">UBUNTU_24_04</span><span class="p">)</span>
-<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="w">    </span><span class="p">.</span><span class="nx">cores</span><span class="p">(</span><span class="mf">4</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">8192</span><span class="p">)</span>
-<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a><span class="w">    </span><span class="p">.</span><span class="nx">ip</span><span class="p">(</span><span class="s2">&quot;10.8.10.51&quot;</span><span class="p">).</span><span class="nx">vlan</span><span class="p">(</span><span class="mf">2010</span><span class="p">)</span>
-<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="w">    </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">)</span>
-<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/default.yaml&quot;</span><span class="p">);</span>
-<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="p">,</span><span class="w"> </span><span class="nx">Destroy</span><span class="p">,</span><span class="w"> </span><span class="nx">Protected</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">,</span><span class="w"> </span><span class="nx">CONFIG</span><span class="p">,</span><span class="w"> </span><span class="nx">OS</span><span class="p">,</span><span class="w"> </span><span class="nx">KEYS</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/proxmox&quot;</span><span class="p">;</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.STAGING</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="kd">class</span><span class="w"> </span><span class="nx">StagingInfra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">  </span><span class="kd">@Protected</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-db01&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="nx">OS</span><span class="p">.</span><span class="nx">UBUNTU_24_04</span><span class="p">)</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">    </span><span class="p">.</span><span class="nx">cores</span><span class="p">(</span><span class="mf">2</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">4096</span><span class="p">)</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">    </span><span class="p">.</span><span class="nx">ip</span><span class="p">(</span><span class="s2">&quot;10.8.10.50&quot;</span><span class="p">).</span><span class="nx">vlan</span><span class="p">(</span><span class="mf">2010</span><span class="p">)</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="w">    </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">);</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="w">  </span><span class="nx">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="w">    </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="nx">OS</span><span class="p">.</span><span class="nx">UBUNTU_24_04</span><span class="p">)</span>
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a><span class="w">    </span><span class="p">.</span><span class="nx">cores</span><span class="p">(</span><span class="mf">4</span><span class="p">).</span><span class="nx">memory</span><span class="p">(</span><span class="mf">8192</span><span class="p">)</span>
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a><span class="w">    </span><span class="p">.</span><span class="nx">ip</span><span class="p">(</span><span class="s2">&quot;10.8.10.51&quot;</span><span class="p">).</span><span class="nx">vlan</span><span class="p">(</span><span class="mf">2010</span><span class="p">)</span>
+<a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a><span class="w">    </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">)</span>
+<a id="__codelineno-15-18" name="__codelineno-15-18" href="#__codelineno-15-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/default.yaml&quot;</span><span class="p">);</span>
+<a id="__codelineno-15-19" name="__codelineno-15-19" href="#__codelineno-15-19"></a><span class="p">}</span>
 </code></pre></div>
 
 

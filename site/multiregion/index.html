@@ -16,7 +16,7 @@
         <link rel="prev" href="../secrets/">
       
       
-        <link rel="next" href="../providers/aws/">
+        <link rel="next" href="../parallel-deployment/">
       
       
         
@@ -546,6 +546,33 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../parallel-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parallel Deployments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -560,10 +587,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
             
   
   
@@ -581,8 +608,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -910,11 +937,13 @@
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="under-the-hood-region-context-isolation">Under the Hood: Region Context Isolation</h3>
-<p>To prevent configuration race conditions on the global config context and to stay within strict cloud provider API rate limits:
-1. Puls loops through each declared region <strong>sequentially</strong>.
-2. Before instantiating each stack instance, it swaps the active provider region (e.g. <code>providers.aws.region = activeRegion</code>).
-3. It instantiates the Stack constructor (which triggers eagerness boundaries inside resources with the correct region set).
-4. Runs <code>deploy()</code> and logs terminal outputs inside a visually distinct regional console block.</p>
+<p>To prevent configuration race conditions on the global config context and to stay within strict cloud provider API rate limits:</p>
+<ol>
+<li>Puls loops through each declared region <strong>sequentially</strong>.</li>
+<li>Before instantiating each stack instance, it swaps the active provider region (e.g. <code>providers.aws.region = activeRegion</code>).</li>
+<li>It instantiates the Stack constructor (which triggers eagerness boundaries inside resources with the correct region set).</li>
+<li>Runs <code>deploy()</code> and logs terminal outputs inside a visually distinct regional console block.</li>
+</ol>
 <hr />
 <h2 id="referencing-regional-stack-outputs">Referencing Regional Stack Outputs</h2>
 <p>When a stack is deployed across multiple regions, Puls generates a distinct stack instance for each region and indexes them inside the global stack registry under a regional key:

@@ -14,6 +14,7 @@ import { Output } from "../../core/output.js";
 import { getEC2Client } from "./api.js";
 import { checkPort, runProvisioner } from "../../core/provisioner.js";
 import { getFileHash } from "../proxmox/hash.js";
+import { EC2TemplateBuilder } from "./template.js";
 
 export class EC2VMBuilder extends BaseBuilder {
   readonly out = {
@@ -23,6 +24,7 @@ export class EC2VMBuilder extends BaseBuilder {
 
   private _instanceType: string = "t3.micro";
   private _ami: string = "ami-0c55b159cbfafe1f0"; // Default standard Ubuntu 22.04 LTS in us-east-1
+  private _templateSource?: EC2TemplateBuilder;
   private _keyName?: string;
   private _subnetId?: string;
   private _securityGroupIds?: string[];
@@ -46,6 +48,12 @@ export class EC2VMBuilder extends BaseBuilder {
 
   ami(amiId: string) {
     this._ami = amiId;
+    return this;
+  }
+
+  fromTemplate(template: EC2TemplateBuilder) {
+    this._templateSource = template;
+    this.dependsOn(template);
     return this;
   }
 
@@ -160,7 +168,8 @@ export class EC2VMBuilder extends BaseBuilder {
     if (dryRun) {
       console.log(`\n🔍 [DRY RUN] AWS EC2 VM "${this.name}"...`);
       if (!existing) {
-        console.log(`   📝 Plan: Create EC2 Instance "${this.name}" (${this._instanceType} from AMI ${this._ami})`);
+        const sourceLabel = this._templateSource ? `Template: ${this._templateSource.name}` : `AMI ${this._ami}`;
+        console.log(`   📝 Plan: Create EC2 Instance "${this.name}" (${this._instanceType} from ${sourceLabel})`);
         if (this._provision.length > 0) {
           console.log(`      └─ Provision: ${this._provision.join(", ")}`);
         }
@@ -191,10 +200,15 @@ export class EC2VMBuilder extends BaseBuilder {
       }
       const initialMetadataVal = mergeAwsTagsForProvision(initialHashes);
 
+      let activeAmi = this._ami;
+      if (this._templateSource) {
+        activeAmi = await this._templateSource.out.amiId.get();
+      }
+
       console.log(`🚀 Creating AWS EC2 VM Instance "${this.name}"...`);
       const result = await client.send(
         new RunInstancesCommand({
-          ImageId: this._ami,
+          ImageId: activeAmi,
           InstanceType: this._instanceType as any,
           MinCount: 1,
           MaxCount: 1,

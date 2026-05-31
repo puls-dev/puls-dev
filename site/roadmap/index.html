@@ -447,6 +447,33 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../parallel-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parallel Deployments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -461,10 +488,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
             
   
   
@@ -482,8 +509,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1168,7 +1195,7 @@
 <li>[x] Cluster-aware node selection - pick the node with the most free RAM via <code>/nodes</code> API instead of always using the first configured node</li>
 <li>[x] <code>.machine()</code> builder method - let users override machine type (i440fx vs q35) per VM rather than the hardcoded default</li>
 <li>[x] <code>CONFIG.PRODUCTION</code> entry in <code>src/types/proxmox.ts</code></li>
-<li>[ ] <strong>Golden Image / VM Templates (<code>Proxmox.Template</code>)</strong> — Declare pre-baked templates with fluent OS base images and playbook provisioning (Packer-like behavior). Clone VMs from these templates to drop VM deployment time from minutes to seconds.</li>
+<li>[x] <strong>Golden Image / VM Templates (<code>Proxmox.Template</code>)</strong> — Declare pre-baked templates with fluent OS base images and playbook provisioning (Packer-like behavior). Clone VMs from these templates to drop VM deployment time from minutes to seconds.</li>
 </ul>
 <h3 id="aws">AWS</h3>
 <ul>
@@ -1179,6 +1206,7 @@
 <li>[x] IAM - role and inline/managed policy management; useful for cross-service wiring without manual console steps</li>
 <li>[x] CloudWatch alarms - CPU/memory thresholds on Fargate and RDS with SNS notification target</li>
 <li>[x] EC2 - Provision EC2 virtual machines with VPC/SG support and stateless tag-based playbook provisioning.</li>
+<li>[x] <strong>Golden Image / VM Templates (<code>AWS.Template</code>)</strong> — Declare pre-baked custom AMIs with fluent OS base images and playbook provisioning (Packer-like behavior). Clone EC2 instances from these templates to drop VM deployment time from minutes to seconds.</li>
 </ul>
 <h3 id="digitalocean">DigitalOcean</h3>
 <ul>
@@ -1208,6 +1236,8 @@
 <li>[x] GCP Pub/Sub (<code>GCP.PubSub</code>) - Topics and subscriptions for decoupled messaging (SQS/SNS parity)</li>
 <li>[x] GCP Cloud DNS (<code>GCP.CloudDNS</code>) - Managed zones, record sets, and DNS routing (Route53 parity)</li>
 <li>[x] GCP IAM (<code>GCP.ServiceAccount</code> / <code>GCP.IAMBinding</code>) - Service accounts, custom roles, and resource-level IAM bindings (IAM parity)</li>
+<li>[x] GCP Compute VM (<code>GCP.VM</code>) - Compute instances with external IP NAT and universal playbook provisioning (EC2/Proxmox parity)</li>
+<li>[x] <strong>Golden Image / VM Templates (<code>GCP.Template</code>)</strong> — Declare pre-baked GCP custom images with fluent OS base images and playbook provisioning (Packer-like behavior). Clone Compute VMs from these templates to drop VM deployment time from minutes to seconds.</li>
 </ul>
 <hr />
 <h2 id="new-providers">New Providers</h2>
@@ -1268,9 +1298,9 @@
 <li>[x] <strong><code>@Protected</code></strong> - marks a resource so it is never modified or destroyed</li>
 <li>[x] <strong>Idempotent Configuration State Tracking</strong> — Store applied playbook and file hashes directly in VM metadata (e.g. Proxmox notes/tags) to support stateless, change-aware Ansible configuration updates on already created servers</li>
 <li>[x] <strong>Hooks</strong> - <code>beforeDeploy</code> / <code>afterDeploy</code> callbacks on <code>Stack</code> for custom side effects (notify Slack, run migrations, etc.)</li>
-<li>[ ] <strong>Multi-region</strong> - run the same stack across N regions in parallel; <code>@Deploy({ regions: [REGION.EU_CENTRAL_1, REGION.US_EAST_1] })</code></li>
-<li>[ ] <strong>Parallel resource deployment</strong> - resources within a stack that have no declared dependency could deploy concurrently instead of sequentially</li>
-<li>[ ] <strong>Secrets at deploy time</strong> - pull credentials from AWS SSM Parameter Store or HashiCorp Vault instead of requiring them as env vars upfront</li>
+<li>[x] <strong>Multi-region</strong> - run the same stack across N regions in parallel; <code>@Deploy({ regions: [REGION.EU_CENTRAL_1, REGION.US_EAST_1] })</code></li>
+<li>[x] <strong>Parallel resource deployment</strong> - resources within a stack that have no declared dependency could deploy concurrently instead of sequentially</li>
+<li>[x] <strong>Secrets at deploy time</strong> - pull credentials from AWS SSM Parameter Store or HashiCorp Vault instead of requiring them as env vars upfront</li>
 <li>[x] <strong>Hybrid Resource Configuration (YAML)</strong> — Support loading bulk static configuration sets (like DNS records, firewall rules, or security group rules) directly from a <code>.yaml</code> or <code>.json</code> file within builder methods while retaining the flexibility to chain programmatic methods for dynamic resource parameters.</li>
 <li>[x] <strong>Opt-in Infrastructure Blueprint Documentation (<code>Config.blueprint</code>)</strong> — Generate version-controlled markdown blueprints (<code>docs/architecture.md</code>) of live system resources, auto-calculating monthly costs, formatting live endpoints, and rendering Mermaid.js dynamic dependency/topology graphs on local runs.</li>
 </ul>

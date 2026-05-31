@@ -5,6 +5,7 @@ import { Output } from "../../core/output.js";
 import { gcpFetch, getProjectId, getRegion } from "./api.js";
 import { checkPort, runProvisioner } from "../../core/provisioner.js";
 import { getFileHash } from "../proxmox/hash.js";
+import { GCPTemplateBuilder } from "./template.js";
 
 export class GCPVMBuilder extends BaseBuilder {
   readonly out = {
@@ -14,6 +15,7 @@ export class GCPVMBuilder extends BaseBuilder {
 
   private _machineType: string = "e2-micro";
   private _image: string = "projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts";
+  private _templateSource?: GCPTemplateBuilder;
   private _zone: string = "us-central1-a";
   private _network: string = "global/networks/default";
   private _sshKeys: string | string[] = [];
@@ -35,6 +37,12 @@ export class GCPVMBuilder extends BaseBuilder {
 
   image(img: string) {
     this._image = img;
+    return this;
+  }
+
+  fromTemplate(template: GCPTemplateBuilder) {
+    this._templateSource = template;
+    this.dependsOn(template);
     return this;
   }
 
@@ -138,7 +146,8 @@ export class GCPVMBuilder extends BaseBuilder {
     if (dryRun) {
       console.log(`\n🔍 [DRY RUN] GCP VM "${this.name}"...`);
       if (!existing) {
-        console.log(`   📝 Plan: Create GCP VM Instance "${this.name}" (${this._machineType} in zone ${this._zone})`);
+        const sourceLabel = this._templateSource ? `Template: ${this._templateSource.name}` : `Image: ${this._image}`;
+        console.log(`   📝 Plan: Create GCP VM Instance "${this.name}" (${this._machineType} in zone ${this._zone} from ${sourceLabel})`);
         if (this._provision.length > 0) {
           console.log(`      └─ Provision: ${this._provision.join(", ")}`);
         }
@@ -187,6 +196,11 @@ export class GCPVMBuilder extends BaseBuilder {
       }
       const initialMetadataVal = mergeGcpMetadataForProvision(initialHashes);
 
+      let activeImage = this._image;
+      if (this._templateSource) {
+        activeImage = await this._templateSource.out.imageId.get();
+      }
+
       const body = {
         name: this.name,
         machineType: `zones/${zone}/machineTypes/${this._machineType}`,
@@ -195,7 +209,7 @@ export class GCPVMBuilder extends BaseBuilder {
             boot: true,
             autoDelete: true,
             initializeParams: {
-              sourceImage: this._image,
+              sourceImage: activeImage,
             },
           },
         ],

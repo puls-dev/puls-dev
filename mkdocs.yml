@@ -42,6 +42,7 @@ nav:
   - Lifecycle Hooks: hooks.md
   - Secrets at Deploy Time: secrets.md
   - Multi-Region Deployments: multiregion.md
+  - Parallel Deployments: parallel-deployment.md
   - Providers:
       - AWS: providers/aws.md
       - Proxmox: providers/proxmox.md
