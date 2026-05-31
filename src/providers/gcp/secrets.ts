@@ -33,8 +33,8 @@ export class GCPSecretBuilder extends BaseBuilder {
         if (payload.payload?.data) {
           this.resolvedValue = Buffer.from(payload.payload.data, "base64").toString("utf8");
         }
-      } catch (err) {
-        // If version access fails (e.g. no versions created yet), keep resolvedValue as null
+      } catch (err: any) {
+        console.warn(`   ⚠️  Could not fetch latest version of secret "${secretId}": ${err.message}`);
       }
 
       return secret;

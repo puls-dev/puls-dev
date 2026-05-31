@@ -79,6 +79,9 @@ export class GCPVMBuilder extends BaseBuilder {
   protected async runProvisioner(ip: string, script: string): Promise<void> {
     const keysArray = Array.isArray(this._sshKeys) ? this._sshKeys : [this._sshKeys];
     const keyPath = keysArray.find(k => !k.startsWith('ssh-') && !k.startsWith('ecdsa-') && !k.startsWith('sk-'));
+    if (!keyPath) {
+      throw new Error(`[GCP VM:${this.name}] No SSH private key path found. Pass a file path via .sshKey() to run provisioning.`);
+    }
     return runProvisioner(ip, "root", keyPath, script);
   }
 
@@ -147,9 +150,22 @@ export class GCPVMBuilder extends BaseBuilder {
       console.log(`\n🔍 [DRY RUN] GCP VM "${this.name}"...`);
       if (!existing) {
         const sourceLabel = this._templateSource ? `Template: ${this._templateSource.name}` : `Image: ${this._image}`;
-        console.log(`   📝 Plan: Create GCP VM Instance "${this.name}" (${this._machineType} in zone ${this._zone} from ${sourceLabel})`);
+        console.log(`   📝 Plan: Create GCP VM Instance`);
+        const details: string[] = [
+          `Name:         ${this.name}`,
+          `Machine Type: ${this._machineType}`,
+          `Zone:         ${this._zone}`,
+          `Source:       ${sourceLabel}`,
+        ];
+        if (this._network) {
+          details.push(`Network:      ${this._network}`);
+        }
         if (this._provision.length > 0) {
-          console.log(`      └─ Provision: ${this._provision.join(", ")}`);
+          details.push(`Provision:    ${this._provision.join(", ")}`);
+        }
+        for (let i = 0; i < details.length; i++) {
+          const prefix = i === details.length - 1 ? "      └─ " : "      ├─ ";
+          console.log(`${prefix}${details[i]}`);
         }
         this.out.id.resolve("PENDING");
         this.out.ip.resolve("0.0.0.0");

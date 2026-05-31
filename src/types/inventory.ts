@@ -94,10 +94,63 @@ export interface AwsInventory {
   hostedZones: AwsHostedZone[];
 }
 
+// ─── GCP ──────────────────────────────────────────────────────────────────────
+
+export interface GcpVM {
+  name: string;
+  zone: string;
+  machineType: string;
+  status: string;
+  ip: string;
+}
+
+export interface GcpCloudSQL {
+  name: string;
+  engine: string;
+  tier: string;
+  status: string;
+}
+
+export interface GcpCloudRun {
+  name: string;
+  region: string;
+  url: string;
+}
+
+export interface GcpCloudDNS {
+  name: string;
+  dnsName: string;
+}
+
+export interface GcpInventory {
+  vms: GcpVM[];
+  rdsInstances: GcpCloudSQL[];
+  distributions: GcpCloudRun[];
+  hostedZones: GcpCloudDNS[];
+}
+
+// ─── Firebase ─────────────────────────────────────────────────────────────────
+
+export interface FirebaseHosting {
+  site: string;
+}
+
+export interface FirebaseFunction {
+  name: string;
+  region: string;
+  entryPoint: string;
+  runtime: string;
+}
+
+export interface FirebaseInventory {
+  hostingSites: FirebaseHosting[];
+  functions: FirebaseFunction[];
+}
+
 // ─── Combined ─────────────────────────────────────────────────────────────────
 
 export interface InventoryError {
-  provider: "proxmox" | "do" | "aws";
+  provider: "proxmox" | "do" | "aws" | "gcp" | "firebase";
   message: string;
 }
 
@@ -105,5 +158,7 @@ export interface InventoryResult {
   proxmox?: ProxmoxInventory;
   do?: DoInventory;
   aws?: AwsInventory;
+  gcp?: GcpInventory;
+  firebase?: FirebaseInventory;
   errors: InventoryError[];
 }

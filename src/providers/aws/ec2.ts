@@ -169,9 +169,18 @@ export class EC2VMBuilder extends BaseBuilder {
       console.log(`\n🔍 [DRY RUN] AWS EC2 VM "${this.name}"...`);
       if (!existing) {
         const sourceLabel = this._templateSource ? `Template: ${this._templateSource.name}` : `AMI ${this._ami}`;
-        console.log(`   📝 Plan: Create EC2 Instance "${this.name}" (${this._instanceType} from ${sourceLabel})`);
+        console.log(`   📝 Plan: Create AWS EC2 Instance`);
+        const details: string[] = [
+          `Name:          ${this.name}`,
+          `Instance Type: ${this._instanceType}`,
+          `Source:        ${sourceLabel}`,
+        ];
         if (this._provision.length > 0) {
-          console.log(`      └─ Provision: ${this._provision.join(", ")}`);
+          details.push(`Provision:     ${this._provision.join(", ")}`);
+        }
+        for (let i = 0; i < details.length; i++) {
+          const prefix = i === details.length - 1 ? "      └─ " : "      ├─ ";
+          console.log(`${prefix}${details[i]}`);
         }
         this.out.id.resolve("PENDING");
         this.out.ip.resolve("0.0.0.0");

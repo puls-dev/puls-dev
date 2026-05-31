@@ -2,7 +2,6 @@ import "reflect-metadata";
 import { readFileSync } from "node:fs";
 import { Config } from "./config.js";
 import { Stack } from "./stack.js";
-import { Checker } from "./checker.js";
 
 type ProviderOpts = {
   token?: string;
@@ -28,26 +27,16 @@ function applyConfig(opts: ProviderOpts) {
   if (opts.dryRun !== undefined) Config.set({ dryRun: opts.dryRun });
   if (opts.parallel !== undefined) Config.set({ parallel: opts.parallel });
   if (opts.token)
-    Config.set({
-      providers: { ...Config.get().providers, do: { token: opts.token } },
-    });
+    Config.set({ providers: { do: { token: opts.token } } });
   if (opts.region)
-    Config.set({
-      providers: { ...Config.get().providers, aws: { region: opts.region } },
-    });
+    Config.set({ providers: { aws: { region: opts.region } } });
   if (opts.proxmox)
-    Config.set({
-      providers: { ...Config.get().providers, proxmox: opts.proxmox },
-    });
+    Config.set({ providers: { proxmox: opts.proxmox } });
   if (opts.firebase) {
     const sa = JSON.parse(readFileSync(opts.firebase, "utf8"));
     Config.set({
       providers: {
-        ...Config.get().providers,
-        firebase: {
-          projectId: sa.project_id,
-          serviceAccountPath: opts.firebase,
-        },
+        firebase: { projectId: sa.project_id, serviceAccountPath: opts.firebase },
       },
     });
   }

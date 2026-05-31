@@ -15,6 +15,7 @@ import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
 import { CloudWatchClient } from "@aws-sdk/client-cloudwatch";
 import { SNSClient } from "@aws-sdk/client-sns";
 import { Config } from "../../core/config.js";
+import { withRetry } from "../../core/retry.js";
 
 function getRegion(): string {
   const region = Config.get().providers.aws?.region;
@@ -25,33 +26,55 @@ function getRegion(): string {
   return region;
 }
 
+function wrapClient<T extends { send: Function }>(client: T): T {
+  const originalSend = client.send;
+  client.send = function (command: any, options?: any) {
+    return withRetry(
+      () => originalSend.call(client, command, options),
+      {
+        retryable: (err) => {
+          const code = err.name || err.code;
+          const status = err.$metadata?.httpStatusCode;
+          return (
+            code === "ThrottlingException" ||
+            code === "ProvisionedThroughputExceededException" ||
+            code === "RequestLimitExceeded" ||
+            (status && status >= 500)
+          );
+        }
+      }
+    );
+  };
+  return client;
+}
+
 export const getS3Client = (region?: string) =>
-  new S3Client({ region: region ?? getRegion() });
+  wrapClient(new S3Client({ region: region ?? getRegion() }));
 
 // CloudFront, Route53, ACM, Route53 Domains, and IAM are all global - must use us-east-1
-export const getCFClient = () => new CloudFrontClient({ region: "us-east-1" });
-export const getR53Client = () => new Route53Client({ region: "us-east-1" });
+export const getCFClient = () => wrapClient(new CloudFrontClient({ region: "us-east-1" }));
+export const getR53Client = () => wrapClient(new Route53Client({ region: "us-east-1" }));
 export const getR53DomainsClient = () =>
-  new Route53DomainsClient({ region: "us-east-1" });
-export const getACMClient = () => new ACMClient({ region: "us-east-1" });
-export const getIAMClient = () => new IAMClient({ region: "us-east-1" });
+  wrapClient(new Route53DomainsClient({ region: "us-east-1" }));
+export const getACMClient = () => wrapClient(new ACMClient({ region: "us-east-1" }));
+export const getIAMClient = () => wrapClient(new IAMClient({ region: "us-east-1" }));
 export const getLambdaClient = (region?: string) =>
-  new LambdaClient({ region: region ?? getRegion() });
+  wrapClient(new LambdaClient({ region: region ?? getRegion() }));
 export const getAPIGWClient = (region?: string) =>
-  new ApiGatewayV2Client({ region: region ?? getRegion() });
+  wrapClient(new ApiGatewayV2Client({ region: region ?? getRegion() }));
 export const getECSClient = (region?: string) =>
-  new ECSClient({ region: region ?? getRegion() });
+  wrapClient(new ECSClient({ region: region ?? getRegion() }));
 export const getEC2Client = (region?: string) =>
-  new EC2Client({ region: region ?? getRegion() });
+  wrapClient(new EC2Client({ region: region ?? getRegion() }));
 export const getCWLogsClient = (region?: string) =>
-  new CloudWatchLogsClient({ region: region ?? getRegion() });
+  wrapClient(new CloudWatchLogsClient({ region: region ?? getRegion() }));
 export const getRDSClient = (region?: string) =>
-  new RDSClient({ region: region ?? getRegion() });
+  wrapClient(new RDSClient({ region: region ?? getRegion() }));
 export const getSQSClient = (region?: string) =>
-  new SQSClient({ region: region ?? getRegion() });
+  wrapClient(new SQSClient({ region: region ?? getRegion() }));
 export const getSecretsClient = (region?: string) =>
-  new SecretsManagerClient({ region: region ?? getRegion() });
+  wrapClient(new SecretsManagerClient({ region: region ?? getRegion() }));
 export const getCWClient = (region?: string) =>
-  new CloudWatchClient({ region: region ?? getRegion() });
+  wrapClient(new CloudWatchClient({ region: region ?? getRegion() }));
 export const getSNSClient = (region?: string) =>
-  new SNSClient({ region: region ?? getRegion() });
+  wrapClient(new SNSClient({ region: region ?? getRegion() }));

@@ -29,7 +29,7 @@ export class Secret extends Output<string> {
    * Helper method to seamlessly unpack either a static string, a standard Output, or a Secret.
    * Call this within resource builder deploy() methods.
    */
-  static async resolve(val: string | Output<string> | Secret | any): Promise<string> {
+  static async resolve(val: string | Output<string> | Secret): Promise<string> {
     if (val instanceof Output) {
       return await val.get();
     }

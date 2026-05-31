@@ -102,9 +102,11 @@ describe("EC2VMBuilder Unit Tests", () => {
       assert.strictEqual(await vm.out.ip.get(), "0.0.0.0");
 
       assert.ok(logOutput.includes("🔍 [DRY RUN]"));
-      assert.ok(logOutput.includes("Plan: Create EC2 Instance \"dryrun-vm\""));
-      assert.ok(logOutput.includes("t3.medium from AMI ami-test123"));
-      assert.ok(logOutput.includes("playbooks/nginx.yaml"));
+      assert.ok(logOutput.includes("Plan: Create AWS EC2 Instance"));
+      assert.ok(logOutput.includes("Name:          dryrun-vm"));
+      assert.ok(logOutput.includes("Instance Type: t3.medium"));
+      assert.ok(logOutput.includes("Source:        AMI ami-test123"));
+      assert.ok(logOutput.includes("Provision:     playbooks/nginx.yaml"));
     } finally {
       console.log = originalLog;
       EC2Client.prototype.send = originalSend;

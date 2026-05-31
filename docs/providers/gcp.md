@@ -245,6 +245,7 @@ const dockerBaseTemplate = GCP.Template("ubuntu-docker-base")
 ```
 
 **Baking Lifecycle**:
+
 1. **Idempotent Baking**: Puls checks if a custom image with this name already exists in your GCP project. If it does and the provision playbooks match (via the applied hashes saved inside the image's description field), image baking is skipped.
 2. **Delete & Rebuild**: Because GCP images are read-only and immutable, if playbooks or configurations change, Puls will automatically delete the old custom image (`DELETE /compute/v1/projects/.../global/images/{name}`) before rebuilding.
 3. **Automated VM Lifecycle**: Puls creates a temporary instance (`puls-bake-temp-{name}`), waits for SSH, runs the Ansible playbooks, stops the instance, creates a new custom image from the stopped instance's boot disk, writes the playbook hashes into the image's description field, waits until the image status is `READY`, and deletes the temporary provisioning VM instance.
@@ -408,13 +409,11 @@ npx tsx examples/deploy.ts
 
 To manage Cloud Run, Cloud SQL, Secret Manager, Pub/Sub, Cloud DNS, and IAM resources, your service account key needs the following IAM roles:
 
-* **Cloud Run Admin** (`roles/run.admin`) — full control over Cloud Run services.
-* **Service Account User** (`roles/iam.serviceAccountUser`) — to associate runtime service accounts.
-* **Cloud SQL Admin** (`roles/cloudsql.admin`) — full control over Cloud SQL database instances.
-* **Secret Manager Admin** (`roles/secretmanager.admin`) — full control over Secret Manager containers and values.
-* **Pub/Sub Admin** (`roles/pubsub.admin`) — full control over Pub/Sub topics and subscriptions.
-* **DNS Administrator** (`roles/dns.admin`) — full control over Google Cloud DNS zones and records.
-* **Create/Delete Service Accounts** (`roles/iam.serviceAccountAdmin`) — to create, modify, and delete custom service accounts.
-* **Project IAM Admin** (`roles/resourcemanager.projectIamAdmin`) — to set and modify project-level IAM policies.
-
-
+* **Cloud Run Admin** (`roles/run.admin`) - full control over Cloud Run services.
+* **Service Account User** (`roles/iam.serviceAccountUser`) - to associate runtime service accounts.
+* **Cloud SQL Admin** (`roles/cloudsql.admin`) - full control over Cloud SQL database instances.
+* **Secret Manager Admin** (`roles/secretmanager.admin`) - full control over Secret Manager containers and values.
+* **Pub/Sub Admin** (`roles/pubsub.admin`) - full control over Pub/Sub topics and subscriptions.
+* **DNS Administrator** (`roles/dns.admin`) - full control over Google Cloud DNS zones and records.
+* **Create/Delete Service Accounts** (`roles/iam.serviceAccountAdmin`) - to create, modify, and delete custom service accounts.
+* **Project IAM Admin** (`roles/resourcemanager.projectIamAdmin`) - to set and modify project-level IAM policies.

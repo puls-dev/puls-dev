@@ -937,6 +937,45 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#roadmap-gap-analysis-tech-debt-planned-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Roadmap Gap Analysis (Tech Debt / Planned Improvements)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#breaking-changes-migration-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Changes &amp; Migration Notes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Breaking Changes &amp; Migration Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shell-script-sh-provisioning-removal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell Script (.sh) Provisioning Removal
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1148,6 +1187,45 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#roadmap-gap-analysis-tech-debt-planned-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Roadmap Gap Analysis (Tech Debt / Planned Improvements)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#breaking-changes-migration-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Changes &amp; Migration Notes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Breaking Changes &amp; Migration Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shell-script-sh-provisioning-removal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell Script (.sh) Provisioning Removal
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1195,7 +1273,7 @@
 <li>[x] Cluster-aware node selection - pick the node with the most free RAM via <code>/nodes</code> API instead of always using the first configured node</li>
 <li>[x] <code>.machine()</code> builder method - let users override machine type (i440fx vs q35) per VM rather than the hardcoded default</li>
 <li>[x] <code>CONFIG.PRODUCTION</code> entry in <code>src/types/proxmox.ts</code></li>
-<li>[x] <strong>Golden Image / VM Templates (<code>Proxmox.Template</code>)</strong> — Declare pre-baked templates with fluent OS base images and playbook provisioning (Packer-like behavior). Clone VMs from these templates to drop VM deployment time from minutes to seconds.</li>
+<li>[x] <strong>Golden Image / VM Templates (<code>Proxmox.Template</code>)</strong> - Declare pre-baked templates with fluent OS base images and playbook provisioning (Packer-like behavior). Clone VMs from these templates to drop VM deployment time from minutes to seconds.</li>
 </ul>
 <h3 id="aws">AWS</h3>
 <ul>
@@ -1206,7 +1284,7 @@
 <li>[x] IAM - role and inline/managed policy management; useful for cross-service wiring without manual console steps</li>
 <li>[x] CloudWatch alarms - CPU/memory thresholds on Fargate and RDS with SNS notification target</li>
 <li>[x] EC2 - Provision EC2 virtual machines with VPC/SG support and stateless tag-based playbook provisioning.</li>
-<li>[x] <strong>Golden Image / VM Templates (<code>AWS.Template</code>)</strong> — Declare pre-baked custom AMIs with fluent OS base images and playbook provisioning (Packer-like behavior). Clone EC2 instances from these templates to drop VM deployment time from minutes to seconds.</li>
+<li>[x] <strong>Golden Image / VM Templates (<code>AWS.Template</code>)</strong> - Declare pre-baked custom AMIs with fluent OS base images and playbook provisioning (Packer-like behavior). Clone EC2 instances from these templates to drop VM deployment time from minutes to seconds.</li>
 </ul>
 <h3 id="digitalocean">DigitalOcean</h3>
 <ul>
@@ -1237,7 +1315,7 @@
 <li>[x] GCP Cloud DNS (<code>GCP.CloudDNS</code>) - Managed zones, record sets, and DNS routing (Route53 parity)</li>
 <li>[x] GCP IAM (<code>GCP.ServiceAccount</code> / <code>GCP.IAMBinding</code>) - Service accounts, custom roles, and resource-level IAM bindings (IAM parity)</li>
 <li>[x] GCP Compute VM (<code>GCP.VM</code>) - Compute instances with external IP NAT and universal playbook provisioning (EC2/Proxmox parity)</li>
-<li>[x] <strong>Golden Image / VM Templates (<code>GCP.Template</code>)</strong> — Declare pre-baked GCP custom images with fluent OS base images and playbook provisioning (Packer-like behavior). Clone Compute VMs from these templates to drop VM deployment time from minutes to seconds.</li>
+<li>[x] <strong>Golden Image / VM Templates (<code>GCP.Template</code>)</strong> - Declare pre-baked GCP custom images with fluent OS base images and playbook provisioning (Packer-like behavior). Clone Compute VMs from these templates to drop VM deployment time from minutes to seconds.</li>
 </ul>
 <hr />
 <h2 id="new-providers">New Providers</h2>
@@ -1286,7 +1364,7 @@
 <li>[x] Add <code>"exports"</code> map with per-provider sub-paths so consumers can import only what they need (e.g. <code>puls-dev/aws</code>, <code>puls-dev/firebase</code>)</li>
 <li>[x] Ship compiled JS + <code>.d.ts</code> declarations</li>
 <li>[x] Standard dependencies for zero-friction out-of-the-box pre-1.0 install</li>
-<li>[ ] <strong>Scoped Monorepo Sub-Packages</strong> — Split <code>puls-dev</code> into separate scoped packages published to the registry (<code>@puls-dev/core</code>, <code>@puls-dev/aws</code>, <code>@puls-dev/gcp</code>, etc.) to provide zero-friction installs with zero dependency bloat</li>
+<li>[ ] <strong>Scoped Monorepo Sub-Packages</strong> - Split <code>puls-dev</code> into separate scoped packages published to the registry (<code>@puls-dev/core</code>, <code>@puls-dev/aws</code>, <code>@puls-dev/gcp</code>, etc.) to provide zero-friction installs with zero dependency bloat</li>
 <li>[ ] Semver versioning - provider additions = minor, breaking DSL changes = major</li>
 </ul>
 <hr />
@@ -1296,13 +1374,33 @@
 <li>[x] <strong>Inventory / <code>@Check</code></strong> - read-only discovery across all configured providers; prints counts, status, and DO cost estimates</li>
 <li>[x] <strong>Dry run</strong> - <code>dryRun: true</code> or <code>@DryRun</code> prints a full plan without any API writes</li>
 <li>[x] <strong><code>@Protected</code></strong> - marks a resource so it is never modified or destroyed</li>
-<li>[x] <strong>Idempotent Configuration State Tracking</strong> — Store applied playbook and file hashes directly in VM metadata (e.g. Proxmox notes/tags) to support stateless, change-aware Ansible configuration updates on already created servers</li>
+<li>[x] <strong>Idempotent Configuration State Tracking</strong> - Store applied playbook and file hashes directly in VM metadata (e.g. Proxmox notes/tags) to support stateless, change-aware Ansible configuration updates on already created servers</li>
 <li>[x] <strong>Hooks</strong> - <code>beforeDeploy</code> / <code>afterDeploy</code> callbacks on <code>Stack</code> for custom side effects (notify Slack, run migrations, etc.)</li>
 <li>[x] <strong>Multi-region</strong> - run the same stack across N regions in parallel; <code>@Deploy({ regions: [REGION.EU_CENTRAL_1, REGION.US_EAST_1] })</code></li>
 <li>[x] <strong>Parallel resource deployment</strong> - resources within a stack that have no declared dependency could deploy concurrently instead of sequentially</li>
 <li>[x] <strong>Secrets at deploy time</strong> - pull credentials from AWS SSM Parameter Store or HashiCorp Vault instead of requiring them as env vars upfront</li>
-<li>[x] <strong>Hybrid Resource Configuration (YAML)</strong> — Support loading bulk static configuration sets (like DNS records, firewall rules, or security group rules) directly from a <code>.yaml</code> or <code>.json</code> file within builder methods while retaining the flexibility to chain programmatic methods for dynamic resource parameters.</li>
-<li>[x] <strong>Opt-in Infrastructure Blueprint Documentation (<code>Config.blueprint</code>)</strong> — Generate version-controlled markdown blueprints (<code>docs/architecture.md</code>) of live system resources, auto-calculating monthly costs, formatting live endpoints, and rendering Mermaid.js dynamic dependency/topology graphs on local runs.</li>
+<li>[x] <strong>Hybrid Resource Configuration (YAML)</strong> - Support loading bulk static configuration sets (like DNS records, firewall rules, or security group rules) directly from a <code>.yaml</code> or <code>.json</code> file within builder methods while retaining the flexibility to chain programmatic methods for dynamic resource parameters.</li>
+<li>[x] <strong>Opt-in Infrastructure Blueprint Documentation (<code>Config.blueprint</code>)</strong> - Generate version-controlled markdown blueprints (<code>docs/architecture.md</code>) of live system resources, auto-calculating monthly costs, formatting live endpoints, and rendering Mermaid.js dynamic dependency/topology graphs on local runs.</li>
+</ul>
+<hr />
+<h2 id="roadmap-gap-analysis-tech-debt-planned-improvements">Roadmap Gap Analysis (Tech Debt / Planned Improvements)</h2>
+<p>A version-controlled analysis of internal tech debt and feature gaps. Gaps are addressed opportunistically.</p>
+<ul>
+<li>[x] <strong>Gap 1: Output<T> Not Exported</strong> — <code>Output&lt;T&gt;</code> is missing from public API index in <code>src/index.ts</code>. Resolving this enables clean public imports for developer-built custom types and cross-stack variables.</li>
+<li>[x] <strong>Gap 2: Generic Retry &amp; Backoff Engine</strong> — Implement a shared <code>withRetry</code> or exponential backoff utility across all providers to handle transient network/API throttling errors gracefully under heavy parallel deployments.</li>
+<li>[ ] <strong>Gap 3: Resource Import &amp; Adoption</strong> — Provide an <code>.adoptId()</code> mechanism on <code>BaseBuilder</code> to allow existing, out-of-band cloud infrastructure to be safely imported under Puls management without recreation.</li>
+<li>[x] <strong>Gap 4: Shell Script Provisioning Deprecation</strong> — Explicitly document the deprecation of <code>.sh</code> script provisioning (in favor of Ansible/Puppet playbooks) to avoid user migration confusion.</li>
+<li>[ ] <strong>Gap 5: Advanced Drift Detection &amp; diff</strong> — Clarify stateless tag/note-based metadata tracking in architecture docs, and design a formal <code>Stack.diff()</code> structural diff engine comparing declared settings against live cloud properties.</li>
+<li>[x] <strong>Gap 6: Checker Integration Completeness</strong> — Newer providers (GCP, Firebase) lack <code>list.ts</code> implementations, causing <code>@Check</code> to silently skip them. Resolve by providing complete <code>list.ts</code> inventory engines for GCP and Firebase.</li>
+<li>[ ] <strong>Gap 7: Provider Plugin &amp; Decoupling API</strong> — Establish a standard <code>registerProvider()</code> hook and split core framework utilities into an independent <code>@puls-dev/core</code> package to enable community-built custom providers.</li>
+</ul>
+<hr />
+<h2 id="breaking-changes-migration-notes">Breaking Changes &amp; Migration Notes</h2>
+<h3 id="shell-script-sh-provisioning-removal">Shell Script (.sh) Provisioning Removal</h3>
+<ul>
+<li><strong>Change</strong>: Standard <code>.sh</code> shell scripts are no longer supported inside the <code>.provision()</code> method.</li>
+<li><strong>Rationale</strong>: Shell scripts are inherently stateful and lack change-aware, idempotent execution. Puls standardizes on Ansible playbooks (<code>.yaml</code>/<code>.yml</code>) and Puppet manifests (<code>.pp</code>) which record provisioning status hashes directly within live resource metadata.</li>
+<li><strong>Migration Path</strong>: Convert raw shell commands to standard Ansible tasks. For example, migrate package installation or service setup to <code>ansible.builtin.apt</code> or standard Ansible modules, and save them as a playbook <code>.yaml</code> file.</li>
 </ul>
 
 

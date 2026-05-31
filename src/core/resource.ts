@@ -9,6 +9,8 @@ export abstract class BaseBuilder {
   /** @internal */
   _deployPromise!: Promise<any>;
   /** @internal */
+  _destroyPromise?: Promise<any>;
+  /** @internal */
   _dependencies: BaseBuilder[] = [];
 
   private _beforeDeployHooks: (() => Promise<void> | void)[] = [];

@@ -138,8 +138,8 @@ export class EC2TemplateBuilder extends BaseBuilder {
           if (snapshotId) {
             try {
               await client.send(new DeleteSnapshotCommand({ SnapshotId: snapshotId }));
-            } catch {
-              // Ignore snapshot delete failure safely
+            } catch (err: any) {
+              console.warn(`   ⚠️  Could not delete snapshot ${snapshotId}: ${err.message}`);
             }
           }
         }

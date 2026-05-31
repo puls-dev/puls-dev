@@ -1977,10 +1977,12 @@
 <a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="s2">&quot;~/.ssh/id_ed25519.pub&quot;</span><span class="p">)</span>
 <a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;playbooks/docker.yaml&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;playbooks/security-hardening.yaml&quot;</span><span class="p">);</span>
 </code></pre></div>
-<p><strong>Baking Lifecycle</strong>:
-1. <strong>Idempotent Baking</strong>: Puls checks if a custom image with this name already exists in your GCP project. If it does and the provision playbooks match (via the applied hashes saved inside the image's description field), image baking is skipped.
-2. <strong>Delete &amp; Rebuild</strong>: Because GCP images are read-only and immutable, if playbooks or configurations change, Puls will automatically delete the old custom image (<code>DELETE /compute/v1/projects/.../global/images/{name}</code>) before rebuilding.
-3. <strong>Automated VM Lifecycle</strong>: Puls creates a temporary instance (<code>puls-bake-temp-{name}</code>), waits for SSH, runs the Ansible playbooks, stops the instance, creates a new custom image from the stopped instance's boot disk, writes the playbook hashes into the image's description field, waits until the image status is <code>READY</code>, and deletes the temporary provisioning VM instance.</p>
+<p><strong>Baking Lifecycle</strong>:</p>
+<ol>
+<li><strong>Idempotent Baking</strong>: Puls checks if a custom image with this name already exists in your GCP project. If it does and the provision playbooks match (via the applied hashes saved inside the image's description field), image baking is skipped.</li>
+<li><strong>Delete &amp; Rebuild</strong>: Because GCP images are read-only and immutable, if playbooks or configurations change, Puls will automatically delete the old custom image (<code>DELETE /compute/v1/projects/.../global/images/{name}</code>) before rebuilding.</li>
+<li><strong>Automated VM Lifecycle</strong>: Puls creates a temporary instance (<code>puls-bake-temp-{name}</code>), waits for SSH, runs the Ansible playbooks, stops the instance, creates a new custom image from the stopped instance's boot disk, writes the playbook hashes into the image's description field, waits until the image status is <code>READY</code>, and deletes the temporary provisioning VM instance.</li>
+</ol>
 <h4 id="vm-cloning-from-template-fromtemplate">VM Cloning from Template (<code>.fromTemplate()</code>)</h4>
 <p>Use the fluent <code>.fromTemplate()</code> builder method on <code>GCP.VM()</code> to spin up a server directly from a pre-baked custom image:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">parallel</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">})</span>
@@ -2157,14 +2159,14 @@
 <h2 id="required-permissions">Required Permissions</h2>
 <p>To manage Cloud Run, Cloud SQL, Secret Manager, Pub/Sub, Cloud DNS, and IAM resources, your service account key needs the following IAM roles:</p>
 <ul>
-<li><strong>Cloud Run Admin</strong> (<code>roles/run.admin</code>) — full control over Cloud Run services.</li>
-<li><strong>Service Account User</strong> (<code>roles/iam.serviceAccountUser</code>) — to associate runtime service accounts.</li>
-<li><strong>Cloud SQL Admin</strong> (<code>roles/cloudsql.admin</code>) — full control over Cloud SQL database instances.</li>
-<li><strong>Secret Manager Admin</strong> (<code>roles/secretmanager.admin</code>) — full control over Secret Manager containers and values.</li>
-<li><strong>Pub/Sub Admin</strong> (<code>roles/pubsub.admin</code>) — full control over Pub/Sub topics and subscriptions.</li>
-<li><strong>DNS Administrator</strong> (<code>roles/dns.admin</code>) — full control over Google Cloud DNS zones and records.</li>
-<li><strong>Create/Delete Service Accounts</strong> (<code>roles/iam.serviceAccountAdmin</code>) — to create, modify, and delete custom service accounts.</li>
-<li><strong>Project IAM Admin</strong> (<code>roles/resourcemanager.projectIamAdmin</code>) — to set and modify project-level IAM policies.</li>
+<li><strong>Cloud Run Admin</strong> (<code>roles/run.admin</code>) - full control over Cloud Run services.</li>
+<li><strong>Service Account User</strong> (<code>roles/iam.serviceAccountUser</code>) - to associate runtime service accounts.</li>
+<li><strong>Cloud SQL Admin</strong> (<code>roles/cloudsql.admin</code>) - full control over Cloud SQL database instances.</li>
+<li><strong>Secret Manager Admin</strong> (<code>roles/secretmanager.admin</code>) - full control over Secret Manager containers and values.</li>
+<li><strong>Pub/Sub Admin</strong> (<code>roles/pubsub.admin</code>) - full control over Pub/Sub topics and subscriptions.</li>
+<li><strong>DNS Administrator</strong> (<code>roles/dns.admin</code>) - full control over Google Cloud DNS zones and records.</li>
+<li><strong>Create/Delete Service Accounts</strong> (<code>roles/iam.serviceAccountAdmin</code>) - to create, modify, and delete custom service accounts.</li>
+<li><strong>Project IAM Admin</strong> (<code>roles/resourcemanager.projectIamAdmin</code>) - to set and modify project-level IAM policies.</li>
 </ul>
 
 

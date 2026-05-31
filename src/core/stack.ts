@@ -156,13 +156,13 @@ export abstract class Stack {
           const isDestroyed = Reflect.getMetadata("destroy", this, prop);
           let res: any;
           if (isDestroyed) {
-            await (resource as any)._runBeforeDestroy();
+            await resource._runBeforeDestroy();
             res = await resource.destroy();
-            await (resource as any)._runAfterDestroy(res);
+            await resource._runAfterDestroy(res);
           } else {
-            await (resource as any)._runBeforeDeploy();
+            await resource._runBeforeDeploy();
             res = await resource.deploy();
-            await (resource as any)._runAfterDeploy(res);
+            await resource._runAfterDeploy(res);
           }
           outputs[prop] = res;
           return res;
@@ -177,13 +177,13 @@ export abstract class Stack {
         const isDestroyed = Reflect.getMetadata("destroy", this, prop);
         let res: any;
         if (isDestroyed) {
-          await (resource as any)._runBeforeDestroy();
+          await resource._runBeforeDestroy();
           res = await resource.destroy();
-          await (resource as any)._runAfterDestroy(res);
+          await resource._runAfterDestroy(res);
         } else {
-          await (resource as any)._runBeforeDeploy();
+          await resource._runBeforeDeploy();
           res = await resource.deploy();
-          await (resource as any)._runAfterDeploy(res);
+          await resource._runAfterDeploy(res);
         }
         outputs[prop] = res;
       }
@@ -231,33 +231,33 @@ export abstract class Stack {
       const startPromise = Promise.resolve();
       // In parallel destroy, await all dependents (reverse dependencies) first
       const promises = resources.map(({ prop, resource }) => {
-        (resource as any)._destroyPromise = (async () => {
+        resource._destroyPromise = (async () => {
           await startPromise;
           // Wait for all resources that explicitly declare this one as a dependency
           const dependents = resources.filter(r => r.resource._dependencies.includes(resource));
           for (const dep of dependents) {
-            if ((dep.resource as any)._destroyPromise) {
-              await (dep.resource as any)._destroyPromise;
+            if (dep.resource._destroyPromise) {
+              await dep.resource._destroyPromise;
             }
           }
 
           // Execute teardown
-          await (resource as any)._runBeforeDestroy();
+          await resource._runBeforeDestroy();
           const res = await resource.destroy();
-          await (resource as any)._runAfterDestroy(res);
+          await resource._runAfterDestroy(res);
           outputs[prop] = res;
           return res;
         })();
-        return (resource as any)._destroyPromise;
+        return resource._destroyPromise;
       });
 
       await Promise.all(promises);
     } else {
       // Sequential mode (original logic)
       for (const { prop, resource } of resources) {
-        await (resource as any)._runBeforeDestroy();
+        await resource._runBeforeDestroy();
         const res = await resource.destroy();
-        await (resource as any)._runAfterDestroy(res);
+        await resource._runAfterDestroy(res);
         outputs[prop] = res;
       }
     }

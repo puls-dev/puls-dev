@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import { GoogleAuth } from 'google-auth-library';
 import { Config } from '../../core/config.js';
+import { withRetry } from '../../core/retry.js';
 
 export interface GCPConfig {
   projectId: string;
@@ -107,19 +108,27 @@ export async function getGCPToken(scopes: string[]): Promise<string> {
 const CLOUD_SCOPE = 'https://www.googleapis.com/auth/cloud-platform';
 
 export async function gcpFetch(base: string, path: string, opts: RequestInit = {}): Promise<any> {
-  const token = await getGCPToken([CLOUD_SCOPE]);
-  const res = await fetch(`${base}${path}`, {
-    ...opts,
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      ...(opts.headers ?? {}),
-    },
+  return withRetry(async () => {
+    const token = await getGCPToken([CLOUD_SCOPE]);
+    const res = await fetch(`${base}${path}`, {
+      ...opts,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        ...(opts.headers ?? {}),
+      },
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`GCP API ${opts.method ?? 'GET'} ${path} → ${res.status}: ${body}`);
+    }
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  }, {
+    retryable: (err) => {
+      const match = err.message.match(/→ (\d+):/);
+      const status = match ? parseInt(match[1], 10) : null;
+      return status === 429 || (status && status >= 500) || err.message.includes("ETIMEDOUT");
+    }
   });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`GCP API ${opts.method ?? 'GET'} ${path} → ${res.status}: ${body}`);
-  }
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
 }

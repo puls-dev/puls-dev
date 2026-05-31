@@ -40,7 +40,11 @@ class ConfigManager {
   };
 
   set(newConfig: Partial<GlobalConfig>) {
-    this.config = { ...this.config, ...newConfig };
+    this.config = {
+      ...this.config,
+      ...newConfig,
+      providers: { ...this.config.providers, ...newConfig.providers },
+    };
   }
 
   get() {

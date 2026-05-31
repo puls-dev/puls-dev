@@ -6,6 +6,8 @@ import type {
   ProxmoxInventory,
   DoInventory,
   AwsInventory,
+  GcpInventory,
+  FirebaseInventory,
 } from "../types/inventory.ts";
 
 
@@ -189,6 +191,83 @@ function renderAws(inv: AwsInventory): void {
   }
 }
 
+function renderGcp(inv: GcpInventory): void {
+  if (inv.vms.length > 0) {
+    printSection(
+      `GCP Compute VMs  ·  ${inv.vms.length}`,
+      inv.vms,
+      [
+        { header: "Name", width: 24, render: (v) => v.name },
+        { header: "Zone", width: 15, render: (v) => v.zone },
+        { header: "Machine Type", width: 14, render: (v) => v.machineType },
+        { header: "Status", width: 8, render: (v) => v.status },
+        { header: "IP", width: 15, render: (v) => v.ip },
+      ],
+    );
+  }
+
+  if (inv.rdsInstances.length > 0) {
+    printSection(
+      `GCP Cloud SQL  ·  ${inv.rdsInstances.length}`,
+      inv.rdsInstances,
+      [
+        { header: "Name", width: 24, render: (i) => i.name },
+        { header: "Engine", width: 18, render: (i) => i.engine },
+        { header: "Tier", width: 12, render: (i) => i.tier },
+        { header: "Status", width: 10, render: (i) => i.status },
+      ],
+    );
+  }
+
+  if (inv.distributions.length > 0) {
+    printSection(
+      `GCP Cloud Run  ·  ${inv.distributions.length}`,
+      inv.distributions,
+      [
+        { header: "Service", width: 24, render: (s) => s.name },
+        { header: "Region", width: 12, render: (s) => s.region },
+        { header: "URL", width: 42, render: (s) => s.url },
+      ],
+    );
+  }
+
+  if (inv.hostedZones.length > 0) {
+    printSection(
+      `GCP Cloud DNS  ·  ${inv.hostedZones.length}`,
+      inv.hostedZones,
+      [
+        { header: "Zone", width: 24, render: (z) => z.name },
+        { header: "DNS Name", width: 32, render: (z) => z.dnsName },
+      ],
+    );
+  }
+}
+
+function renderFirebase(inv: FirebaseInventory): void {
+  if (inv.hostingSites.length > 0) {
+    printSection(
+      `Firebase Hosting  ·  ${inv.hostingSites.length}`,
+      inv.hostingSites,
+      [
+        { header: "Site ID", width: 32, render: (s) => s.site },
+      ],
+    );
+  }
+
+  if (inv.functions.length > 0) {
+    printSection(
+      `Firebase Functions  ·  ${inv.functions.length}`,
+      inv.functions,
+      [
+        { header: "Function", width: 24, render: (f) => f.name },
+        { header: "Region", width: 12, render: (f) => f.region },
+        { header: "Entry Point", width: 18, render: (f) => f.entryPoint },
+        { header: "Runtime", width: 10, render: (f) => f.runtime },
+      ],
+    );
+  }
+}
+
 // ─── Checker ──────────────────────────────────────────────────────────────────
 
 export abstract class Checker {
@@ -239,11 +318,39 @@ export abstract class Checker {
       );
     }
 
+    if (cfg.providers.gcp?.serviceAccountPath || process.env.GCP_SA) {
+      tasks.push(
+        import("../providers/gcp/list.js")
+          .then((m) => m.listGcpResources())
+          .then((inv) => {
+            result.gcp = inv;
+          })
+          .catch((err: Error) => {
+            errors.push({ provider: "gcp", message: err.message });
+          }),
+      );
+    }
+
+    if (cfg.providers.firebase?.serviceAccountPath || process.env.FIREBASE_SA) {
+      tasks.push(
+        import("../providers/firebase/list.js")
+          .then((m) => m.listFirebaseResources())
+          .then((inv) => {
+            result.firebase = inv;
+          })
+          .catch((err: Error) => {
+            errors.push({ provider: "firebase", message: err.message });
+          }),
+      );
+    }
+
     await Promise.all(tasks);
 
     if (result.proxmox) renderProxmox(result.proxmox);
     if (result.do) renderDo(result.do);
     if (result.aws) renderAws(result.aws);
+    if (result.gcp) renderGcp(result.gcp);
+    if (result.firebase) renderFirebase(result.firebase);
 
     for (const e of errors) {
       console.warn(`\n  [!] ${e.provider}: ${e.message}`);

@@ -1,5 +1,6 @@
 import { Agent } from "undici";
 import { Config } from "../../core/config.js";
+import { withRetry } from "../../core/retry.js";
 
 export class ProxmoxApiClient {
   private baseUrl: string;
@@ -26,23 +27,31 @@ export class ProxmoxApiClient {
     path: string,
     body?: unknown,
   ): Promise<any> {
-    const headers: Record<string, string> = {
-      Authorization: `PVEAPIToken=${this.authToken}`,
-    };
-    if (body !== undefined) headers['Content-Type'] = 'application/json';
+    return withRetry(async () => {
+      const headers: Record<string, string> = {
+        Authorization: `PVEAPIToken=${this.authToken}`,
+      };
+      if (body !== undefined) headers['Content-Type'] = 'application/json';
 
-    const opts: any = { method, headers };
-    if (body !== undefined) opts.body = JSON.stringify(body);
-    if (this.dispatcher) opts.dispatcher = this.dispatcher;
+      const opts: any = { method, headers };
+      if (body !== undefined) opts.body = JSON.stringify(body);
+      if (this.dispatcher) opts.dispatcher = this.dispatcher;
 
-    const res = await fetch(`${this.baseUrl}${path}`, opts);
-    if (!res.ok)
-      throw new Error(
-        `Proxmox ${method} ${path}: ${res.status} ${await res.text()}`,
-      );
+      const res = await fetch(`${this.baseUrl}${path}`, opts);
+      if (!res.ok)
+        throw new Error(
+          `Proxmox ${method} ${path}: ${res.status} ${await res.text()}`,
+        );
 
-    const json = (await res.json()) as { data?: unknown };
-    return json.data ?? null;
+      const json = (await res.json()) as { data?: unknown };
+      return json.data ?? null;
+    }, {
+      retryable: (err) => {
+        const match = err.message.match(/: (\d+)/);
+        const status = match ? parseInt(match[1], 10) : null;
+        return status === 429 || (status && status >= 500) || err.message.includes("ETIMEDOUT");
+      }
+    });
   }
 
   async get<T>(path: string): Promise<T> {

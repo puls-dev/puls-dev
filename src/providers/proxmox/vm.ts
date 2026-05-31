@@ -49,7 +49,8 @@ export class VMBuilder extends BaseBuilder {
         try {
           const config = await pm.get<any>(`/nodes/${match.node}/qemu/${match.vmid}/config`);
           match.description = config.description ?? "";
-        } catch {
+        } catch (err: any) {
+          console.warn(`   ⚠️  Could not fetch VM config for ${match.vmid}: ${err.message}`);
           match.description = "";
         }
       }
