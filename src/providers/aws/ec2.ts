@@ -15,6 +15,7 @@ import { getEC2Client } from "./api.js";
 import { checkPort, runProvisioner } from "../../core/provisioner.js";
 import { getFileHash } from "../proxmox/hash.js";
 import { EC2TemplateBuilder } from "./template.js";
+import { resourceContextStorage } from "../../core/context.js";
 
 export class EC2VMBuilder extends BaseBuilder {
   readonly out = {
@@ -342,6 +343,20 @@ export class EC2VMBuilder extends BaseBuilder {
 
       if (!hasChanges && !playbookRunRequired) {
         console.log(`   ✅ AWS EC2 VM "${this.name}" is up to date.`);
+      }
+    }
+
+    const context = resourceContextStorage.getStore();
+    if (context && context.hosts) {
+      const activeIp = this.resolvedIp ?? "0.0.0.0";
+      if (!context.hosts.some(h => h.name === this.name)) {
+        context.hosts.push({
+          name: this.name,
+          ip: activeIp,
+          user: "ubuntu",
+          sshKey: this._sshPrivateKeyPath,
+          provider: "aws"
+        });
       }
     }
 

@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import { BaseBuilder } from "./resource.js";
 import { Config } from "./config.js";
+import { resourceContextStorage } from "./context.js";
+import { resolvedSecrets } from "./secret.js";
 
 const _registry = new Map<Function | string, Stack>();
 
@@ -9,23 +11,36 @@ type OutputEntry = {
   sub?: string[];
 };
 
-function formatEntry(val: any): OutputEntry {
+function formatEntry(val: any, parentKey?: string): OutputEntry {
+  const isSensitiveKey = (k: string) => /password|secret|token|key/i.test(k);
+
+  if (parentKey && isSensitiveKey(parentKey)) {
+    return { primary: "********" };
+  }
+
   if (!val || typeof val !== "object") return { primary: String(val) };
 
+  const redactedVal = { ...val };
+  for (const k of Object.keys(redactedVal)) {
+    if (isSensitiveKey(k)) {
+      redactedVal[k] = "********";
+    }
+  }
+
   // Known shapes
-  if ("destroyed" in val)
-    return { primary: val.destroyed ? "🗑️  destroyed" : "─  not found" };
-  if (val.zone) return { primary: val.zone };
-  if (val.name && val.id) return { primary: `${val.name}  [${val.id}]` };
-  if (val.name) return { primary: val.name };
-  if (val.arn) return { primary: val.arn };
+  if ("destroyed" in redactedVal)
+    return { primary: redactedVal.destroyed ? "🗑️  destroyed" : "─  not found" };
+  if (redactedVal.zone) return { primary: redactedVal.zone };
+  if (redactedVal.name && redactedVal.id) return { primary: `${redactedVal.name}  [${redactedVal.id}]` };
+  if (redactedVal.name) return { primary: redactedVal.name };
+  if (redactedVal.arn) return { primary: redactedVal.arn };
 
   // Generic: pull all scalar values
-  const pairs = Object.entries(val).filter(
+  const pairs = Object.entries(redactedVal).filter(
     ([, v]) => typeof v === "string" || typeof v === "number",
   ) as [string, string][];
 
-  if (pairs.length === 0) return { primary: JSON.stringify(val) };
+  if (pairs.length === 0) return { primary: JSON.stringify(redactedVal) };
 
   // Try compact inline (values only, dot-separated)
   const inline = pairs.map(([, v]) => v).join("  ·  ");
@@ -45,7 +60,7 @@ function printOutputs(stackName: string, outputs: Record<string, any>) {
 
   const rows = Object.entries(outputs).map(([key, val]) => ({
     key,
-    ...formatEntry(val),
+    ...formatEntry(val, key),
   }));
 
   // textWidth = width of row text content (without the 2-space padding on each side)
@@ -109,167 +124,307 @@ export abstract class Stack {
   }
 
   async deploy(): Promise<Record<string, any>> {
-    console.log(`\n🏗️  Deploying Stack: ${this.constructor.name}`);
+    const controller = new AbortController();
+    const hosts: any[] = [];
+    const context = {
+      abortSignal: controller.signal,
+      hosts,
+      stackName: this.constructor.name
+    };
 
-    // Stack-level beforeDeploy hook
-    if (typeof (this as any).beforeDeploy === "function") {
-      console.log(`   ⚡ Running Stack-level beforeDeploy hook...`);
-      await (this as any).beforeDeploy();
-    }
-
-    const props = Object.getOwnPropertyNames(this);
-    const outputs: Record<string, any> = {};
-    const isParallel = Config.isParallelActive();
-
-    // 1. Gather all resources
-    const resources: { prop: string; resource: BaseBuilder }[] = [];
-    for (const prop of props) {
-      const val = (this as Record<string, unknown>)[prop];
-      if (val instanceof BaseBuilder) {
-        resources.push({ prop, resource: val });
-
-        // Apply metadata properties eagerly
-        const isProtected = Reflect.getMetadata("protected", this, prop);
-        if (isProtected) val.protect();
-
-        const forceConfigCheck = Reflect.getMetadata("forceConfigCheck", this, prop);
-        if (forceConfigCheck && typeof (val as any).forceConfigCheck === "function") {
-          (val as any).forceConfigCheck();
-        }
-      }
-    }
-
-    // 2. Schedule execution
-    if (isParallel) {
-      const startPromise = Promise.resolve();
-      const promises = resources.map(({ prop, resource }) => {
-        resource._deployPromise = (async () => {
-          await startPromise;
-          // Wait for explicit dependencies
-          for (const dep of resource._dependencies) {
-            if (dep._deployPromise) {
-              await dep._deployPromise;
+    return resourceContextStorage.run(context, async () => {
+      const originalLog = console.log;
+      console.log = (...args: any[]) => {
+        const redact = (message: any): any => {
+          if (typeof message !== "string") return message;
+          let result = message;
+          for (const secret of resolvedSecrets) {
+            if (secret && secret.length >= 3) {
+              const escaped = secret.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+              const regex = new RegExp(escaped, 'g');
+              result = result.replace(regex, '********');
             }
           }
+          return result;
+        };
 
-          // Execute hooks and deploy
-          const isDestroyed = Reflect.getMetadata("destroy", this, prop);
-          let res: any;
-          if (isDestroyed) {
-            await resource._runBeforeDestroy();
-            res = await resource.destroy();
-            await resource._runAfterDestroy(res);
-          } else {
-            await resource._runBeforeDeploy();
-            res = await resource.deploy();
-            await resource._runAfterDeploy(res);
+        const redactedArgs = args.map(arg => {
+          if (typeof arg === "string") {
+            return redact(arg);
           }
-          outputs[prop] = res;
-          return res;
-        })();
-        return resource._deployPromise;
-      });
+          try {
+            const str = String(arg);
+            let hasSecret = false;
+            for (const secret of resolvedSecrets) {
+              if (secret && secret.length >= 3 && str.includes(secret)) {
+                hasSecret = true;
+                break;
+              }
+            }
+            if (hasSecret) {
+              return redact(str);
+            }
+          } catch {}
+          return arg;
+        });
+        originalLog(...redactedArgs);
+      };
 
-      await Promise.all(promises);
-    } else {
-      // Sequential mode (original logic)
-      for (const { prop, resource } of resources) {
-        const isDestroyed = Reflect.getMetadata("destroy", this, prop);
-        let res: any;
-        if (isDestroyed) {
-          await resource._runBeforeDestroy();
-          res = await resource.destroy();
-          await resource._runAfterDestroy(res);
-        } else {
-          await resource._runBeforeDeploy();
-          res = await resource.deploy();
-          await resource._runAfterDeploy(res);
+      try {
+        console.log(`\n🏗️  Deploying Stack: ${this.constructor.name}`);
+
+        // Stack-level beforeDeploy hook
+        if (typeof (this as any).beforeDeploy === "function") {
+          console.log(`   ⚡ Running Stack-level beforeDeploy hook...`);
+          await (this as any).beforeDeploy();
         }
-        outputs[prop] = res;
+
+        const props = Object.getOwnPropertyNames(this);
+        const outputs: Record<string, any> = {};
+        const isParallel = Config.isParallelActive();
+
+        // 1. Gather all resources
+        const resources: { prop: string; resource: BaseBuilder }[] = [];
+        for (const prop of props) {
+          const val = (this as Record<string, unknown>)[prop];
+          if (val instanceof BaseBuilder) {
+            resources.push({ prop, resource: val });
+
+            // Apply metadata properties eagerly
+            const isProtected = Reflect.getMetadata("protected", this, prop);
+            if (isProtected) val.protect();
+
+            const forceConfigCheck = Reflect.getMetadata("forceConfigCheck", this, prop);
+            if (forceConfigCheck && typeof (val as any).forceConfigCheck === "function") {
+              (val as any).forceConfigCheck();
+            }
+          }
+        }
+
+        // 2. Schedule execution
+        if (isParallel) {
+          const startPromise = Promise.resolve();
+          const promises = resources.map(({ prop, resource }) => {
+            resource._deployPromise = (async () => {
+              try {
+                await startPromise;
+                if (controller.signal.aborted) {
+                  throw new Error("Deployment aborted due to previous failure");
+                }
+                // Wait for explicit dependencies
+                for (const dep of resource._dependencies) {
+                  if (dep._deployPromise) {
+                    await dep._deployPromise;
+                  }
+                }
+                if (controller.signal.aborted) {
+                  throw new Error("Deployment aborted due to previous failure");
+                }
+
+                // Execute hooks and deploy
+                const isDestroyed = Reflect.getMetadata("destroy", this, prop);
+                let res: any;
+                if (isDestroyed) {
+                  await resource._runBeforeDestroy();
+                  res = await resource.destroy();
+                  await resource._runAfterDestroy(res);
+                } else {
+                  await resource._runBeforeDeploy();
+                  res = await resource.deploy();
+                  await resource._runAfterDeploy(res);
+                }
+                outputs[prop] = res;
+                return res;
+              } catch (err) {
+                controller.abort();
+                throw err;
+              }
+            })();
+            return resource._deployPromise;
+          });
+
+          await Promise.all(promises);
+        } else {
+          // Sequential mode
+          for (const { prop, resource } of resources) {
+            if (controller.signal.aborted) {
+              throw new Error("Deployment aborted due to previous failure");
+            }
+            try {
+              const isDestroyed = Reflect.getMetadata("destroy", this, prop);
+              let res: any;
+              if (isDestroyed) {
+                await resource._runBeforeDestroy();
+                res = await resource.destroy();
+                await resource._runAfterDestroy(res);
+              } else {
+                await resource._runBeforeDeploy();
+                res = await resource.deploy();
+                await resource._runAfterDeploy(res);
+              }
+              outputs[prop] = res;
+            } catch (err) {
+              controller.abort();
+              throw err;
+            }
+          }
+        }
+
+        printOutputs(this.constructor.name, outputs);
+
+        // Stack-level afterDeploy hook
+        if (typeof (this as any).afterDeploy === "function") {
+          console.log(`   ⚡ Running Stack-level afterDeploy hook...`);
+          await (this as any).afterDeploy(outputs);
+        }
+
+        return outputs;
+      } finally {
+        console.log = originalLog;
       }
-    }
-
-    printOutputs(this.constructor.name, outputs);
-
-    // Stack-level afterDeploy hook
-    if (typeof (this as any).afterDeploy === "function") {
-      console.log(`   ⚡ Running Stack-level afterDeploy hook...`);
-      await (this as any).afterDeploy(outputs);
-    }
-
-    return outputs;
+    });
   }
 
   async destroy(): Promise<Record<string, any>> {
-    console.log(`\n💥 Tearing down Stack: ${this.constructor.name}`);
+    const controller = new AbortController();
+    const hosts: any[] = [];
+    const context = {
+      abortSignal: controller.signal,
+      hosts,
+      stackName: this.constructor.name
+    };
 
-    // Stack-level beforeDestroy hook
-    if (typeof (this as any).beforeDestroy === "function") {
-      console.log(`   ⚡ Running Stack-level beforeDestroy hook...`);
-      await (this as any).beforeDestroy();
-    }
-
-    const props = Object.getOwnPropertyNames(this).reverse();
-    const outputs: Record<string, any> = {};
-    const isParallel = Config.isParallelActive();
-
-    // 1. Gather all resources
-    const resources: { prop: string; resource: BaseBuilder }[] = [];
-    for (const prop of props) {
-      const val = (this as Record<string, unknown>)[prop];
-      if (val instanceof BaseBuilder) {
-        if (Reflect.getMetadata("protected", this, prop)) {
-          console.log(`   🔒 Skipping protected resource "${prop}"`);
-          continue;
-        }
-        resources.push({ prop, resource: val });
-      }
-    }
-
-    // 2. Schedule execution
-    if (isParallel) {
-      const startPromise = Promise.resolve();
-      // In parallel destroy, await all dependents (reverse dependencies) first
-      const promises = resources.map(({ prop, resource }) => {
-        resource._destroyPromise = (async () => {
-          await startPromise;
-          // Wait for all resources that explicitly declare this one as a dependency
-          const dependents = resources.filter(r => r.resource._dependencies.includes(resource));
-          for (const dep of dependents) {
-            if (dep.resource._destroyPromise) {
-              await dep.resource._destroyPromise;
+    return resourceContextStorage.run(context, async () => {
+      const originalLog = console.log;
+      console.log = (...args: any[]) => {
+        const redact = (message: any): any => {
+          if (typeof message !== "string") return message;
+          let result = message;
+          for (const secret of resolvedSecrets) {
+            if (secret && secret.length >= 3) {
+              const escaped = secret.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+              const regex = new RegExp(escaped, 'g');
+              result = result.replace(regex, '********');
             }
           }
+          return result;
+        };
 
-          // Execute teardown
-          await resource._runBeforeDestroy();
-          const res = await resource.destroy();
-          await resource._runAfterDestroy(res);
-          outputs[prop] = res;
-          return res;
-        })();
-        return resource._destroyPromise;
-      });
+        const redactedArgs = args.map(arg => {
+          if (typeof arg === "string") {
+            return redact(arg);
+          }
+          try {
+            const str = String(arg);
+            let hasSecret = false;
+            for (const secret of resolvedSecrets) {
+              if (secret && secret.length >= 3 && str.includes(secret)) {
+                hasSecret = true;
+                break;
+              }
+            }
+            if (hasSecret) {
+              return redact(str);
+            }
+          } catch {}
+          return arg;
+        });
+        originalLog(...redactedArgs);
+      };
 
-      await Promise.all(promises);
-    } else {
-      // Sequential mode (original logic)
-      for (const { prop, resource } of resources) {
-        await resource._runBeforeDestroy();
-        const res = await resource.destroy();
-        await resource._runAfterDestroy(res);
-        outputs[prop] = res;
+      try {
+        console.log(`\n💥 Tearing down Stack: ${this.constructor.name}`);
+
+        // Stack-level beforeDestroy hook
+        if (typeof (this as any).beforeDestroy === "function") {
+          console.log(`   ⚡ Running Stack-level beforeDestroy hook...`);
+          await (this as any).beforeDestroy();
+        }
+
+        const props = Object.getOwnPropertyNames(this).reverse();
+        const outputs: Record<string, any> = {};
+        const isParallel = Config.isParallelActive();
+
+        // 1. Gather all resources
+        const resources: { prop: string; resource: BaseBuilder }[] = [];
+        for (const prop of props) {
+          const val = (this as Record<string, unknown>)[prop];
+          if (val instanceof BaseBuilder) {
+            if (Reflect.getMetadata("protected", this, prop)) {
+              console.log(`   🔒 Skipping protected resource "${prop}"`);
+              continue;
+            }
+            resources.push({ prop, resource: val });
+          }
+        }
+
+        // 2. Schedule execution
+        if (isParallel) {
+          const startPromise = Promise.resolve();
+          // In parallel destroy, await all dependents (reverse dependencies) first
+          const promises = resources.map(({ prop, resource }) => {
+            resource._destroyPromise = (async () => {
+              try {
+                await startPromise;
+                if (controller.signal.aborted) {
+                  throw new Error("Teardown aborted due to previous failure");
+                }
+                // Wait for all resources that explicitly declare this one as a dependency
+                const dependents = resources.filter(r => r.resource._dependencies.includes(resource));
+                for (const dep of dependents) {
+                  if (dep.resource._destroyPromise) {
+                    await dep.resource._destroyPromise;
+                  }
+                }
+                if (controller.signal.aborted) {
+                  throw new Error("Teardown aborted due to previous failure");
+                }
+
+                // Execute teardown
+                await resource._runBeforeDestroy();
+                const res = await resource.destroy();
+                await resource._runAfterDestroy(res);
+                outputs[prop] = res;
+                return res;
+              } catch (err) {
+                controller.abort();
+                throw err;
+              }
+            })();
+            return resource._destroyPromise;
+          });
+
+          await Promise.all(promises);
+        } else {
+          // Sequential mode
+          for (const { prop, resource } of resources) {
+            if (controller.signal.aborted) {
+              throw new Error("Teardown aborted due to previous failure");
+            }
+            try {
+              await resource._runBeforeDestroy();
+              const res = await resource.destroy();
+              await resource._runAfterDestroy(res);
+              outputs[prop] = res;
+            } catch (err) {
+              controller.abort();
+              throw err;
+            }
+          }
+        }
+
+        printOutputs(this.constructor.name, outputs);
+
+        // Stack-level afterDestroy hook
+        if (typeof (this as any).afterDestroy === "function") {
+          console.log(`   ⚡ Running Stack-level afterDestroy hook...`);
+          await (this as any).afterDestroy(outputs);
+        }
+
+        return outputs;
+      } finally {
+        console.log = originalLog;
       }
-    }
-
-    printOutputs(this.constructor.name, outputs);
-
-    // Stack-level afterDestroy hook
-    if (typeof (this as any).afterDestroy === "function") {
-      console.log(`   ⚡ Running Stack-level afterDestroy hook...`);
-      await (this as any).afterDestroy(outputs);
-    }
-
-    return outputs;
+    });
   }
 }

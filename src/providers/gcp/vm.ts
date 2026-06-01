@@ -6,6 +6,7 @@ import { gcpFetch, getProjectId, getRegion } from "./api.js";
 import { checkPort, runProvisioner } from "../../core/provisioner.js";
 import { getFileHash } from "../proxmox/hash.js";
 import { GCPTemplateBuilder } from "./template.js";
+import { resourceContextStorage } from "../../core/context.js";
 
 export class GCPVMBuilder extends BaseBuilder {
   readonly out = {
@@ -361,6 +362,23 @@ export class GCPVMBuilder extends BaseBuilder {
 
       if (!hasChanges && !playbookRunRequired) {
         console.log(`✅ GCP VM "${this.name}" is up to date.`);
+      }
+    }
+
+    const context = resourceContextStorage.getStore();
+    if (context && context.hosts) {
+      const activeIp = this.resolvedIp ?? "0.0.0.0";
+      const keysArray = Array.isArray(this._sshKeys) ? this._sshKeys : [this._sshKeys];
+      const keyPath = keysArray.find(k => !k.startsWith('ssh-') && !k.startsWith('ecdsa-') && !k.startsWith('sk-'));
+
+      if (!context.hosts.some(h => h.name === this.name)) {
+        context.hosts.push({
+          name: this.name,
+          ip: activeIp,
+          user: "root",
+          sshKey: keyPath,
+          provider: "gcp"
+        });
       }
     }
 

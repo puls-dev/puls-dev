@@ -10,6 +10,7 @@ import { LoadBalancerBuilder } from './load_balancer.js';
 import { getDoApi, DoApiClient } from './api.js';
 import { checkPort, runProvisioner } from '../../core/provisioner.js';
 import { getFileHash } from '../proxmox/hash.js';
+import { resourceContextStorage } from '../../core/context.js';
 
 export class DropletBuilder extends BaseBuilder {
   readonly out = {
@@ -288,6 +289,20 @@ export class DropletBuilder extends BaseBuilder {
 
       if (!hasChanges && !playbookRunRequired) {
         console.log(`✅ ${this.name} is up to date.`);
+      }
+    }
+
+    const context = resourceContextStorage.getStore();
+    if (context && context.hosts) {
+      const activeIp = this.resolvedIp ?? "0.0.0.0";
+      if (!context.hosts.some(h => h.name === this.name)) {
+        context.hosts.push({
+          name: this.name,
+          ip: activeIp,
+          user: "root",
+          sshKey: this.sshKeyPath,
+          provider: "do"
+        });
       }
     }
 

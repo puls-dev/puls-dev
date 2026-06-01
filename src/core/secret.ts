@@ -1,6 +1,8 @@
 import { Output } from "./output.js";
 import { Config } from "./config.js";
 
+export const resolvedSecrets = new Set<string>();
+
 /**
  * Secret represents a lazy, secure credential that is fetched asynchronously
  * at deployment time instead of during the eager construction phase.
@@ -15,11 +17,16 @@ export class Secret extends Output<string> {
     try {
       if (Config.isGlobalDryRun()) {
         // Resolve immediately to a secure placeholder during dry-run testing
-        this.resolve(`[SECRET:${this.secretName}]`);
+        const placeholder = `[SECRET:${this.secretName}]`;
+        this.resolve(placeholder);
+        resolvedSecrets.add(placeholder);
         return;
       }
       const val = await fetcher();
       this.resolve(val);
+      if (val && val.length >= 3) {
+        resolvedSecrets.add(val);
+      }
     } catch (err: any) {
       this.reject(err);
     }
@@ -31,7 +38,11 @@ export class Secret extends Output<string> {
    */
   static async resolve(val: string | Output<string> | Secret): Promise<string> {
     if (val instanceof Output) {
-      return await val.get();
+      const resolved = await val.get();
+      if (val instanceof Secret && resolved && resolved.length >= 3) {
+        resolvedSecrets.add(resolved);
+      }
+      return resolved;
     }
     return val;
   }

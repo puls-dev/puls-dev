@@ -10,6 +10,7 @@ import type { OSImage } from "../../types/proxmox.js";
 import { getFileHash, parseProvisionMetadata, mergeProvisionMetadata } from "./hash.js";
 import { checkPort, runProvisioner } from "../../core/provisioner.js";
 import { TemplateBuilder } from "./template.js";
+import { resourceContextStorage } from "../../core/context.js";
 
 export class VMBuilder extends BaseBuilder {
   readonly out = {
@@ -443,6 +444,20 @@ export class VMBuilder extends BaseBuilder {
 
     if (this._replace) {
       await this.destroyVmByName(this._replace, pm);
+    }
+
+    const context = resourceContextStorage.getStore();
+    if (context && context.hosts) {
+      const activeIp = this.resolvedIp ?? "0.0.0.0";
+      if (!context.hosts.some(h => h.name === this.name)) {
+        context.hosts.push({
+          name: this.name,
+          ip: activeIp,
+          user: "root",
+          sshKey: this.sshKeyPath(),
+          provider: "proxmox"
+        });
+      }
     }
 
     return { name: this.name, vmid: this.resolvedVmid, ip: this.resolvedIp };

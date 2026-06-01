@@ -16,21 +16,80 @@ import { CloudWatchClient } from "@aws-sdk/client-cloudwatch";
 import { SNSClient } from "@aws-sdk/client-sns";
 import { Config } from "../../core/config.js";
 import { withRetry } from "../../core/retry.js";
+import { resourceContextStorage } from "../../core/context.js";
 
 function getRegion(): string {
   const region = Config.get().providers.aws?.region;
-  if (!region)
+  if (!region) {
+    if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+      return "us-east-1";
+    }
     throw new Error(
       'AWS region not configured. Call AWS.init({ region: "..." })',
     );
+  }
   return region;
+}
+
+function createAwsOfflineMock(command: any): any {
+  const name = command.constructor.name;
+  if (name.includes("RunInstances")) {
+    return {
+      Instances: [
+        {
+          InstanceId: "i-mock1234567890abcdef0",
+          State: { Name: "running" },
+          PublicIpAddress: "54.210.12.34",
+          PrivateIpAddress: "10.0.1.10",
+        }
+      ]
+    };
+  }
+  if (name.includes("CreateVpc")) {
+    return { Vpc: { VpcId: "vpc-mock123456" } };
+  }
+  if (name.includes("CreateSubnet")) {
+    return { Subnet: { SubnetId: "subnet-mock123456" } };
+  }
+  if (name.includes("CreateSecurityGroup")) {
+    return { GroupId: "sg-mock123456" };
+  }
+  if (name.includes("CreateBucket")) {
+    return { Location: "/mock-bucket" };
+  }
+  if (name.includes("CreateKeyPair")) {
+    return { KeyMaterial: "mock-private-key", KeyName: "mock-key" };
+  }
+  const mockProxy: any = new Proxy({}, {
+    get(target, prop: string) {
+      if (prop === "then") return undefined;
+      if (prop === "CertificateArn") return "arn:aws:acm:us-east-1:123456789012:certificate/mock-cert-uuid";
+      if (prop === "HostedZoneId") return "Z2FDTNDATAQYW2";
+      if (prop === "Id" || prop === "id") return "mock-id-12345";
+      if (prop === "Arn" || prop === "arn") return `arn:aws:mock:::resource/mock-id`;
+      if (prop === "Status" || prop === "status") return "Active";
+      if (prop === "DNSName") return "mock.cloudfront.net";
+      if (prop.endsWith("s")) return [];
+      return `mock-${prop.toLowerCase()}`;
+    }
+  });
+  return mockProxy;
 }
 
 function wrapClient<T extends { send: Function }>(client: T): T {
   const originalSend = client.send;
   client.send = function (command: any, options?: any) {
+    const context = resourceContextStorage.getStore();
+    const abortSignal = context?.abortSignal;
+
+    if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+      return Promise.resolve(createAwsOfflineMock(command));
+    }
+
+    const opts = abortSignal ? { abortSignal, ...options } : options;
+
     return withRetry(
-      () => originalSend.call(client, command, options),
+      () => originalSend.call(client, command, opts),
       {
         retryable: (err) => {
           const code = err.name || err.code;

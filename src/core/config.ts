@@ -1,6 +1,7 @@
 export interface GlobalConfig {
   dryRun?: boolean;
   parallel?: boolean;
+  offline?: boolean;
   providers: {
     do?: {
       token: string;
@@ -57,6 +58,10 @@ class ConfigManager {
 
   isParallelActive() {
     return this.config.parallel ?? false;
+  }
+
+  isOfflineMode() {
+    return this.config.offline ?? false;
   }
 }
 

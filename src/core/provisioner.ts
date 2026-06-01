@@ -2,6 +2,9 @@ import { spawn } from "node:child_process";
 import net from "node:net";
 import { homedir } from "node:os";
 
+import { writeFileSync } from "node:fs";
+import { resourceContextStorage } from "./context.js";
+
 export function checkPort(ip: string, port: number): Promise<boolean> {
   return new Promise((resolve) => {
     const socket = new net.Socket();
@@ -41,20 +44,44 @@ export function runAnsible(
 ): Promise<void> {
   console.log(`   🔧 Running Ansible: ${playbook} → ${ip}`);
   const keyPath = resolveSshKeyPath(sshKeys);
+
+  const context = resourceContextStorage.getStore();
+  const stackName = context?.stackName ?? "default";
+  const hosts = context?.hosts ?? [];
+
   return new Promise((resolve, reject) => {
+    const args = [playbook];
+
+    if (hosts.length > 0) {
+      const inventoryPath = `/tmp/puls-inventory-${stackName}.ini`;
+      let inventoryContent = "[all]\n";
+      for (const h of hosts) {
+        const hKeyPath = resolveSshKeyPath(h.sshKey);
+        inventoryContent += `${h.name} ansible_host=${h.ip} ansible_user=${h.user} ansible_ssh_private_key_file=${hKeyPath}\n`;
+      }
+      try {
+        writeFileSync(inventoryPath, inventoryContent, "utf8");
+      } catch (err: any) {
+        reject(new Error(`Failed to write Ansible inventory: ${err.message}`));
+        return;
+      }
+
+      const currentHost = hosts.find(h => h.ip === ip);
+      const hostLimit = currentHost ? currentHost.name : ip;
+
+      args.push("-i", inventoryPath, "--limit", hostLimit);
+    } else {
+      args.push("-i", `${ip},`, "-u", user, "--private-key", keyPath);
+    }
+
+    args.push(
+      "--ssh-extra-args",
+      "-o StrictHostKeyChecking=no -o ConnectTimeout=30"
+    );
+
     const proc = spawn(
       "ansible-playbook",
-      [
-        playbook,
-        "-i",
-        `${ip},`,
-        "-u",
-        user,
-        "--private-key",
-        keyPath,
-        "--ssh-extra-args",
-        "-o StrictHostKeyChecking=no -o ConnectTimeout=30",
-      ],
+      args,
       { stdio: "inherit" },
     );
     proc.on("close", (code) => {

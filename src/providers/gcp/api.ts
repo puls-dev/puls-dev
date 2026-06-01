@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import { GoogleAuth } from 'google-auth-library';
 import { Config } from '../../core/config.js';
 import { withRetry } from '../../core/retry.js';
+import { resourceContextStorage } from '../../core/context.js';
 
 export interface GCPConfig {
   projectId: string;
@@ -10,6 +11,8 @@ export interface GCPConfig {
 }
 
 export function resolveGCPConfig(): GCPConfig {
+  const isOffline = Config.isOfflineMode() || Config.isGlobalDryRun();
+
   // 1. Check Config.providers.gcp
   const gcpCfg = Config.get().providers.gcp;
   if (gcpCfg?.serviceAccountPath) {
@@ -80,6 +83,14 @@ export function resolveGCPConfig(): GCPConfig {
     }
   }
 
+  if (isOffline) {
+    return {
+      projectId: "mock-gcp-project",
+      serviceAccountPath: "/mock/sa.json",
+      region: gcpCfg?.region ?? "us-central1"
+    };
+  }
+
   throw new Error(
     'GCP credentials not configured. Please set GCP_SA or FIREBASE_SA env var, or configure providers.gcp or providers.firebase in Config.'
   );
@@ -95,6 +106,9 @@ export function getRegion(): string {
 }
 
 export async function getGCPToken(scopes: string[]): Promise<string> {
+  if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+    return "mock-gcp-token";
+  }
   const { serviceAccountPath } = resolveGCPConfig();
   const auth = new GoogleAuth({ keyFile: serviceAccountPath, scopes });
   const client = await auth.getClient();
@@ -105,22 +119,74 @@ export async function getGCPToken(scopes: string[]): Promise<string> {
   return token.token;
 }
 
+function createGcpOfflineMock(base: string, path: string, opts: RequestInit): any {
+  if (path.includes("/secrets/")) {
+    return {
+      payload: {
+        data: Buffer.from("mock-gcp-secret-value").toString("base64")
+      }
+    };
+  }
+  if (path.includes("/instances")) {
+    return {
+      status: "RUNNING",
+      id: "mock-gcp-instance-id",
+      networkInterfaces: [
+        {
+          networkIP: "10.128.0.2",
+          accessConfigs: [
+            {
+              natIP: "34.56.78.90"
+            }
+          ]
+        }
+      ]
+    };
+  }
+  if (path.includes("/global/networks")) {
+    return { status: "READY", name: "mock-network" };
+  }
+  if (path.includes("/subnetworks")) {
+    return { status: "READY", name: "mock-subnetwork" };
+  }
+  // Generic fallback proxy
+  return new Proxy({}, {
+    get(target, prop: string) {
+      if (prop === "then") return undefined;
+      if (prop === "id") return "mock-gcp-id-12345";
+      if (prop === "name") return "mock-gcp-name";
+      if (prop === "status" || prop === "status") return "RUNNING";
+      if (prop.endsWith("s")) return [];
+      return `mock-gcp-${prop.toLowerCase()}`;
+    }
+  });
+}
+
 const CLOUD_SCOPE = 'https://www.googleapis.com/auth/cloud-platform';
 
 export async function gcpFetch(base: string, path: string, opts: RequestInit = {}): Promise<any> {
+  const context = resourceContextStorage.getStore();
+  const abortSignal = context?.abortSignal;
+
+  if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+    return Promise.resolve(createGcpOfflineMock(base, path, opts));
+  }
+
+  const fetchOpts = abortSignal ? { ...opts, signal: abortSignal } : opts;
+
   return withRetry(async () => {
     const token = await getGCPToken([CLOUD_SCOPE]);
     const res = await fetch(`${base}${path}`, {
-      ...opts,
+      ...fetchOpts,
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        ...(opts.headers ?? {}),
+        ...(fetchOpts.headers ?? {}),
       },
     });
     if (!res.ok) {
       const body = await res.text();
-      throw new Error(`GCP API ${opts.method ?? 'GET'} ${path} → ${res.status}: ${body}`);
+      throw new Error(`GCP API ${fetchOpts.method ?? 'GET'} ${path} → ${res.status}: ${body}`);
     }
     const text = await res.text();
     return text ? JSON.parse(text) : null;
