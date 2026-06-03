@@ -188,16 +188,17 @@ export class TemplateBuilder extends BaseBuilder {
         `   📋 Cloning base template "${baseTemplate.name}" (vmid=${baseTemplate.vmid}) → "${this.name}" (vmid=${newVmid})`,
       );
       const taskId = await pm.post<string>(
-        `/nodes/${node}/qemu/${baseTemplate.vmid}/clone`,
+        `/nodes/${baseTemplate.node || node}/qemu/${baseTemplate.vmid}/clone`,
         {
           newid: newVmid,
           name: this.name,
           full: 1,
           storage,
           format: "raw",
+          target: node,
         },
       );
-      await this.waitForTask(node, taskId, pm);
+      await this.waitForTask(baseTemplate.node || node, taskId, pm);
     } else {
       console.log(`   🆕 Creating blank VM "${this.name}" (vmid=${newVmid})`);
       await pm.post(`/nodes/${node}/qemu`, {

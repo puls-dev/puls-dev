@@ -1,5 +1,6 @@
 import { BaseBuilder } from "../../core/resource.js";
 import { gcpFetch, getProjectId } from "./api.js";
+import { resolvedSecrets } from "../../core/secret.js";
 
 const SECRET_BASE = "https://secretmanager.googleapis.com";
 
@@ -32,6 +33,9 @@ export class GCPSecretBuilder extends BaseBuilder {
         );
         if (payload.payload?.data) {
           this.resolvedValue = Buffer.from(payload.payload.data, "base64").toString("utf8");
+          if (this.resolvedValue && this.resolvedValue.length >= 3) {
+            resolvedSecrets.add(this.resolvedValue);
+          }
         }
       } catch (err: any) {
         console.warn(`   ⚠️  Could not fetch latest version of secret "${secretId}": ${err.message}`);
@@ -57,11 +61,18 @@ export class GCPSecretBuilder extends BaseBuilder {
 
   plainText(v: string) {
     this._value = v;
+    if (v && v.length >= 3) {
+      resolvedSecrets.add(v);
+    }
     return this;
   }
 
   keyValue(obj: object) {
-    this._value = JSON.stringify(obj);
+    const v = JSON.stringify(obj);
+    this._value = v;
+    if (v && v.length >= 3) {
+      resolvedSecrets.add(v);
+    }
     return this;
   }
 
@@ -77,7 +88,7 @@ export class GCPSecretBuilder extends BaseBuilder {
       if (existing) {
         console.log(`   ✅ Secret "${secretId}" exists`);
         if (this.resolvedValue !== null) {
-          console.log(`   💬 Value: ${this.resolvedValue}`);
+          console.log(`   💬 Value: ********`);
         }
         if (this._value) {
           console.log(`   📝 [PLAN] Update secret value`);
@@ -133,11 +144,14 @@ export class GCPSecretBuilder extends BaseBuilder {
       );
 
       this.resolvedValue = this._value;
+      if (this._value && this._value.length >= 3) {
+        resolvedSecrets.add(this._value);
+      }
       console.log(`🚀 Created secret "${secretId}"`);
     } else {
       console.log(`   ✅ Secret "${secretId}" exists`);
       if (this.resolvedValue !== null) {
-        console.log(`   💬 Value: ${this.resolvedValue}`);
+        console.log(`   💬 Value: ********`);
       }
       if (this._value && this._value !== this.resolvedValue) {
         const base64Data = Buffer.from(this._value, "utf8").toString("base64");
@@ -154,6 +168,9 @@ export class GCPSecretBuilder extends BaseBuilder {
           }
         );
         this.resolvedValue = this._value;
+        if (this._value && this._value.length >= 3) {
+          resolvedSecrets.add(this._value);
+        }
         console.log(`   ✅ Updated secret value`);
       }
     }

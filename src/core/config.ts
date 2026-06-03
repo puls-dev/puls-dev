@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 export interface GlobalConfig {
   dryRun?: boolean;
   parallel?: boolean;

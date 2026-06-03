@@ -7,6 +7,7 @@ import {
 } from "@aws-sdk/client-secrets-manager";
 import { BaseBuilder } from "../../core/resource.js";
 import { getSecretsClient } from "./api.js";
+import { resolvedSecrets } from "../../core/secret.js";
 
 export class SecretsBuilder extends BaseBuilder {
   private _value?: string;
@@ -27,6 +28,9 @@ export class SecretsBuilder extends BaseBuilder {
         new GetSecretValueCommand({ SecretId: secretId }),
       );
       this.resolvedValue = result.SecretString ?? null;
+      if (this.resolvedValue && this.resolvedValue.length >= 3) {
+        resolvedSecrets.add(this.resolvedValue);
+      }
       this.resolvedArn = result.ARN ?? null;
       return result;
     } catch (e: any) {
@@ -48,10 +52,17 @@ export class SecretsBuilder extends BaseBuilder {
 
   plainText(v: string) {
     this._value = v;
+    if (v && v.length >= 3) {
+      resolvedSecrets.add(v);
+    }
     return this;
   }
   keyValue(obj: object) {
-    this._value = JSON.stringify(obj);
+    const v = JSON.stringify(obj);
+    this._value = v;
+    if (v && v.length >= 3) {
+      resolvedSecrets.add(v);
+    }
     return this;
   }
   description(d: string) {
@@ -74,7 +85,7 @@ export class SecretsBuilder extends BaseBuilder {
       if (existing) {
         console.log(`   ✅ Secret "${this.name}" exists`);
         if (this.resolvedValue !== null)
-          console.log(`   💬 Value: ${this.resolvedValue}`);
+          console.log(`   💬 Value: ********`);
         if (this._value) console.log(`   📝 [PLAN] Update secret value`);
       } else {
         console.log(`   📝 [PLAN] Create secret "${this.name}"`);
@@ -104,11 +115,14 @@ export class SecretsBuilder extends BaseBuilder {
       );
       this.resolvedArn = result.ARN ?? null;
       this.resolvedValue = this._value;
+      if (this._value && this._value.length >= 3) {
+        resolvedSecrets.add(this._value);
+      }
       console.log(`🚀 Created secret "${this.name}"`);
     } else {
       console.log(`   ✅ Secret "${this.name}" exists`);
       if (this.resolvedValue !== null)
-        console.log(`   💬 Value: ${this.resolvedValue}`);
+        console.log(`   💬 Value: ********`);
       if (this._value && this._value !== this.resolvedValue) {
         await client.send(
           new PutSecretValueCommand({
@@ -117,6 +131,9 @@ export class SecretsBuilder extends BaseBuilder {
           }),
         );
         this.resolvedValue = this._value;
+        if (this._value && this._value.length >= 3) {
+          resolvedSecrets.add(this._value);
+        }
         console.log(`   ✅ Updated secret value`);
       }
     }

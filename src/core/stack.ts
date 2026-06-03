@@ -198,6 +198,18 @@ export abstract class Stack {
             if (forceConfigCheck && typeof (val as any).forceConfigCheck === "function") {
               (val as any).forceConfigCheck();
             }
+          } else if (Array.isArray(val)) {
+            const isProtected = Reflect.getMetadata("protected", this, prop);
+            const forceConfigCheck = Reflect.getMetadata("forceConfigCheck", this, prop);
+            for (const item of val) {
+              if (item instanceof BaseBuilder) {
+                resources.push({ prop, resource: item });
+                if (isProtected) item.protect();
+                if (forceConfigCheck && typeof (item as any).forceConfigCheck === "function") {
+                  (item as any).forceConfigCheck();
+                }
+              }
+            }
           }
         }
 
@@ -233,7 +245,18 @@ export abstract class Stack {
                   res = await resource.deploy();
                   await resource._runAfterDeploy(res);
                 }
-                outputs[prop] = res;
+                const propVal = (this as Record<string, unknown>)[prop];
+                if (Array.isArray(propVal)) {
+                  const idx = propVal.indexOf(resource);
+                  if (idx !== -1) {
+                    if (!outputs[prop]) {
+                      outputs[prop] = [];
+                    }
+                    outputs[prop][idx] = res;
+                  }
+                } else {
+                  outputs[prop] = res;
+                }
                 return res;
               } catch (err) {
                 controller.abort();
@@ -262,7 +285,18 @@ export abstract class Stack {
                 res = await resource.deploy();
                 await resource._runAfterDeploy(res);
               }
-              outputs[prop] = res;
+              const propVal = (this as Record<string, unknown>)[prop];
+              if (Array.isArray(propVal)) {
+                const idx = propVal.indexOf(resource);
+                if (idx !== -1) {
+                  if (!outputs[prop]) {
+                    outputs[prop] = [];
+                  }
+                  outputs[prop][idx] = res;
+                }
+              } else {
+                outputs[prop] = res;
+              }
             } catch (err) {
               controller.abort();
               throw err;
@@ -355,6 +389,16 @@ export abstract class Stack {
               continue;
             }
             resources.push({ prop, resource: val });
+          } else if (Array.isArray(val)) {
+            if (Reflect.getMetadata("protected", this, prop)) {
+              console.log(`   🔒 Skipping protected resource "${prop}"`);
+              continue;
+            }
+            for (const item of val) {
+              if (item instanceof BaseBuilder) {
+                resources.push({ prop, resource: item });
+              }
+            }
           }
         }
 
@@ -384,7 +428,18 @@ export abstract class Stack {
                 await resource._runBeforeDestroy();
                 const res = await resource.destroy();
                 await resource._runAfterDestroy(res);
-                outputs[prop] = res;
+                const propVal = (this as Record<string, unknown>)[prop];
+                if (Array.isArray(propVal)) {
+                  const idx = propVal.indexOf(resource);
+                  if (idx !== -1) {
+                    if (!outputs[prop]) {
+                      outputs[prop] = [];
+                    }
+                    outputs[prop][idx] = res;
+                  }
+                } else {
+                  outputs[prop] = res;
+                }
                 return res;
               } catch (err) {
                 controller.abort();
@@ -405,7 +460,18 @@ export abstract class Stack {
               await resource._runBeforeDestroy();
               const res = await resource.destroy();
               await resource._runAfterDestroy(res);
-              outputs[prop] = res;
+              const propVal = (this as Record<string, unknown>)[prop];
+              if (Array.isArray(propVal)) {
+                const idx = propVal.indexOf(resource);
+                if (idx !== -1) {
+                  if (!outputs[prop]) {
+                    outputs[prop] = [];
+                  }
+                  outputs[prop][idx] = res;
+                }
+              } else {
+                outputs[prop] = res;
+              }
             } catch (err) {
               controller.abort();
               throw err;

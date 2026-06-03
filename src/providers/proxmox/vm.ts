@@ -306,18 +306,19 @@ export class VMBuilder extends BaseBuilder {
         `   📋 Cloning template "${template.name}" (vmid=${template.vmid}) → "${this.name}" (vmid=${newVmid})`,
       );
       const taskId = await pm.post<string>(
-        `/nodes/${node}/qemu/${template.vmid}/clone`,
+        `/nodes/${template.node || node}/qemu/${template.vmid}/clone`,
         {
           newid: newVmid,
           name: this.name,
           full: 1,
           storage,
           format: "raw",
+          target: node,
         },
       );
 
       // Clone is async - wait for the Proxmox task to finish before configuring
-      await this.waitForTask(node, taskId, pm);
+      await this.waitForTask(template.node || node, taskId, pm);
     } else {
       console.log(`   🆕 Creating blank VM "${this.name}" (vmid=${newVmid})`);
       await pm.post(`/nodes/${node}/qemu`, {

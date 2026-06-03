@@ -160,3 +160,41 @@ export abstract class BaseBuilder {
 
   abstract deploy(): Promise<any>;
 }
+
+export function createBuilderArray<T extends BaseBuilder>(builders: T[]): T[] & T {
+  return new Proxy(builders, {
+    get(target, prop, receiver) {
+      if (prop in target) {
+        const val = Reflect.get(target, prop, receiver);
+        if (typeof val === "function") {
+          return val.bind(target);
+        }
+        return val;
+      }
+
+      if (builders.length > 0) {
+        const first = builders[0];
+        const val = Reflect.get(first, prop);
+        if (typeof val === "function") {
+          return function (...args: any[]) {
+            builders.forEach((b, idx) => {
+              const method = Reflect.get(b, prop);
+              if (typeof method === "function") {
+                const mappedArgs = args.map((arg) => {
+                  if (Array.isArray(arg) && arg.length === builders.length) {
+                    return arg[idx];
+                  }
+                  return arg;
+                });
+                method.apply(b, mappedArgs);
+              }
+            });
+            return receiver;
+          };
+        }
+      }
+
+      return undefined;
+    },
+  }) as any;
+}

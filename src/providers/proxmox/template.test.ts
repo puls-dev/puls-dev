@@ -162,14 +162,14 @@ describe("Proxmox TemplateBuilder Unit Tests", () => {
     assert.ok(templateCall);
   });
 
-  test("VM clones from Template successfully", async () => {
+  test("VM clones from Template successfully across nodes", async () => {
     const nginxHash = getFileHash("playbooks/nginx.yaml");
     const notes = mergeProvisionMetadata("Pre-baked template notes", {
       "nginx.yaml": nginxHash,
     });
 
     mockGetResponses["/cluster/resources?type=vm"] = [
-      // Template exists
+      // Template exists on pve1
       { name: "my-game-template", vmid: 500, node: "pve1", template: 1 },
     ];
     mockGetResponses["/nodes/pve1/qemu/500/config"] = {
@@ -177,7 +177,8 @@ describe("Proxmox TemplateBuilder Unit Tests", () => {
     };
     mockGetResponses["/cluster/nextid"] = 205;
     mockGetResponses["/nodes"] = [
-      { node: "pve1", status: "online", maxmem: 32 * 1024 * 1024 * 1024, mem: 12 * 1024 * 1024 * 1024 }
+      // Target node is pve2
+      { node: "pve2", status: "online", maxmem: 32 * 1024 * 1024 * 1024, mem: 12 * 1024 * 1024 * 1024 }
     ];
 
     class ProxmoxStack extends Stack {
@@ -200,10 +201,50 @@ describe("Proxmox TemplateBuilder Unit Tests", () => {
     assert.strictEqual(result.template.vmid, 500);
     assert.strictEqual(result.server.vmid, 205);
 
-    // Verify clone POST used the template's VMID
+    // Verify clone POST used the template's node (pve1) and vmid (500), but with target (pve2)
     const cloneCall = clientCalls.find(c => c.method === "POST" && c.path === "/nodes/pve1/qemu/500/clone");
     assert.ok(cloneCall);
     assert.strictEqual(cloneCall.body.newid, 205);
     assert.strictEqual(cloneCall.body.name, "my-prod-game-01");
+    assert.strictEqual(cloneCall.body.target, "pve2");
+  });
+
+  test("Template bakes from baseTemplate on a different node successfully", async () => {
+    mockGetResponses["/cluster/resources?type=vm"] = [
+      // Base template exists on pve1
+      { name: "ubuntu-base", vmid: 9000, node: "pve1", template: 1 },
+    ];
+    mockGetResponses["/nodes"] = [
+      // Target node pve2 has more free RAM than pve1
+      { node: "pve1", status: "online", maxmem: 32 * 1024 * 1024 * 1024, mem: 20 * 1024 * 1024 * 1024 },
+      { node: "pve2", status: "online", maxmem: 32 * 1024 * 1024 * 1024, mem: 5 * 1024 * 1024 * 1024 },
+    ];
+    mockGetResponses["/cluster/nextid"] = 9001;
+    mockGetResponses["/nodes/pve2/qemu/9001/agent/network-get-interfaces"] = [
+      {
+        name: "eth0",
+        "ip-addresses": [
+          { "ip-address-type": "ipv4", "ip-address": "10.8.10.199" }
+        ]
+      }
+    ];
+
+    const builder = new TemplateBuilder("my-new-template")
+      .baseImage("ubuntu-base")
+      .provision("playbooks/nginx.yaml");
+
+    (builder as any).waitFor = async () => true;
+    (builder as any).checkPort = async () => true;
+    (builder as any).checkCloudInit = async () => true;
+
+    const result = await builder.deploy();
+    assert.strictEqual(result.vmid, 9001);
+    assert.strictEqual(result.node, "pve2");
+
+    // Verify clone POST was sent to pve1 (source node) but targeted pve2
+    const cloneCall = clientCalls.find(c => c.method === "POST" && c.path === "/nodes/pve1/qemu/9000/clone");
+    assert.ok(cloneCall);
+    assert.strictEqual(cloneCall.body.newid, 9001);
+    assert.strictEqual(cloneCall.body.target, "pve2");
   });
 });
