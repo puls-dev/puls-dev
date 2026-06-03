@@ -1,7 +1,7 @@
 import { Config } from "../../core/config.js";
 import { VMBuilder } from "./vm.js";
 import { TemplateBuilder } from "./template.js";
-import { createBuilderArray } from "../../core/resource.js";
+import { createBuilderArray, BuilderGroup } from "../../core/resource.js";
 
 export const Proxmox = {
   init: (opts: {
@@ -21,7 +21,7 @@ export const Proxmox = {
   },
   VM: <T extends string | string[]>(
     name: T
-  ): T extends string[] ? VMBuilder[] & VMBuilder : VMBuilder => {
+  ): T extends string[] ? BuilderGroup<VMBuilder> : VMBuilder => {
     if (Array.isArray(name)) {
       return createBuilderArray(name.map((n) => new VMBuilder(n))) as any;
     }
@@ -29,7 +29,7 @@ export const Proxmox = {
   },
   Template: <T extends string | string[]>(
     name: T
-  ): T extends string[] ? TemplateBuilder[] & TemplateBuilder : TemplateBuilder => {
+  ): T extends string[] ? BuilderGroup<TemplateBuilder> : TemplateBuilder => {
     if (Array.isArray(name)) {
       return createBuilderArray(name.map((n) => new TemplateBuilder(n))) as any;
     }

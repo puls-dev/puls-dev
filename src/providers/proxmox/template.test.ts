@@ -230,12 +230,15 @@ describe("Proxmox TemplateBuilder Unit Tests", () => {
     ];
 
     const builder = new TemplateBuilder("my-new-template")
-      .baseImage("ubuntu-base")
+      .baseImage("ubuntu-base" as any)
       .provision("playbooks/nginx.yaml");
 
-    (builder as any).waitFor = async () => true;
+    (builder as any).waitFor = async (label: string, condition: () => Promise<boolean>) => {
+      return await condition();
+    };
     (builder as any).checkPort = async () => true;
     (builder as any).checkCloudInit = async () => true;
+    (builder as any).runProvisioner = async () => {};
 
     const result = await builder.deploy();
     assert.strictEqual(result.vmid, 9001);

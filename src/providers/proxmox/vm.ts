@@ -132,6 +132,7 @@ export class VMBuilder extends BaseBuilder {
       if (this.resolvedIp) {
         this.out.ip.resolve(this.resolvedIp);
       }
+      this.registerHost();
 
       const activeIp = this.resolvedIp ?? "0.0.0.0";
 
@@ -417,6 +418,8 @@ export class VMBuilder extends BaseBuilder {
       console.log(`   🌐 IP: ${this.resolvedIp}`);
     }
 
+    this.registerHost();
+
     if (this._provision.length > 0) {
       await this.waitFor(
         `SSH on ${this.resolvedIp} to be ready`,
@@ -445,20 +448,6 @@ export class VMBuilder extends BaseBuilder {
 
     if (this._replace) {
       await this.destroyVmByName(this._replace, pm);
-    }
-
-    const context = resourceContextStorage.getStore();
-    if (context && context.hosts) {
-      const activeIp = this.resolvedIp ?? "0.0.0.0";
-      if (!context.hosts.some(h => h.name === this.name)) {
-        context.hosts.push({
-          name: this.name,
-          ip: activeIp,
-          user: "root",
-          sshKey: this.sshKeyPath(),
-          provider: "proxmox"
-        });
-      }
     }
 
     return { name: this.name, vmid: this.resolvedVmid, ip: this.resolvedIp };
@@ -496,6 +485,22 @@ export class VMBuilder extends BaseBuilder {
       }
     }
     return null;
+  }
+
+  private registerHost() {
+    const context = resourceContextStorage.getStore();
+    if (context && context.hosts) {
+      const activeIp = this.resolvedIp ?? "0.0.0.0";
+      if (!context.hosts.some((h) => h.name === this.name)) {
+        context.hosts.push({
+          name: this.name,
+          ip: activeIp,
+          user: "root",
+          sshKey: this.sshKeyPath(),
+          provider: "proxmox",
+        });
+      }
+    }
   }
 
 

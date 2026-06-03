@@ -161,7 +161,17 @@ export abstract class BaseBuilder {
   abstract deploy(): Promise<any>;
 }
 
-export function createBuilderArray<T extends BaseBuilder>(builders: T[]): T[] & T {
+export type DistributeArgs<Args extends any[]> = {
+  [K in keyof Args]: Args[K] | Args[K][];
+};
+
+export type BuilderGroup<B extends BaseBuilder> = B[] & {
+  [K in keyof B]: B[K] extends (...args: infer Args) => any
+    ? (...args: DistributeArgs<Args>) => BuilderGroup<B>
+    : B[K];
+};
+
+export function createBuilderArray<T extends BaseBuilder>(builders: T[]): BuilderGroup<T> {
   return new Proxy(builders, {
     get(target, prop, receiver) {
       if (prop in target) {
