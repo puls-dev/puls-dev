@@ -21,6 +21,7 @@ type ProviderOpts = {
     dnsDomain?: string;
     dnsServers?: string[];
     verifySsl?: boolean;
+    sshUser?: string;
   };
 };
 
@@ -42,6 +43,9 @@ function applyConfig(opts: ProviderOpts) {
       },
     });
   }
+  // CLI env-var overrides — applied last so `puls plan/destroy/--parallel` wins over decorator options
+  if (process.env.PULS_DRY_RUN === "true") Config.set({ dryRun: true });
+  if (process.env.PULS_PARALLEL === "true") Config.set({ parallel: true });
 }
 
 export function Protected(target: any, propertyKey: string) {
@@ -98,15 +102,19 @@ export function Destroy(optsOrTarget: any, propertyKey?: string): any {
 export function Deploy(opts: ProviderOpts = {}) {
   return function (constructor: any) {
     const regions = opts.regions ?? [];
+    const mode = process.env.PULS_MODE;
     if (regions.length > 0) {
       Promise.resolve().then(async () => {
         for (const r of regions) {
-          console.log(`\n🌍 [MULTI-REGION] Deploying stack to region: ${r}`);
+          const label = mode === "destroy" ? "Tearing down" : "Deploying";
+          console.log(`\n🌍 [MULTI-REGION] ${label} stack in region: ${r}`);
           applyConfig({ ...opts, region: r });
           const instance = new constructor();
           Stack._register(constructor, instance, r);
-          if (typeof instance.deploy === "function") {
-            await instance.deploy();
+          if (mode === "destroy") {
+            if (typeof instance.destroy === "function") await instance.destroy();
+          } else {
+            if (typeof instance.deploy === "function") await instance.deploy();
           }
         }
       });
@@ -115,7 +123,11 @@ export function Deploy(opts: ProviderOpts = {}) {
       const instance = new constructor();
       Stack._register(constructor, instance);
       Promise.resolve().then(async () => {
-        if (typeof instance.deploy === "function") await instance.deploy();
+        if (mode === "destroy") {
+          if (typeof instance.destroy === "function") await instance.destroy();
+        } else {
+          if (typeof instance.deploy === "function") await instance.deploy();
+        }
       });
     }
   };

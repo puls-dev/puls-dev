@@ -28,7 +28,7 @@ import "reflect-metadata";
 import { Stack, Deploy } from "puls-dev";
 import { AWS, REGION, RUNTIME } from "puls-dev/aws";
 
-@Deploy({ region: REGION.EU_CENTRAL_1, dryRun: true })
+@Deploy({ region: REGION.EU_CENTRAL_1 })
 class MyFirstStack extends Stack {
   fn = AWS.Lambda("hello-world")
     .code("./functions/hello")
@@ -36,23 +36,45 @@ class MyFirstStack extends Stack {
 }
 ```
 
-Run it:
+## The `puls` CLI
+
+`puls-dev` ships a `puls` binary that gives you three commands without ever editing source:
+
+```bash
+puls plan    my-first-stack.ts   # dry-run — prints what would change, no API writes
+puls deploy  my-first-stack.ts   # apply the stack
+puls destroy my-first-stack.ts   # tear down the stack
+```
+
+**Always run `plan` first.** It activates dry-run mode automatically regardless of what `dryRun` is set to in your decorator.
+
+Additional flags:
+
+```bash
+puls deploy  my-stack.ts --parallel   # enable parallel resource execution
+puls deploy  my-stack.ts --dry-run    # force dry-run on any command
+puls --version
+puls --help
+```
+
+> **Note:** `puls` requires [tsx](https://github.com/privatenumber/tsx) to execute TypeScript files.
+> It is installed automatically as a dev dependency: `npm install --save-dev tsx`
+
+### Running without the CLI
+
+You can still run stack files directly if you prefer:
 
 ```bash
 npx tsx my-first-stack.ts
 ```
 
-With `dryRun: true`, Puls prints what it *would* do without touching any API. When you're ready to apply, flip it to `false`.
-
-## Dry run
-
-Every stack should be run dry first:
+Use the `dryRun` decorator option to control mode in that case:
 
 ```typescript
 @Deploy({ region: REGION.EU_CENTRAL_1, dryRun: true })  // safe - no API writes
 ```
 
-Output looks like:
+## Dry run output
 
 ```
 🏗️  Deploying Stack: MyFirstStack

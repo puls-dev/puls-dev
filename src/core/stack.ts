@@ -4,6 +4,45 @@ import { Config } from "./config.js";
 import { resourceContextStorage } from "./context.js";
 import { resolvedSecrets } from "./secret.js";
 
+async function withRedactedConsole<T>(
+  secrets: Set<string>,
+  fn: () => Promise<T>,
+): Promise<T> {
+  const originalLog = console.log;
+  const redact = (message: any): any => {
+    if (typeof message !== "string") return message;
+    let result = message;
+    for (const secret of secrets) {
+      if (secret && secret.length >= 3) {
+        const escaped = secret.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+        result = result.replace(new RegExp(escaped, "g"), "********");
+      }
+    }
+    return result;
+  };
+
+  console.log = (...args: any[]) => {
+    const redactedArgs = args.map((arg) => {
+      if (typeof arg === "string") return redact(arg);
+      try {
+        const str = String(arg);
+        const hasSecret = [...secrets].some(
+          (s) => s && s.length >= 3 && str.includes(s),
+        );
+        if (hasSecret) return redact(str);
+      } catch {}
+      return arg;
+    });
+    originalLog(...redactedArgs);
+  };
+
+  try {
+    return await fn();
+  } finally {
+    console.log = originalLog;
+  }
+}
+
 const _registry = new Map<Function | string, Stack>();
 
 type OutputEntry = {
@@ -126,51 +165,17 @@ export abstract class Stack {
   async deploy(): Promise<Record<string, any>> {
     const controller = new AbortController();
     const hosts: any[] = [];
+    // Snapshot current secrets; new secrets resolved during this run are added via context
+    const secrets = new Set<string>(resolvedSecrets);
     const context = {
       abortSignal: controller.signal,
       hosts,
-      stackName: this.constructor.name
+      stackName: this.constructor.name,
+      secrets,
     };
 
     return resourceContextStorage.run(context, async () => {
-      const originalLog = console.log;
-      console.log = (...args: any[]) => {
-        const redact = (message: any): any => {
-          if (typeof message !== "string") return message;
-          let result = message;
-          for (const secret of resolvedSecrets) {
-            if (secret && secret.length >= 3) {
-              const escaped = secret.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-              const regex = new RegExp(escaped, 'g');
-              result = result.replace(regex, '********');
-            }
-          }
-          return result;
-        };
-
-        const redactedArgs = args.map(arg => {
-          if (typeof arg === "string") {
-            return redact(arg);
-          }
-          try {
-            const str = String(arg);
-            let hasSecret = false;
-            for (const secret of resolvedSecrets) {
-              if (secret && secret.length >= 3 && str.includes(secret)) {
-                hasSecret = true;
-                break;
-              }
-            }
-            if (hasSecret) {
-              return redact(str);
-            }
-          } catch {}
-          return arg;
-        });
-        originalLog(...redactedArgs);
-      };
-
-      try {
+      return withRedactedConsole(secrets, async () => {
         console.log(`\n🏗️  Deploying Stack: ${this.constructor.name}`);
 
         // Stack-level beforeDeploy hook
@@ -215,11 +220,13 @@ export abstract class Stack {
 
         // 2. Schedule execution
         if (isParallel) {
-          const startPromise = Promise.resolve();
           const promises = resources.map(({ prop, resource }) => {
             resource._deployPromise = (async () => {
               try {
-                await startPromise;
+                // Yield so the map() loop finishes assigning all _deployPromise values before
+                // any task checks its dependencies — a dependency that appears later in the list
+                // would otherwise have an undefined _deployPromise and be silently skipped.
+                await Promise.resolve();
                 if (controller.signal.aborted) {
                   throw new Error("Deployment aborted due to previous failure");
                 }
@@ -313,60 +320,23 @@ export abstract class Stack {
         }
 
         return outputs;
-      } finally {
-        console.log = originalLog;
-      }
+      });
     });
   }
 
   async destroy(): Promise<Record<string, any>> {
     const controller = new AbortController();
     const hosts: any[] = [];
+    const secrets = new Set<string>(resolvedSecrets);
     const context = {
       abortSignal: controller.signal,
       hosts,
-      stackName: this.constructor.name
+      stackName: this.constructor.name,
+      secrets,
     };
 
     return resourceContextStorage.run(context, async () => {
-      const originalLog = console.log;
-      console.log = (...args: any[]) => {
-        const redact = (message: any): any => {
-          if (typeof message !== "string") return message;
-          let result = message;
-          for (const secret of resolvedSecrets) {
-            if (secret && secret.length >= 3) {
-              const escaped = secret.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-              const regex = new RegExp(escaped, 'g');
-              result = result.replace(regex, '********');
-            }
-          }
-          return result;
-        };
-
-        const redactedArgs = args.map(arg => {
-          if (typeof arg === "string") {
-            return redact(arg);
-          }
-          try {
-            const str = String(arg);
-            let hasSecret = false;
-            for (const secret of resolvedSecrets) {
-              if (secret && secret.length >= 3 && str.includes(secret)) {
-                hasSecret = true;
-                break;
-              }
-            }
-            if (hasSecret) {
-              return redact(str);
-            }
-          } catch {}
-          return arg;
-        });
-        originalLog(...redactedArgs);
-      };
-
-      try {
+      return withRedactedConsole(secrets, async () => {
         console.log(`\n💥 Tearing down Stack: ${this.constructor.name}`);
 
         // Stack-level beforeDestroy hook
@@ -404,12 +374,13 @@ export abstract class Stack {
 
         // 2. Schedule execution
         if (isParallel) {
-          const startPromise = Promise.resolve();
           // In parallel destroy, await all dependents (reverse dependencies) first
           const promises = resources.map(({ prop, resource }) => {
             resource._destroyPromise = (async () => {
               try {
-                await startPromise;
+                // Yield so the map() loop finishes assigning all _destroyPromise values before
+                // any task checks its dependents (same reason as parallel deploy).
+                await Promise.resolve();
                 if (controller.signal.aborted) {
                   throw new Error("Teardown aborted due to previous failure");
                 }
@@ -488,9 +459,7 @@ export abstract class Stack {
         }
 
         return outputs;
-      } finally {
-        console.log = originalLog;
-      }
+      });
     });
   }
 }

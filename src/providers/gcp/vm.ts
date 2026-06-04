@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { homedir } from "node:os";
 import { BaseBuilder } from "../../core/resource.js";
+import { Config } from "../../core/config.js";
 import { Output } from "../../core/output.js";
 import { gcpFetch, getProjectId, getRegion } from "./api.js";
 import { checkPort, runProvisioner } from "../../core/provisioner.js";
@@ -20,6 +21,7 @@ export class GCPVMBuilder extends BaseBuilder {
   private _zone: string = "us-central1-a";
   private _network: string = "global/networks/default";
   private _sshKeys: string | string[] = [];
+  private _sshUser?: string;
   private _provision: string[] = [];
   private _forceConfigCheck: boolean = false;
 
@@ -63,6 +65,20 @@ export class GCPVMBuilder extends BaseBuilder {
     return this;
   }
 
+  sshUser(user: string) {
+    this._sshUser = user;
+    return this;
+  }
+
+  private resolveUser(): string {
+    return (
+      this._sshUser ??
+      process.env.GCP_SSH_USER ??
+      Config.get().providers.gcp?.sshUser ??
+      "root"
+    );
+  }
+
   provision(...playbookPaths: (string | string[])[]) {
     this._provision.push(...playbookPaths.flat());
     return this;
@@ -83,7 +99,7 @@ export class GCPVMBuilder extends BaseBuilder {
     if (!keyPath) {
       throw new Error(`[GCP VM:${this.name}] No SSH private key path found. Pass a file path via .sshKey() to run provisioning.`);
     }
-    return runProvisioner(ip, "root", keyPath, script);
+    return runProvisioner(ip, this.resolveUser(), keyPath, script);
   }
 
   private async discoverVM(): Promise<any> {
@@ -375,7 +391,7 @@ export class GCPVMBuilder extends BaseBuilder {
         context.hosts.push({
           name: this.name,
           ip: activeIp,
-          user: "root",
+          user: this.resolveUser(),
           sshKey: keyPath,
           provider: "gcp"
         });

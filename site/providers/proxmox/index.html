@@ -1193,6 +1193,7 @@
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>PROXMOX_NODES=pve1,pve2
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>PROXMOX_DNS_DOMAIN=nolimit.int
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>PROXMOX_DNS_SERVERS=10.8.10.11,10.8.10.12,10.8.10.13
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a># PROXMOX_SSH_USER=ubuntu
 </code></pre></div>
 <p>Auth uses PVE API tokens (<code>USER@REALM!TOKENNAME=SECRET</code>). Create one in Datacenter → Permissions → API Tokens.</p>
 <p>Define environments once in <code>src/types/proxmox.ts</code>:</p>
@@ -1206,8 +1207,9 @@
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="nx">dnsDomain</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.PROXMOX_DNS_DOMAIN</span><span class="p">,</span>
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="nx">dnsServers</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.PROXMOX_DNS_SERVERS?.split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">),</span>
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="nx">verifySsl</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="p">};</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="nx">sshUser</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ubuntu&quot;</span><span class="p">,</span><span class="w">   </span><span class="c1">// optional — overrides the default SSH user for provisioning</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">};</span>
 </code></pre></div>
 <p>Reference everywhere via <code>@Deploy({ proxmox: CONFIG.STAGING })</code>.</p>
 <h2 id="vm">VM</h2>
@@ -1216,13 +1218,15 @@
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">cores</span><span class="p">(</span><span class="mf">4</span><span class="p">)</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">memory</span><span class="p">(</span><span class="mf">8192</span><span class="p">)</span><span class="w">               </span><span class="c1">// MB</span>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">ip</span><span class="p">(</span><span class="s2">&quot;10.8.10.83&quot;</span><span class="p">)</span><span class="w">           </span><span class="c1">// static IP - omit for DHCP or DNS auto-resolve</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">vlan</span><span class="p">(</span><span class="mf">2010</span><span class="p">)</span><span class="w">                 </span><span class="c1">// VLAN tag on vmbr1</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">)</span><span class="w">               </span><span class="c1">// array of public key strings</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="p">.</span><span class="nx">machine</span><span class="p">(</span><span class="s2">&quot;i440fx&quot;</span><span class="p">)</span><span class="w">          </span><span class="c1">// machine type (&quot;q35&quot; or &quot;i440fx&quot;, default &quot;q35&quot;)</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/default.yaml&quot;</span><span class="p">)</span><span class="w">   </span><span class="c1">// single script or playbook</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">([</span><span class="s2">&quot;common.yml&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app.yml&quot;</span><span class="p">])</span><span class="w"> </span><span class="c1">// or multiple files run in order</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">  </span><span class="p">.</span><span class="nx">forceConfigCheck</span><span class="p">()</span><span class="w">                 </span><span class="c1">// force playbooks to run even if hashes match</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01-old&quot;</span><span class="p">)</span><span class="w">       </span><span class="c1">// destroy old VM after new one is up</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">gateway</span><span class="p">(</span><span class="s2">&quot;10.8.10.254&quot;</span><span class="p">)</span><span class="w">     </span><span class="c1">// optional: custom gateway (default: first three octets + &quot;.1&quot;)</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="p">.</span><span class="nx">vlan</span><span class="p">(</span><span class="mf">2010</span><span class="p">)</span><span class="w">                 </span><span class="c1">// VLAN tag on vmbr1</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">)</span><span class="w">               </span><span class="c1">// array of public key strings</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="p">.</span><span class="nx">sshUser</span><span class="p">(</span><span class="s2">&quot;ubuntu&quot;</span><span class="p">)</span><span class="w">          </span><span class="c1">// optional: SSH user for provisioning (default: &quot;root&quot;)</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span><span class="p">.</span><span class="nx">machine</span><span class="p">(</span><span class="s2">&quot;i440fx&quot;</span><span class="p">)</span><span class="w">          </span><span class="c1">// machine type (&quot;q35&quot; or &quot;i440fx&quot;, default &quot;q35&quot;)</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;config/default.yaml&quot;</span><span class="p">)</span><span class="w">   </span><span class="c1">// single script or playbook</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">([</span><span class="s2">&quot;common.yml&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app.yml&quot;</span><span class="p">])</span><span class="w"> </span><span class="c1">// or multiple files run in order</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">  </span><span class="p">.</span><span class="nx">forceConfigCheck</span><span class="p">()</span><span class="w">                 </span><span class="c1">// force playbooks to run even if hashes match</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s2">&quot;ix-sto1-app01-old&quot;</span><span class="p">)</span><span class="w">       </span><span class="c1">// destroy old VM after new one is up</span>
 </code></pre></div>
 <h2 id="golden-image-vm-templates">Golden Image / VM Templates</h2>
 <p>Puls supports declaring pre-baked virtual machine templates, analogous to HashiCorp Packer's workflow. This allows developers to configure a golden template image (with pre-installed packages, Docker, libraries, or security policies), bake it once, and then spin up actual VMs from it in seconds.</p>
@@ -1233,7 +1237,8 @@
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">cores</span><span class="p">(</span><span class="mf">4</span><span class="p">)</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">memory</span><span class="p">(</span><span class="mf">4096</span><span class="p">)</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="nx">KEYS</span><span class="p">)</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;playbooks/docker.yaml&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;playbooks/security-hardening.yaml&quot;</span><span class="p">);</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">sshUser</span><span class="p">(</span><span class="s2">&quot;ubuntu&quot;</span><span class="p">)</span><span class="w">   </span><span class="c1">// optional: SSH user for provisioning (default: &quot;root&quot;)</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;playbooks/docker.yaml&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;playbooks/security-hardening.yaml&quot;</span><span class="p">);</span>
 </code></pre></div>
 <p><strong>Template Lifecycle</strong>:</p>
 <ol>
@@ -1274,7 +1279,7 @@
 </code></pre></div>
 <p>Pass via <code>.sshKey(KEYS)</code> - injected into cloud-init so every VM has your team's keys from first boot.</p>
 <h2 id="ip-resolution">IP resolution</h2>
-<p>Static IP via <code>.ip("10.8.10.83")</code> - sets cloud-init <code>ipconfig0</code> with gateway derived from the first three octets (<code>10.8.10.1</code>).</p>
+<p>Static IP via <code>.ip("10.8.10.83")</code> - sets cloud-init <code>ipconfig0</code> with gateway derived from the first three octets (<code>10.8.10.1</code> by default). Use <code>.gateway("10.8.10.254")</code> to override the gateway for non-standard subnets.</p>
 <p>If no <code>.ip()</code> is set, Puls tries DNS first:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>dns.resolve4(&quot;vm-name.nolimit.int&quot;)  →  uses resolved IP as static
 <a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>                                     →  falls back to DHCP if not in DNS
@@ -1297,7 +1302,7 @@
 <tbody>
 <tr>
 <td><code>.yaml</code> / <code>.yml</code></td>
-<td><code>ansible-playbook -i "IP," -u root --private-key ...</code></td>
+<td><code>ansible-playbook -i "IP," -u &lt;user&gt; --private-key ...</code> where <code>&lt;user&gt;</code> is resolved from <code>.sshUser()</code> → <code>PROXMOX_SSH_USER</code> env var → <code>config.sshUser</code> → <code>"root"</code></td>
 </tr>
 <tr>
 <td><code>.pp</code></td>

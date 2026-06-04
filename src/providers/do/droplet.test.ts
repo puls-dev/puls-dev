@@ -126,7 +126,7 @@ describe('DropletBuilder Unit Tests', () => {
     builder
       .region('nyc3')
       .size('s-1vcpu-1gb')
-      .sslKey('~/.ssh/id_rsa.pub');
+      .sshKey('~/.ssh/id_rsa.pub');
 
     const result = await builder.deploy();
 

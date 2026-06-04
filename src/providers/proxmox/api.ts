@@ -1,4 +1,4 @@
-import { Agent } from "undici";
+import { Agent, fetch } from "undici";
 import { Config } from "../../core/config.js";
 import { withRetry } from "../../core/retry.js";
 import { resourceContextStorage } from "../../core/context.js";
@@ -87,9 +87,10 @@ export class ProxmoxApiClient {
       return json.data ?? null;
     }, {
       retryable: (err) => {
-        const match = err.message.match(/: (\d+)/);
+        // Match the 3-digit HTTP status that appears after ": " at the end of the path segment
+        const match = err.message.match(/:\s(\d{3})(?:\s|$)/);
         const status = match ? parseInt(match[1], 10) : null;
-        return status === 429 || (status && status >= 500) || err.message.includes("ETIMEDOUT");
+        return status === 429 || (status !== null && status >= 500) || err.message.includes("ETIMEDOUT");
       }
     });
   }
@@ -111,12 +112,27 @@ export class ProxmoxApiClient {
   }
 }
 
+let _vmidLock: Promise<void> = Promise.resolve();
+
+export async function withVmidAllocation<T>(fn: () => Promise<T>): Promise<T> {
+  let release!: () => void;
+  const acquired = new Promise<void>(r => { release = r; });
+  const prev = _vmidLock;
+  _vmidLock = prev.then(() => acquired);
+  await prev;
+  try {
+    return await fn();
+  } finally {
+    release();
+  }
+}
+
 export function getPMClient(): ProxmoxApiClient {
   const cfg = Config.get().providers.proxmox;
   if (!cfg?.url || !cfg?.user || !cfg?.tokenName || !cfg?.tokenSecret) {
     if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
       return new ProxmoxApiClient(
-        "https://10.8.4.39:8006",
+        "https://proxmox.invalid:8006",
         "mock-user@pve",
         "mock-token-name",
         "mock-token-secret",

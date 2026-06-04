@@ -1,18 +1,14 @@
-import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { spawn } from "node:child_process";
-import { dirname } from "node:path";
-import { BaseBuilder } from "../../core/resource.js";
+import { ProxmoxBaseBuilder } from "./base.js";
 import { Config } from "../../core/config.js";
 import { Output } from "../../core/output.js";
-import { getPMClient, ProxmoxApiClient } from "./api.js";
+import { getPMClient, withVmidAllocation, ProxmoxApiClient } from "./api.js";
 import type { OSImage } from "../../types/proxmox.js";
 import { getFileHash, parseProvisionMetadata, mergeProvisionMetadata } from "./hash.js";
-import { checkPort, runProvisioner } from "../../core/provisioner.js";
 import { TemplateBuilder } from "./template.js";
 import { resourceContextStorage } from "../../core/context.js";
 
-export class VMBuilder extends BaseBuilder {
+export class VMBuilder extends ProxmoxBaseBuilder {
   readonly out = {
     ip: new Output<string>(),
     vmid: new Output<number>(),
@@ -32,7 +28,7 @@ export class VMBuilder extends BaseBuilder {
   private _storage?: string;
   private _vlan?: number;
   private _ip?: string;
-  private _sshKeys?: string | string[];
+  private _gateway?: string;
   private _machine: "q35" | "i440fx" = "q35";
   private _forceConfigCheck: boolean = false;
 
@@ -91,7 +87,6 @@ export class VMBuilder extends BaseBuilder {
     this._node = n;
     return this;
   }
-
   storage(pool: string) {
     this._storage = pool;
     return this;
@@ -104,8 +99,8 @@ export class VMBuilder extends BaseBuilder {
     this._ip = address;
     return this;
   }
-  sshKey(keys: string | readonly string[]) {
-    this._sshKeys = Array.isArray(keys) ? [...keys] : (keys as string);
+  gateway(gw: string) {
+    this._gateway = gw;
     return this;
   }
   machine(type: "q35" | "i440fx") {
@@ -118,6 +113,16 @@ export class VMBuilder extends BaseBuilder {
   }
 
   async deploy() {
+    try {
+      return await this._deploy();
+    } catch (err) {
+      this.out.vmid.reject(err as Error);
+      this.out.ip.reject(err as Error);
+      throw err;
+    }
+  }
+
+  private async _deploy() {
     const dryRun = this.isDryRunActive();
     const existing = await this.discoveryPromise;
     const pm = getPMClient();
@@ -131,8 +136,8 @@ export class VMBuilder extends BaseBuilder {
       this.resolvedIp = await this.resolveExistingIp(existing.node, existing.vmid, pm);
       if (this.resolvedIp) {
         this.out.ip.resolve(this.resolvedIp);
+        this.registerHost();
       }
-      this.registerHost();
 
       const activeIp = this.resolvedIp ?? "0.0.0.0";
 
@@ -162,10 +167,10 @@ export class VMBuilder extends BaseBuilder {
             console.log(`      └─ Playbook: ${p.path} (hash: ${p.hash})`);
           }
         } else {
-          console.log(`   🔄 Running ${playbooksToRun.length} playbook changes → ${activeIp}`);
           if (activeIp === "0.0.0.0") {
             throw new Error(`Failed to resolve IP for existing VM "${this.name}" to run playbooks`);
           }
+          console.log(`   🔄 Running ${playbooksToRun.length} playbook changes → ${activeIp}`);
 
           // Wait for SSH
           await this.waitFor(
@@ -196,7 +201,7 @@ export class VMBuilder extends BaseBuilder {
         };
       }
 
-      // No playbook changes!
+      // No playbook changes
       console.log(`\n🖥️  Finalizing Proxmox VM "${this.name}"...`);
       console.log(
         `   ✅ VM "${this.name}" already exists (vmid=${existing.vmid}, node=${existing.node}, status=${existing.status})`
@@ -259,35 +264,7 @@ export class VMBuilder extends BaseBuilder {
     }
 
     // Resolve target node: explicit → cluster-aware (online & max free RAM) → configured nodes list → template's node → API discovery
-    let node = this._node;
-    if (!node) {
-      try {
-        const nodesList = await pm.get<any[]>("/nodes");
-        const configuredNodes = Config.get().providers.proxmox?.nodes;
-        const onlineNodes = (nodesList ?? []).filter((n) => {
-          if (n.status !== "online") return false;
-          if (configuredNodes && configuredNodes.length > 0) {
-            return configuredNodes.includes(n.node);
-          }
-          return true;
-        });
-
-        if (onlineNodes.length > 0) {
-          // Sort descending by free memory (maxmem - mem)
-          onlineNodes.sort((a, b) => {
-            const freeA = (a.maxmem ?? 0) - (a.mem ?? 0);
-            const freeB = (b.maxmem ?? 0) - (b.mem ?? 0);
-            return freeB - freeA;
-          });
-          node = onlineNodes[0].node;
-          console.log(
-            `   🧠 Cluster-aware node selection: picked "${node}" with the most free RAM (${Math.round((((onlineNodes[0].maxmem ?? 0) - (onlineNodes[0].mem ?? 0)) / 1024 / 1024 / 1024) * 10) / 10} GB free)`
-          );
-        }
-      } catch (err) {
-        // Fallback silently to configured nodes list or discovery
-      }
-    }
+    let node = this._node ?? await this.selectBestNode(pm);
 
     if (!node) {
       const configuredNodes = Config.get().providers.proxmox?.nodes;
@@ -299,37 +276,44 @@ export class VMBuilder extends BaseBuilder {
     }
     if (!node) throw new Error("No Proxmox nodes available");
 
-    const newVmid = await pm.get<number>("/cluster/nextid");
     const storage = this._storage ?? "rbd_pool";
 
-    if (template) {
-      console.log(
-        `   📋 Cloning template "${template.name}" (vmid=${template.vmid}) → "${this.name}" (vmid=${newVmid})`,
-      );
-      const taskId = await pm.post<string>(
-        `/nodes/${template.node || node}/qemu/${template.vmid}/clone`,
-        {
-          newid: newVmid,
+    // Allocate VMID and immediately issue the create/clone request while holding the lock
+    // to prevent parallel VMs from claiming the same VMID.
+    const { newVmid, cloneTaskId, cloneNode } = await withVmidAllocation(async () => {
+      const vmid = await pm.get<number>("/cluster/nextid");
+      if (template) {
+        console.log(
+          `   📋 Cloning template "${template.name}" (vmid=${template.vmid}) → "${this.name}" (vmid=${vmid})`,
+        );
+        const taskId = await pm.post<string>(
+          `/nodes/${template.node || node}/qemu/${template.vmid}/clone`,
+          {
+            newid: vmid,
+            name: this.name,
+            full: 1,
+            storage,
+            format: "raw",
+            target: node,
+          },
+        );
+        return { newVmid: vmid, cloneTaskId: taskId, cloneNode: template.node || node };
+      } else {
+        console.log(`   🆕 Creating blank VM "${this.name}" (vmid=${vmid})`);
+        await pm.post(`/nodes/${node}/qemu`, {
+          vmid,
           name: this.name,
-          full: 1,
-          storage,
-          format: "raw",
-          target: node,
-        },
-      );
+          cores: this._cores,
+          memory: this._memory,
+          net0: `virtio,bridge=vmbr1${this._vlan ? `,tag=${this._vlan}` : ""}`,
+          ostype: "l26",
+        });
+        return { newVmid: vmid, cloneTaskId: null, cloneNode: null };
+      }
+    });
 
-      // Clone is async - wait for the Proxmox task to finish before configuring
-      await this.waitForTask(template.node || node, taskId, pm);
-    } else {
-      console.log(`   🆕 Creating blank VM "${this.name}" (vmid=${newVmid})`);
-      await pm.post(`/nodes/${node}/qemu`, {
-        vmid: newVmid,
-        name: this.name,
-        cores: this._cores,
-        memory: this._memory,
-        net0: `virtio,bridge=vmbr1${this._vlan ? `,tag=${this._vlan}` : ""}`,
-        ostype: "l26",
-      });
+    if (cloneTaskId && cloneNode) {
+      await this.waitForTask(cloneNode, cloneTaskId, pm);
     }
 
     this.resolvedVmid = newVmid;
@@ -363,7 +347,7 @@ export class VMBuilder extends BaseBuilder {
       ipconfig0: this._ip
         ? (() => {
             const [addr, prefix = "24"] = this._ip!.split("/");
-            const gw = addr.split(".").slice(0, 3).join(".") + ".1";
+            const gw = this._gateway ?? (addr.split(".").slice(0, 3).join(".") + ".1");
             return `gw=${gw},ip=${addr}/${prefix}`;
           })()
         : "ip=dhcp",
@@ -414,7 +398,9 @@ export class VMBuilder extends BaseBuilder {
         { intervalMs: 10_000, timeoutMs: 300_000 },
       );
 
-      if (this.resolvedIp) this.out.ip.resolve(this.resolvedIp);
+      if (this.resolvedIp) {
+        this.out.ip.resolve(this.resolvedIp);
+      }
       console.log(`   🌐 IP: ${this.resolvedIp}`);
     }
 
@@ -489,20 +475,18 @@ export class VMBuilder extends BaseBuilder {
 
   private registerHost() {
     const context = resourceContextStorage.getStore();
-    if (context && context.hosts) {
-      const activeIp = this.resolvedIp ?? "0.0.0.0";
+    if (context && context.hosts && this.resolvedIp) {
       if (!context.hosts.some((h) => h.name === this.name)) {
         context.hosts.push({
           name: this.name,
-          ip: activeIp,
-          user: "root",
+          ip: this.resolvedIp,
+          user: this.resolveUser(),
           sshKey: this.sshKeyPath(),
           provider: "proxmox",
         });
       }
     }
   }
-
 
   async destroy(): Promise<any> {
     const dryRun = this.isDryRunActive();
@@ -525,29 +509,6 @@ export class VMBuilder extends BaseBuilder {
     const pm = getPMClient();
     await this.destroyVmByName(this.name, pm);
     return { destroyed: this.name };
-  }
-
-  // Poll a Proxmox task UPID until it exits, then throw if it failed
-  private async waitForTask(
-    node: string,
-    upid: string,
-    pm: ProxmoxApiClient,
-  ): Promise<void> {
-    const encoded = encodeURIComponent(upid);
-    await this.waitFor(
-      `clone task to complete`,
-      async () => {
-        const status = await pm.get<any>(
-          `/nodes/${node}/tasks/${encoded}/status`,
-        );
-        if (status?.status !== "stopped") return false;
-        if (status.exitstatus && status.exitstatus !== "OK") {
-          throw new Error(`Clone task failed: ${status.exitstatus}`);
-        }
-        return true;
-      },
-      { intervalMs: 5_000, timeoutMs: 300_000 },
-    );
   }
 
   private async destroyVmByName(name: string, pm: ProxmoxApiClient) {
@@ -576,90 +537,5 @@ export class VMBuilder extends BaseBuilder {
       `/nodes/${vm.node}/qemu/${vm.vmid}?purge=1&destroy-unreferenced-disks=1`,
     );
     console.log(`   🗑️  Removed VM "${name}" (vmid=${vm.vmid})`);
-  }
-
-  private resolvePublicKeys(): string[] {
-    const input = this._sshKeys;
-    if (!input) {
-      // Default: read ~/.ssh/id_rsa.pub if it exists
-      try {
-        return [
-          readFileSync(`${homedir()}/.ssh/id_ed25519.pub`, "utf-8").trim(),
-        ];
-      } catch {
-        return [];
-      }
-    }
-    if (Array.isArray(input))
-      return (input as string[]).map((k) => k.trim()).filter(Boolean);
-    // Single string: key literal (starts with ssh-) or file path
-    if (
-      (input as string).startsWith("ssh-") ||
-      (input as string).startsWith("ecdsa-") ||
-      (input as string).startsWith("sk-")
-    ) {
-      return [(input as string).trim()];
-    }
-    try {
-      return [
-        readFileSync(
-          (input as string).replace(/^~/, homedir()),
-          "utf-8",
-        ).trim(),
-      ];
-    } catch {
-      return [];
-    }
-  }
-
-  private checkCloudInit(ip: string): Promise<boolean> {
-    const keyPath = this.sshKeyPath();
-    return new Promise((resolve) => {
-      const proc = spawn(
-        "ssh",
-        [
-          "-i",
-          keyPath,
-          "-o",
-          "StrictHostKeyChecking=no",
-          "-o",
-          "ConnectTimeout=10",
-          "-o",
-          "BatchMode=yes",
-          `root@${ip}`,
-          "cloud-init status",
-        ],
-        { stdio: ["ignore", "pipe", "ignore"] },
-      );
-
-      let out = "";
-      proc.stdout.on("data", (d: Buffer) => (out += d.toString()));
-      proc.on("close", () =>
-        resolve(out.includes("done") || out.includes("error")),
-      );
-      proc.on("error", () => resolve(false));
-    });
-  }
-
-  protected async checkPort(ip: string, port: number): Promise<boolean> {
-    return checkPort(ip, port);
-  }
-
-  protected async runProvisioner(ip: string, script: string): Promise<void> {
-    return runProvisioner(ip, "root", this._sshKeys, script);
-  }
-
-  private sshKeyPath(): string {
-    const keyInput = Array.isArray(this._sshKeys)
-      ? null
-      : (this._sshKeys as string | undefined);
-    return (
-      keyInput &&
-      !keyInput.startsWith("ssh-") &&
-      !keyInput.startsWith("ecdsa-") &&
-      !keyInput.startsWith("sk-")
-        ? keyInput.replace(/\.pub$/, "")
-        : `${homedir()}/.ssh/id_ed25519`
-    ).replace(/^~/, homedir());
   }
 }

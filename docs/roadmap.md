@@ -11,6 +11,7 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 - [x] DO `DomainBuilder` deletes and recreates records on every deploy instead of true upsert - can cause brief DNS gaps
 - [x] Firebase `FunctionsBuilder` skips eager discovery (resolves `null` immediately) - diverges from the standard pattern where discovery fires in the constructor
 - [x] Scattered `as any` casts on Route53 record types and elsewhere - replace with proper SDK type imports where possible
+- [x] `DropletBuilder.sslKey()` method named incorrectly - all other providers use `.sshKey()`; renamed to `.sshKey()` with a deprecated `.sslKey()` shim for backwards compatibility
 
 ---
 

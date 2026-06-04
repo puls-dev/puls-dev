@@ -26,7 +26,13 @@ export class Output<T> {
   apply<U>(fn: (val: T) => U): Output<U> {
     const out = new Output<U>();
     this._promise.then(
-      v => out.resolve(fn(v)),
+      v => {
+        try {
+          out.resolve(fn(v));
+        } catch (e) {
+          out.reject(e);
+        }
+      },
       err => out.reject(err)
     );
     return out;

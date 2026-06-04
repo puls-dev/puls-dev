@@ -187,6 +187,7 @@ describe("Production Features Unit Tests", () => {
   test("Ansible Provisioner Stack-Wide Dynamic Inventory Generation", async () => {
     const context = {
       stackName: "my-test-stack",
+      secrets: new Set<string>(),
       hosts: [
         { name: "web1", ip: "1.2.3.4", user: "root", sshKey: "/path/to/key", provider: "do" },
         { name: "db1", ip: "5.6.7.8", user: "ubuntu", sshKey: "/path/to/other-key", provider: "aws" }

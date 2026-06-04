@@ -1,7 +1,12 @@
 import { Output } from "./output.js";
 import { Config } from "./config.js";
+import { resourceContextStorage } from "./context.js";
 
 export const resolvedSecrets = new Set<string>();
+
+export function clearResolvedSecrets(): void {
+  resolvedSecrets.clear();
+}
 
 /**
  * Secret represents a lazy, secure credential that is fetched asynchronously
@@ -26,6 +31,7 @@ export class Secret extends Output<string> {
       this.resolve(val);
       if (val && val.length >= 3) {
         resolvedSecrets.add(val);
+        resourceContextStorage.getStore()?.secrets.add(val);
       }
     } catch (err: any) {
       this.reject(err);

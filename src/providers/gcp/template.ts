@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { homedir } from "node:os";
 import { BaseBuilder } from "../../core/resource.js";
+import { Config } from "../../core/config.js";
 import { Output } from "../../core/output.js";
 import { gcpFetch, getProjectId } from "./api.js";
 import { checkPort, runProvisioner } from "../../core/provisioner.js";
@@ -17,6 +18,7 @@ export class GCPTemplateBuilder extends BaseBuilder {
   private _zone: string = "us-central1-a";
   private _network: string = "global/networks/default";
   private _sshKeys: string | string[] = [];
+  private _sshUser?: string;
   private _provision: string[] = [];
 
   constructor(name: string) {
@@ -45,6 +47,21 @@ export class GCPTemplateBuilder extends BaseBuilder {
     this._sshKeys = keys;
     return this;
   }
+
+  sshUser(user: string) {
+    this._sshUser = user;
+    return this;
+  }
+
+  private resolveUser(): string {
+    return (
+      this._sshUser ??
+      process.env.GCP_SSH_USER ??
+      Config.get().providers.gcp?.sshUser ??
+      "root"
+    );
+  }
+
   provision(...playbookPaths: (string | string[])[]) {
     this._provision.push(...playbookPaths.flat());
     return this;
@@ -77,7 +94,7 @@ export class GCPTemplateBuilder extends BaseBuilder {
   protected async runProvisioner(ip: string, script: string): Promise<void> {
     const keysArray = Array.isArray(this._sshKeys) ? this._sshKeys : [this._sshKeys];
     const keyPath = keysArray.find(k => !k.startsWith('ssh-') && !k.startsWith('ecdsa-') && !k.startsWith('sk-'));
-    return runProvisioner(ip, "root", keyPath, script);
+    return runProvisioner(ip, this.resolveUser(), keyPath, script);
   }
 
   async deploy() {

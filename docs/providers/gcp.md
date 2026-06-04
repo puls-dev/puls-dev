@@ -20,13 +20,14 @@ Puls dynamically resolves the GCP configuration through several fallbacks to mak
        gcp: {
          projectId: "my-gcp-project",
          serviceAccountPath: "/path/to/sa.json",
-         region: "us-central1" // Optional, defaults to "us-central1"
+         region: "us-central1",  // Optional, defaults to "us-central1"
+         sshUser: "ubuntu",       // Optional, default SSH user for VM/Template provisioning
        }
      }
    });
    ```
 2. **Firebase reuse fallback**: If you are already using the Firebase provider, GCP automatically reuses `Config.providers.firebase` configuration.
-3. **Environment variables**: If config objects are omitted, Puls checks the `GCP_SA` or `FIREBASE_SA` environment variables pointing to a JSON key file.
+3. **Environment variables**: If config objects are omitted, Puls checks the `GCP_SA` or `FIREBASE_SA` environment variables pointing to a JSON key file. Set `GCP_SSH_USER` to configure the default SSH user for VM and Template provisioning.
 
 ---
 
@@ -212,7 +213,8 @@ GCP.VM("my-app-server")
 | `.image(img)` | `string` | Boot image URI or family name. | `"projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts"` |
 | `.zone(z)` | `string` | GCP availability zone where the VM instance resides. | `"us-central1-a"` |
 | `.network(netPath)` | `string` | Virtual Private Cloud network resource path. | `"global/networks/default"` |
-| `.sshKey(keys)` | `string \| string[]` | Public SSH key strings, or local paths to public keys (e.g. `"~/.ssh/id_rsa.pub"`) to inject into the `root` user for SSH access. | `[]` |
+| `.sshKey(keys)` | `string \| string[]` | Public SSH key strings, or local paths to public keys (e.g. `"~/.ssh/id_rsa.pub"`) to inject into the VM for SSH access. | `[]` |
+| `.sshUser(user)` | `string` | SSH username used for provisioning. Falls back to `GCP_SSH_USER` env var → `config.gcp.sshUser` → `"root"`. | `"root"` |
 | `.provision(...playbooks)` | `string[]` | Ordered list of playbook configuration YAML files to execute on the VM post-boot. | `[]` |
 | `.forceConfigCheck()` | `void` | Forces Puls to ignore previously cached playbook hashes and re-run all provision playbooks. | - |
 
@@ -241,6 +243,7 @@ const dockerBaseTemplate = GCP.Template("ubuntu-docker-base")
   .machineType("e2-medium")
   .zone("us-central1-a")
   .sshKey("~/.ssh/id_ed25519.pub")
+  .sshUser("ubuntu")   // optional: SSH user for provisioning (default: "root")
   .provision("playbooks/docker.yaml", "playbooks/security-hardening.yaml");
 ```
 

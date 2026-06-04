@@ -27,6 +27,7 @@ export class DropletBuilder extends BaseBuilder {
   private dropletId?: number;
   private resolvedIp?: string;
   private sshKeyPath?: string;
+  private _sshUser?: string;
   private _provision: string[] = [];
   private _forceConfigCheck: boolean = false;
 
@@ -79,9 +80,28 @@ export class DropletBuilder extends BaseBuilder {
     return this;
   }
 
-  sslKey(keyPath: string) {
+  sshKey(keyPath: string) {
     this.sshKeyPath = keyPath.replace('~', homedir());
     return this;
+  }
+
+  /** @deprecated Use `.sshKey()` instead */
+  sslKey(keyPath: string) {
+    return this.sshKey(keyPath);
+  }
+
+  sshUser(user: string) {
+    this._sshUser = user;
+    return this;
+  }
+
+  private resolveUser(): string {
+    return (
+      this._sshUser ??
+      process.env.DO_SSH_USER ??
+      Config.get().providers.do?.sshUser ??
+      "root"
+    );
   }
 
   vpc(uuid: string | Output<string>) {
@@ -105,7 +125,7 @@ export class DropletBuilder extends BaseBuilder {
 
   protected async runProvisioner(ip: string, script: string): Promise<void> {
     const keyPath = this.sshKeyPath ? this.sshKeyPath : undefined;
-    return runProvisioner(ip, "root", keyPath, script);
+    return runProvisioner(ip, this.resolveUser(), keyPath, script);
   }
 
   private async resolveOrRegisterSshKey(api: DoApiClient): Promise<number> {
@@ -299,7 +319,7 @@ export class DropletBuilder extends BaseBuilder {
         context.hosts.push({
           name: this.name,
           ip: activeIp,
-          user: "root",
+          user: this.resolveUser(),
           sshKey: this.sshKeyPath,
           provider: "do"
         });

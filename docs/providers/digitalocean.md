@@ -4,6 +4,7 @@
 
 ```
 DO_TOKEN=your_digitalocean_token
+# DO_SSH_USER=ubuntu
 ```
 
 Pass via decorator or call `DO.init()` before declaring resources:
@@ -39,7 +40,8 @@ DigitalOcean Droplets support first-class, stateless, change-aware provisioning 
 DO.Droplet("prod-web")
   .size(SIZE.MEDIUM)
   .region(REGION.NYC)
-  .sslKey("~/.ssh/id_rsa") // SSH key used for Ansible/SSH authentication
+  .sshKey("~/.ssh/id_rsa") // SSH key used for Ansible/SSH authentication
+  .sshUser("ubuntu")       // optional: SSH user (default: "root", or DO_SSH_USER env var)
   .provision("config/common.yaml", "config/nginx.yaml")
   .forceConfigCheck()      // (Optional) Forces re-running playbooks
 ```

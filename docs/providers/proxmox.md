@@ -10,6 +10,7 @@ PROXMOX_TOKEN_SECRET=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 PROXMOX_NODES=pve1,pve2
 PROXMOX_DNS_DOMAIN=nolimit.int
 PROXMOX_DNS_SERVERS=10.8.10.11,10.8.10.12,10.8.10.13
+# PROXMOX_SSH_USER=ubuntu
 ```
 
 Auth uses PVE API tokens (`USER@REALM!TOKENNAME=SECRET`). Create one in Datacenter → Permissions → API Tokens.
@@ -27,6 +28,7 @@ export const CONFIG = {
     dnsDomain: process.env.PROXMOX_DNS_DOMAIN,
     dnsServers: process.env.PROXMOX_DNS_SERVERS?.split(','),
     verifySsl: false,
+    sshUser: "ubuntu",   // optional — overrides the default SSH user for provisioning
   },
 };
 ```
@@ -41,8 +43,10 @@ Proxmox.VM("ix-sto1-app01")
   .cores(4)
   .memory(8192)               // MB
   .ip("10.8.10.83")           // static IP - omit for DHCP or DNS auto-resolve
+  .gateway("10.8.10.254")     // optional: custom gateway (default: first three octets + ".1")
   .vlan(2010)                 // VLAN tag on vmbr1
   .sshKey(KEYS)               // array of public key strings
+  .sshUser("ubuntu")          // optional: SSH user for provisioning (default: "root")
   .machine("i440fx")          // machine type ("q35" or "i440fx", default "q35")
   .provision("config/default.yaml")   // single script or playbook
   .provision(["common.yml", "app.yml"]) // or multiple files run in order
@@ -64,6 +68,7 @@ const dockerBaseTemplate = Proxmox.Template("ubuntu-docker-base")
   .cores(4)
   .memory(4096)
   .sshKey(KEYS)
+  .sshUser("ubuntu")   // optional: SSH user for provisioning (default: "root")
   .provision("playbooks/docker.yaml", "playbooks/security-hardening.yaml");
 ```
 
@@ -118,7 +123,7 @@ Pass via `.sshKey(KEYS)` - injected into cloud-init so every VM has your team's 
 
 ## IP resolution
 
-Static IP via `.ip("10.8.10.83")` - sets cloud-init `ipconfig0` with gateway derived from the first three octets (`10.8.10.1`).
+Static IP via `.ip("10.8.10.83")` - sets cloud-init `ipconfig0` with gateway derived from the first three octets (`10.8.10.1` by default). Use `.gateway("10.8.10.254")` to override the gateway for non-standard subnets.
 
 If no `.ip()` is set, Puls tries DNS first:
 
@@ -139,7 +144,7 @@ After a VM starts, Puls runs these steps for each provisioner provided to `.prov
 
 | Extension | Action |
 |-----------|--------|
-| `.yaml` / `.yml` | `ansible-playbook -i "IP," -u root --private-key ...` |
+| `.yaml` / `.yml` | `ansible-playbook -i "IP," -u <user> --private-key ...` where `<user>` is resolved from `.sshUser()` → `PROXMOX_SSH_USER` env var → `config.sshUser` → `"root"` |
 | `.pp` | `scp manifest.pp /tmp/` then `ssh 'puppet apply /tmp/manifest.pp'` |
 
 ### Idempotent & Incremental Provisioning

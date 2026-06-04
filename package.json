@@ -1,6 +1,6 @@
 {
   "name": "puls-dev",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Intent-driven infrastructure-as-code with eager discovery and no state files.",
   "type": "module",
   "main": "./dist/index.js",
@@ -37,8 +37,12 @@
     "README.md",
     "LICENSE"
   ],
+  "bin": {
+    "puls": "dist/bin/puls.js"
+  },
   "scripts": {
     "build": "tsc",
+    "postbuild": "node -e \"const fs=require('fs'),f='dist/bin/puls.js',c=fs.readFileSync(f,'utf8');if(!c.startsWith('#!'))fs.writeFileSync(f,'#!/usr/bin/env node\\n'+c);\" && chmod +x dist/bin/puls.js",
     "prepublishOnly": "npm run build",
     "test": "tsx --test \"src/**/*.test.ts\""
   },
@@ -54,29 +58,10 @@
   "author": "Bia",
   "license": "ISC",
   "devDependencies": {
-    "@aws-sdk/client-acm": "^3.1053.0",
-    "@aws-sdk/client-apigatewayv2": "^3.1053.0",
-    "@aws-sdk/client-cloudfront": "^3.1053.0",
-    "@aws-sdk/client-cloudwatch": "^3.1053.0",
-    "@aws-sdk/client-cloudwatch-logs": "^3.1053.0",
-    "@aws-sdk/client-ec2": "^3.1053.0",
-    "@aws-sdk/client-ecs": "^3.1053.0",
-    "@aws-sdk/client-iam": "^3.1053.0",
-    "@aws-sdk/client-lambda": "^3.1053.0",
-    "@aws-sdk/client-rds": "^3.1053.0",
-    "@aws-sdk/client-route-53": "^3.1053.0",
-    "@aws-sdk/client-route-53-domains": "^3.1053.0",
-    "@aws-sdk/client-s3": "^3.1053.0",
-    "@aws-sdk/client-secrets-manager": "^3.1053.0",
-    "@aws-sdk/client-sns": "^3.1053.0",
-    "@aws-sdk/client-sqs": "^3.1053.0",
-    "@aws-sdk/client-ssm": "^3.1053.0",
     "@types/node": "^25.6.2",
-    "google-auth-library": "^10.6.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.3",
-    "undici": "^8.3.0"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "@aws-sdk/client-acm": "^3.1053.0",

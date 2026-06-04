@@ -1,15 +1,11 @@
-import { readFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { spawn } from "node:child_process";
-import { BaseBuilder } from "../../core/resource.js";
+import { ProxmoxBaseBuilder } from "./base.js";
 import { Config } from "../../core/config.js";
 import { Output } from "../../core/output.js";
-import { getPMClient, ProxmoxApiClient } from "./api.js";
+import { getPMClient, withVmidAllocation } from "./api.js";
 import type { OSImage } from "../../types/proxmox.js";
 import { getFileHash, parseProvisionMetadata, mergeProvisionMetadata } from "./hash.js";
-import { checkPort, runProvisioner } from "../../core/provisioner.js";
 
-export class TemplateBuilder extends BaseBuilder {
+export class TemplateBuilder extends ProxmoxBaseBuilder {
   readonly out = {
     vmid: new Output<number>(),
   };
@@ -22,7 +18,6 @@ export class TemplateBuilder extends BaseBuilder {
   private _memory: number = 2048;
   private _provision: string[] = [];
   private _storage?: string;
-  private _sshKeys?: string | string[];
 
   constructor(name: string) {
     super(name);
@@ -65,25 +60,26 @@ export class TemplateBuilder extends BaseBuilder {
     this._storage = pool;
     return this;
   }
-  sshKey(keys: string | readonly string[]) {
-    this._sshKeys = Array.isArray(keys) ? [...keys] : (keys as string);
-    return this;
-  }
   provision(...playbookPaths: (string | string[])[]) {
     this._provision.push(...playbookPaths.flat());
     return this;
   }
 
   async deploy() {
+    try {
+      return await this._deploy();
+    } catch (err) {
+      this.out.vmid.reject(err as Error);
+      throw err;
+    }
+  }
+
+  private async _deploy() {
     const dryRun = this.isDryRunActive();
     const existing = await this.discoveryPromise;
     const pm = getPMClient();
 
     if (existing) {
-      this.resolvedVmid = existing.vmid;
-      this.resolvedNode = existing.node;
-      this.out.vmid.resolve(existing.vmid);
-
       // Check if playbook hashes differ
       const appliedHashes = parseProvisionMetadata(existing.description ?? "");
       const declaredPlaybooksWithHashes = this._provision.map((p) => {
@@ -97,6 +93,9 @@ export class TemplateBuilder extends BaseBuilder {
       });
 
       if (!hasChanges) {
+        this.resolvedVmid = existing.vmid;
+        this.resolvedNode = existing.node;
+        this.out.vmid.resolve(existing.vmid);
         console.log(`\n🖥️  Finalizing Proxmox Template "${this.name}"...`);
         console.log(`   ✅ Template "${this.name}" already exists and matches defined state.`);
         return { name: this.name, vmid: this.resolvedVmid, node: this.resolvedNode };
@@ -106,10 +105,12 @@ export class TemplateBuilder extends BaseBuilder {
       console.log(`   🔄 Template playbook hashes changed. Purging old template...`);
       if (dryRun) {
         console.log(`   📝 [PLAN] Would purge template "${this.name}" (vmid=${existing.vmid}) and rebuild.`);
+        this.out.vmid.resolve(-1);
         return { name: this.name, vmid: "PENDING" };
-      } else {
-        await pm.delete(`/nodes/${existing.node}/qemu/${existing.vmid}?purge=1&destroy-unreferenced-disks=1`);
       }
+
+      await pm.delete(`/nodes/${existing.node}/qemu/${existing.vmid}?purge=1&destroy-unreferenced-disks=1`);
+      // Fall through to rebuild
     }
 
     console.log(`\n🖥️  Finalizing Proxmox Template "${this.name}"...`);
@@ -126,32 +127,7 @@ export class TemplateBuilder extends BaseBuilder {
     }
 
     // Pick target node (cluster-aware)
-    let node: string | undefined;
-    try {
-      const nodesList = await pm.get<any[]>("/nodes");
-      const configuredNodes = Config.get().providers.proxmox?.nodes;
-      const onlineNodes = (nodesList ?? []).filter((n) => {
-        if (n.status !== "online") return false;
-        if (configuredNodes && configuredNodes.length > 0) {
-          return configuredNodes.includes(n.node);
-        }
-        return true;
-      });
-
-      if (onlineNodes.length > 0) {
-        onlineNodes.sort((a, b) => {
-          const freeA = (a.maxmem ?? 0) - (a.mem ?? 0);
-          const freeB = (b.maxmem ?? 0) - (b.mem ?? 0);
-          return freeB - freeA;
-        });
-        node = onlineNodes[0].node;
-        console.log(
-          `   🧠 Cluster-aware node selection: picked "${node}" with the most free RAM (${Math.round((((onlineNodes[0].maxmem ?? 0) - (onlineNodes[0].mem ?? 0)) / 1024 / 1024 / 1024) * 10) / 10} GB free)`
-        );
-      }
-    } catch (err) {
-      // Fallback
-    }
+    let node = await this.selectBestNode(pm);
 
     if (!node) {
       const configuredNodes = Config.get().providers.proxmox?.nodes;
@@ -162,9 +138,6 @@ export class TemplateBuilder extends BaseBuilder {
       node = (nodes ?? [])[0]?.node;
     }
     if (!node) throw new Error("No Proxmox nodes available");
-
-    const newVmid = await pm.get<number>("/cluster/nextid");
-    const storage = this._storage ?? "rbd_pool";
 
     // Lookup base image template
     const resources = await pm.get<any[]>("/cluster/resources?type=vm");
@@ -183,32 +156,44 @@ export class TemplateBuilder extends BaseBuilder {
       throw new Error(`No Proxmox base template found matching "${this._baseImage}".`);
     }
 
-    if (baseTemplate) {
-      console.log(
-        `   📋 Cloning base template "${baseTemplate.name}" (vmid=${baseTemplate.vmid}) → "${this.name}" (vmid=${newVmid})`,
-      );
-      const taskId = await pm.post<string>(
-        `/nodes/${baseTemplate.node || node}/qemu/${baseTemplate.vmid}/clone`,
-        {
-          newid: newVmid,
+    const storage = this._storage ?? "rbd_pool";
+
+    // Allocate VMID and immediately issue the create/clone request while holding the lock
+    // to prevent parallel templates from claiming the same VMID.
+    const { newVmid, cloneTaskId, cloneNode } = await withVmidAllocation(async () => {
+      const vmid = await pm.get<number>("/cluster/nextid");
+      if (baseTemplate) {
+        console.log(
+          `   📋 Cloning base template "${baseTemplate.name}" (vmid=${baseTemplate.vmid}) → "${this.name}" (vmid=${vmid})`,
+        );
+        const taskId = await pm.post<string>(
+          `/nodes/${baseTemplate.node || node}/qemu/${baseTemplate.vmid}/clone`,
+          {
+            newid: vmid,
+            name: this.name,
+            full: 1,
+            storage,
+            format: "raw",
+            target: node,
+          },
+        );
+        return { newVmid: vmid, cloneTaskId: taskId, cloneNode: baseTemplate.node || node };
+      } else {
+        console.log(`   🆕 Creating blank VM "${this.name}" (vmid=${vmid})`);
+        await pm.post(`/nodes/${node}/qemu`, {
+          vmid,
           name: this.name,
-          full: 1,
-          storage,
-          format: "raw",
-          target: node,
-        },
-      );
-      await this.waitForTask(baseTemplate.node || node, taskId, pm);
-    } else {
-      console.log(`   🆕 Creating blank VM "${this.name}" (vmid=${newVmid})`);
-      await pm.post(`/nodes/${node}/qemu`, {
-        vmid: newVmid,
-        name: this.name,
-        cores: this._cores,
-        memory: this._memory,
-        net0: "virtio,bridge=vmbr1",
-        ostype: "l26",
-      });
+          cores: this._cores,
+          memory: this._memory,
+          net0: "virtio,bridge=vmbr1",
+          ostype: "l26",
+        });
+        return { newVmid: vmid, cloneTaskId: null, cloneNode: null };
+      }
+    });
+
+    if (cloneTaskId && cloneNode) {
+      await this.waitForTask(cloneNode, cloneTaskId, pm);
     }
 
     this.resolvedVmid = newVmid;
@@ -336,92 +321,5 @@ export class TemplateBuilder extends BaseBuilder {
     await pm.delete(`/nodes/${existing.node}/qemu/${existing.vmid}?purge=1&destroy-unreferenced-disks=1`);
     console.log(`   🗑️  Removed Template "${this.name}" (vmid=${existing.vmid})`);
     return { destroyed: this.name };
-  }
-
-  private async waitForTask(node: string, upid: string, pm: ProxmoxApiClient): Promise<void> {
-    const encoded = encodeURIComponent(upid);
-    await this.waitFor(
-      `clone task to complete`,
-      async () => {
-        const status = await pm.get<any>(`/nodes/${node}/tasks/${encoded}/status`);
-        if (status?.status !== "stopped") return false;
-        if (status.exitstatus && status.exitstatus !== "OK") {
-          throw new Error(`Clone task failed: ${status.exitstatus}`);
-        }
-        return true;
-      },
-      { intervalMs: 5_000, timeoutMs: 300_000 },
-    );
-  }
-
-  private resolvePublicKeys(): string[] {
-    const input = this._sshKeys;
-    if (!input) {
-      try {
-        return [readFileSync(`${homedir()}/.ssh/id_ed25519.pub`, "utf-8").trim()];
-      } catch {
-        return [];
-      }
-    }
-    if (Array.isArray(input)) return (input as string[]).map((k) => k.trim()).filter(Boolean);
-    if (
-      (input as string).startsWith("ssh-") ||
-      (input as string).startsWith("ecdsa-") ||
-      (input as string).startsWith("sk-")
-    ) {
-      return [(input as string).trim()];
-    }
-    try {
-      return [readFileSync((input as string).replace(/^~/, homedir()), "utf-8").trim()];
-    } catch {
-      return [];
-    }
-  }
-
-  private checkCloudInit(ip: string): Promise<boolean> {
-    const keyPath = this.sshKeyPath();
-    return new Promise((resolve) => {
-      const proc = spawn(
-        "ssh",
-        [
-          "-i",
-          keyPath,
-          "-o",
-          "StrictHostKeyChecking=no",
-          "-o",
-          "ConnectTimeout=10",
-          "-o",
-          "BatchMode=yes",
-          `root@${ip}`,
-          "cloud-init status",
-        ],
-        { stdio: ["ignore", "pipe", "ignore"] },
-      );
-
-      let out = "";
-      proc.stdout.on("data", (d: Buffer) => (out += d.toString()));
-      proc.on("close", () => resolve(out.includes("done") || out.includes("error")));
-      proc.on("error", () => resolve(false));
-    });
-  }
-
-  protected async checkPort(ip: string, port: number): Promise<boolean> {
-    return checkPort(ip, port);
-  }
-
-  protected async runProvisioner(ip: string, script: string): Promise<void> {
-    return runProvisioner(ip, "root", this._sshKeys, script);
-  }
-
-  private sshKeyPath(): string {
-    const keyInput = Array.isArray(this._sshKeys) ? null : (this._sshKeys as string | undefined);
-    return (
-      keyInput &&
-      !keyInput.startsWith("ssh-") &&
-      !keyInput.startsWith("ecdsa-") &&
-      !keyInput.startsWith("sk-")
-        ? keyInput.replace(/\.pub$/, "")
-        : `${homedir()}/.ssh/id_ed25519`
-    ).replace(/^~/, homedir());
   }
 }

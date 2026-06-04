@@ -1256,6 +1256,7 @@
 <li>[x] DO <code>DomainBuilder</code> deletes and recreates records on every deploy instead of true upsert - can cause brief DNS gaps</li>
 <li>[x] Firebase <code>FunctionsBuilder</code> skips eager discovery (resolves <code>null</code> immediately) - diverges from the standard pattern where discovery fires in the constructor</li>
 <li>[x] Scattered <code>as any</code> casts on Route53 record types and elsewhere - replace with proper SDK type imports where possible</li>
+<li>[x] <code>DropletBuilder.sslKey()</code> method named incorrectly - all other providers use <code>.sshKey()</code>; renamed to <code>.sshKey()</code> with a deprecated <code>.sslKey()</code> shim for backwards compatibility</li>
 </ul>
 <hr />
 <h2 id="testing">Testing</h2>

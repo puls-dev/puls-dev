@@ -12,6 +12,7 @@ export interface ResourceContext {
   abortSignal?: AbortSignal;
   hosts?: HostEntry[];
   stackName?: string;
+  secrets: Set<string>;
 }
 
 export const resourceContextStorage = new AsyncLocalStorage<ResourceContext>();

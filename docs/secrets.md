@@ -73,6 +73,23 @@ Testing your infrastructure shouldn't require configuring real cloud credentials
 
 ---
 
+## Running Multiple Stacks in One Process
+
+When you run more than one `Stack.deploy()` call sequentially inside the same Node.js process, Puls carries resolved secret values forward into each subsequent run's console-redaction filter by default. This is usually safe, but if you want a clean slate between runs you can clear the accumulated secret set:
+
+```typescript
+import { clearResolvedSecrets } from "puls-dev";
+
+await StackA.deploy();
+clearResolvedSecrets(); // wipe resolved values before the next stack
+
+await StackB.deploy();
+```
+
+This is only relevant when sequentially deploying multiple stacks in a single script. Individual stack runs are always isolated — each deployment creates its own redaction context so secrets from one stack can never leak into another stack's logs.
+
+---
+
 ## Zero-Dependency Architecture
 
 To keep the Puls core package ultra-lightweight and prevent startup crashes, **dynamic imports are used under the hood**. 

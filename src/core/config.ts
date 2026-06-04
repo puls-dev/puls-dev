@@ -10,6 +10,7 @@ export interface GlobalConfig {
       defaultRegion?: string;
       spacesAccessKey?: string;
       spacesSecretKey?: string;
+      sshUser?: string;
     };
     aws?: {
       region: string;
@@ -24,6 +25,7 @@ export interface GlobalConfig {
       dnsDomain?: string; // e.g. 'nolimit.int' - search domain + auto-resolves <vm>.domain for IP
       dnsServers?: string[]; // e.g. ['10.8.10.11', '10.8.10.12', '10.8.10.13']
       verifySsl?: boolean; // default: true
+      sshUser?: string; // SSH user for Ansible provisioning
     };
     firebase?: {
       projectId: string;
@@ -33,6 +35,7 @@ export interface GlobalConfig {
       projectId?: string;
       serviceAccountPath?: string;
       region?: string;
+      sshUser?: string;
     };
   };
 }
