@@ -1,5 +1,8 @@
 import { getDoApi } from './api.js';
-import type { DoInventory, DoDroplet, DoFirewall, DoLoadBalancer, DoDomain } from '../../types/inventory.js';
+import type {
+  DoInventory, DoDroplet, DoFirewall, DoLoadBalancer, DoDomain,
+  DoDatabase, DoApp, DoVpc,
+} from '../../types/inventory.js';
 
 const DO_PRICING: Record<string, number> = {
   's-1vcpu-1gb':    6,
@@ -25,11 +28,14 @@ function priceForSlug(slug: string): number {
 export async function listDoResources(): Promise<DoInventory> {
   const api = getDoApi();
 
-  const [dropletsData, firewallsData, lbData, domainsData] = await Promise.all([
+  const [dropletsData, firewallsData, lbData, domainsData, dbData, appsData, vpcsData] = await Promise.all([
     api.get<{ droplets: any[] }>('/droplets?per_page=200'),
     api.get<{ firewalls: any[] }>('/firewalls?per_page=200'),
     api.get<{ load_balancers: any[] }>('/load_balancers?per_page=200'),
     api.get<{ domains: any[] }>('/domains?per_page=200'),
+    api.get<{ databases: any[] }>('/databases?per_page=200'),
+    api.get<{ apps: any[] }>('/apps?per_page=200'),
+    api.get<{ vpcs: any[] }>('/vpcs?per_page=200'),
   ]);
 
   const droplets: DoDroplet[] = dropletsData.droplets.map((d) => {
@@ -64,7 +70,30 @@ export async function listDoResources(): Promise<DoInventory> {
     ttl:  d.ttl,
   }));
 
+  const databases: DoDatabase[] = (dbData.databases ?? []).map((d: any) => ({
+    id:        d.id,
+    name:      d.name,
+    engine:    `${d.engine} ${d.version ?? ''}`.trim(),
+    region:    d.region ?? '',
+    status:    d.status ?? '',
+    nodeCount: d.num_nodes ?? 1,
+  }));
+
+  const apps: DoApp[] = (appsData.apps ?? []).map((a: any) => ({
+    id:      a.id,
+    name:    a.spec?.name ?? a.id,
+    liveUrl: a.live_url ?? '',
+    status:  a.active_deployment?.phase ?? 'unknown',
+  }));
+
+  const vpcs: DoVpc[] = (vpcsData.vpcs ?? []).map((v: any) => ({
+    id:      v.id,
+    name:    v.name,
+    region:  v.region ?? '',
+    ipRange: v.ip_range ?? '',
+  }));
+
   const totalMonthlyCost = droplets.reduce((sum, d) => sum + d.monthlyCost, 0);
 
-  return { droplets, firewalls, loadBalancers, domains, totalMonthlyCost };
+  return { droplets, firewalls, loadBalancers, domains, databases, apps, vpcs, totalMonthlyCost };
 }

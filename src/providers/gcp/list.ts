@@ -1,14 +1,19 @@
 import { gcpFetch, getProjectId } from "./api.js";
-import type { GcpInventory, GcpVM, GcpCloudSQL, GcpCloudRun, GcpCloudDNS } from "../../types/inventory.js";
+import type {
+  GcpInventory, GcpVM, GcpCloudSQL, GcpCloudRun, GcpCloudDNS,
+  GcpPubSubTopic, GcpSecret,
+} from "../../types/inventory.js";
 
 export async function listGcpResources(): Promise<GcpInventory> {
   const project = getProjectId();
 
-  const [vmRes, sqlRes, runRes, dnsRes] = await Promise.all([
+  const [vmRes, sqlRes, runRes, dnsRes, pubsubRes, secretsRes] = await Promise.all([
     gcpFetch("https://compute.googleapis.com", `/compute/v1/projects/${project}/aggregated/instances`).catch(() => ({})),
     gcpFetch("https://sqladmin.googleapis.com", `/v1/projects/${project}/instances`).catch(() => ({})),
     gcpFetch("https://run.googleapis.com", `/v2/projects/${project}/locations/-/services`).catch(() => ({})),
     gcpFetch("https://dns.googleapis.com", `/dns/v1/projects/${project}/managedZones`).catch(() => ({})),
+    gcpFetch("https://pubsub.googleapis.com", `/v1/projects/${project}/topics`).catch(() => ({})),
+    gcpFetch("https://secretmanager.googleapis.com", `/v1/projects/${project}/secrets`).catch(() => ({})),
   ]);
 
   // 1. Map VM Instances
@@ -59,5 +64,15 @@ export async function listGcpResources(): Promise<GcpInventory> {
     dnsName: z.dnsName ?? "",
   }));
 
-  return { vms, rdsInstances, distributions, hostedZones };
+  // 5. Map Pub/Sub Topics
+  const pubSubTopics: GcpPubSubTopic[] = (pubsubRes.topics ?? []).map((t: any) => ({
+    name: t.name.split("/").pop() ?? t.name,
+  }));
+
+  // 6. Map Secret Manager Secrets
+  const secrets: GcpSecret[] = (secretsRes.secrets ?? []).map((s: any) => ({
+    name: s.name.split("/").pop() ?? s.name,
+  }));
+
+  return { vms, rdsInstances, distributions, hostedZones, pubSubTopics, secrets };
 }

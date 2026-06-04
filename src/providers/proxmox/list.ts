@@ -1,5 +1,5 @@
 import { getPMClient } from './api.js';
-import type { ProxmoxInventory, ProxmoxVm } from '../../types/inventory.js';
+import type { ProxmoxInventory, ProxmoxVm, ProxmoxTemplate } from '../../types/inventory.js';
 
 export async function listProxmoxVMs(): Promise<ProxmoxInventory> {
   const resources = await getPMClient().get<any[]>('/cluster/resources?type=vm');
@@ -13,5 +13,12 @@ export async function listProxmoxVMs(): Promise<ProxmoxInventory> {
       maxmem:  r.maxmem  ?? 0,
       maxdisk: r.maxdisk ?? 0,
     }));
-  return { vms };
+  const templates: ProxmoxTemplate[] = (resources ?? [])
+    .filter((r) => r.template === 1)
+    .map((r) => ({
+      name: r.name,
+      vmid: r.vmid,
+      node: r.node,
+    }));
+  return { vms, templates };
 }

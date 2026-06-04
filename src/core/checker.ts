@@ -73,6 +73,18 @@ function renderProxmox(inv: ProxmoxInventory): void {
       },
     ],
   );
+
+  if (inv.templates.length > 0) {
+    printSection(
+      `Proxmox Templates  ·  ${inv.templates.length}`,
+      inv.templates,
+      [
+        { header: "Name", width: 32, render: (t) => t.name },
+        { header: "VMID", width: 6, render: (t) => String(t.vmid) },
+        { header: "Node", width: 12, render: (t) => t.node },
+      ],
+    );
+  }
 }
 
 function renderDo(inv: DoInventory): void {
@@ -129,9 +141,61 @@ function renderDo(inv: DoInventory): void {
       ],
     );
   }
+
+  if (inv.databases.length > 0) {
+    printSection(
+      `DigitalOcean Databases  ·  ${inv.databases.length}`,
+      inv.databases,
+      [
+        { header: "Name", width: 24, render: (d) => d.name },
+        { header: "Engine", width: 14, render: (d) => d.engine },
+        { header: "Region", width: 8, render: (d) => d.region },
+        { header: "Status", width: 10, render: (d) => d.status },
+        { header: "Nodes", width: 5, render: (d) => String(d.nodeCount) },
+      ],
+    );
+  }
+
+  if (inv.apps.length > 0) {
+    printSection(
+      `DigitalOcean Apps  ·  ${inv.apps.length}`,
+      inv.apps,
+      [
+        { header: "Name", width: 24, render: (a) => a.name },
+        { header: "Status", width: 12, render: (a) => a.status },
+        { header: "URL", width: 40, render: (a) => a.liveUrl || "-" },
+      ],
+    );
+  }
+
+  if (inv.vpcs.length > 0) {
+    printSection(
+      `DigitalOcean VPCs  ·  ${inv.vpcs.length}`,
+      inv.vpcs,
+      [
+        { header: "Name", width: 24, render: (v) => v.name },
+        { header: "Region", width: 8, render: (v) => v.region },
+        { header: "IP Range", width: 20, render: (v) => v.ipRange },
+      ],
+    );
+  }
 }
 
 function renderAws(inv: AwsInventory): void {
+  if (inv.ec2Instances.length > 0) {
+    printSection(
+      `AWS EC2  ·  ${inv.ec2Instances.length} instances  ·  ${inv.region}`,
+      inv.ec2Instances,
+      [
+        { header: "Name", width: 24, render: (i) => i.name },
+        { header: "ID", width: 20, render: (i) => i.id },
+        { header: "Type", width: 14, render: (i) => i.type },
+        { header: "State", width: 10, render: (i) => i.state },
+        { header: "IP", width: 15, render: (i) => i.publicIp ?? "-" },
+      ],
+    );
+  }
+
   if (inv.distributions.length > 0) {
     printSection(
       `AWS CloudFront  ·  ${inv.distributions.length}  ·  ${inv.region}`,
@@ -241,6 +305,26 @@ function renderGcp(inv: GcpInventory): void {
       ],
     );
   }
+
+  if (inv.pubSubTopics.length > 0) {
+    printSection(
+      `GCP Pub/Sub Topics  ·  ${inv.pubSubTopics.length}`,
+      inv.pubSubTopics,
+      [
+        { header: "Topic", width: 52, render: (t) => t.name },
+      ],
+    );
+  }
+
+  if (inv.secrets.length > 0) {
+    printSection(
+      `GCP Secret Manager  ·  ${inv.secrets.length}`,
+      inv.secrets,
+      [
+        { header: "Secret", width: 52, render: (s) => s.name },
+      ],
+    );
+  }
 }
 
 function renderFirebase(inv: FirebaseInventory): void {
@@ -263,6 +347,51 @@ function renderFirebase(inv: FirebaseInventory): void {
         { header: "Region", width: 12, render: (f) => f.region },
         { header: "Entry Point", width: 18, render: (f) => f.entryPoint },
         { header: "Runtime", width: 10, render: (f) => f.runtime },
+      ],
+    );
+  }
+
+  if (inv.firestoreDbs.length > 0) {
+    printSection(
+      `Firebase Firestore  ·  ${inv.firestoreDbs.length}`,
+      inv.firestoreDbs,
+      [
+        { header: "Database", width: 24, render: (d) => d.name },
+        { header: "Type", width: 20, render: (d) => d.type },
+        { header: "State", width: 10, render: (d) => d.state },
+      ],
+    );
+  }
+
+  if (inv.storageBuckets.length > 0) {
+    printSection(
+      `Firebase Storage  ·  ${inv.storageBuckets.length}`,
+      inv.storageBuckets,
+      [
+        { header: "Bucket", width: 40, render: (b) => b.name },
+        { header: "Location", width: 12, render: (b) => b.location },
+      ],
+    );
+  }
+
+  if (inv.authProviders.length > 0) {
+    printSection(
+      `Firebase Auth  ·  ${inv.authProviders.length} provider${inv.authProviders.length !== 1 ? "s" : ""}`,
+      inv.authProviders,
+      [
+        { header: "Provider", width: 32, render: (p) => p.providerId },
+      ],
+    );
+  }
+
+  if (inv.remoteConfig) {
+    const rc = inv.remoteConfig;
+    printSection(
+      `Firebase RemoteConfig  ·  v${rc.version}`,
+      [rc],
+      [
+        { header: "Parameters", width: 10, render: (r) => String(r.parameterCount) },
+        { header: "Version", width: 12, render: (r) => r.version },
       ],
     );
   }

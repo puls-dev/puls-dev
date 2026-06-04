@@ -128,6 +128,12 @@ function createGcpOfflineMock(base: string, path: string, opts: RequestInit): an
     };
   }
   if (path.includes("/instances")) {
+    // Specific instance GET (discovery path: /instances/{name}) — return not-found so
+    // builders plan creation rather than treating the mock VM as already existing
+    const afterInstances = path.split("/instances")[1] ?? "";
+    if (afterInstances.startsWith("/") && afterInstances.length > 1) {
+      throw new Error(`GCP API GET ${path} → 404: Not Found`);
+    }
     return {
       status: "RUNNING",
       id: "mock-gcp-instance-id",

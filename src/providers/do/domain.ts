@@ -151,7 +151,7 @@ export class DomainBuilder extends BaseBuilder {
         const res = await api.get<{ domain_records: any[] }>(
           `/domains/${this.domainName}/records?per_page=200`
         );
-        existingRecords = res.domain_records;
+        existingRecords = res.domain_records ?? [];
       } catch {
         existingRecords = [];
       }

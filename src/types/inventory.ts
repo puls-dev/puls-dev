@@ -9,8 +9,15 @@ export interface ProxmoxVm {
   maxdisk: number; // bytes
 }
 
+export interface ProxmoxTemplate {
+  name: string;
+  vmid: number;
+  node: string;
+}
+
 export interface ProxmoxInventory {
   vms: ProxmoxVm[];
+  templates: ProxmoxTemplate[];
 }
 
 // ─── DigitalOcean ─────────────────────────────────────────────────────────────
@@ -44,11 +51,37 @@ export interface DoDomain {
   ttl: number;
 }
 
+export interface DoDatabase {
+  id: string;
+  name: string;
+  engine: string;
+  region: string;
+  status: string;
+  nodeCount: number;
+}
+
+export interface DoApp {
+  id: string;
+  name: string;
+  liveUrl: string;
+  status: string;
+}
+
+export interface DoVpc {
+  id: string;
+  name: string;
+  region: string;
+  ipRange: string;
+}
+
 export interface DoInventory {
   droplets: DoDroplet[];
   firewalls: DoFirewall[];
   loadBalancers: DoLoadBalancer[];
   domains: DoDomain[];
+  databases: DoDatabase[];
+  apps: DoApp[];
+  vpcs: DoVpc[];
   totalMonthlyCost: number;
 }
 
@@ -85,6 +118,14 @@ export interface AwsHostedZone {
   recordCount: number;
 }
 
+export interface AwsEc2Instance {
+  id: string;
+  name: string;
+  type: string;
+  state: string;
+  publicIp?: string;
+}
+
 export interface AwsInventory {
   region: string;
   distributions: AwsDistribution[];
@@ -92,6 +133,7 @@ export interface AwsInventory {
   lambdas: AwsLambdaFn[];
   rdsInstances: AwsRdsInstance[];
   hostedZones: AwsHostedZone[];
+  ec2Instances: AwsEc2Instance[];
 }
 
 // ─── GCP ──────────────────────────────────────────────────────────────────────
@@ -122,11 +164,21 @@ export interface GcpCloudDNS {
   dnsName: string;
 }
 
+export interface GcpPubSubTopic {
+  name: string;
+}
+
+export interface GcpSecret {
+  name: string;
+}
+
 export interface GcpInventory {
   vms: GcpVM[];
   rdsInstances: GcpCloudSQL[];
   distributions: GcpCloudRun[];
   hostedZones: GcpCloudDNS[];
+  pubSubTopics: GcpPubSubTopic[];
+  secrets: GcpSecret[];
 }
 
 // ─── Firebase ─────────────────────────────────────────────────────────────────
@@ -142,9 +194,33 @@ export interface FirebaseFunction {
   runtime: string;
 }
 
+export interface FirebaseFirestoreDb {
+  name: string;
+  type: string;
+  state: string;
+}
+
+export interface FirebaseStorageBucket {
+  name: string;
+  location: string;
+}
+
+export interface FirebaseAuthProvider {
+  providerId: string;
+}
+
+export interface FirebaseRemoteConfig {
+  parameterCount: number;
+  version: string;
+}
+
 export interface FirebaseInventory {
   hostingSites: FirebaseHosting[];
   functions: FirebaseFunction[];
+  firestoreDbs: FirebaseFirestoreDb[];
+  storageBuckets: FirebaseStorageBucket[];
+  authProviders: FirebaseAuthProvider[];
+  remoteConfig?: FirebaseRemoteConfig;
 }
 
 // ─── Combined ─────────────────────────────────────────────────────────────────

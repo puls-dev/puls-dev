@@ -63,6 +63,8 @@ function createAwsOfflineMock(command: any): any {
   const mockProxy: any = new Proxy({}, {
     get(target, prop: string) {
       if (prop === "then") return undefined;
+      // Pagination tokens must be undefined so discovery loops exit cleanly
+      if (prop === "NextToken" || prop === "NextMarker" || prop === "Marker" || prop === "ContinuationToken") return undefined;
       if (prop === "CertificateArn") return "arn:aws:acm:us-east-1:123456789012:certificate/mock-cert-uuid";
       if (prop === "HostedZoneId") return "Z2FDTNDATAQYW2";
       if (prop === "Id" || prop === "id") return "mock-id-12345";
