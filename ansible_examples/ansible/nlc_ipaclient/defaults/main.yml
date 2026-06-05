@@ -1,9 +1,0 @@
-nlc_ipaclient_principal: admin
-nlc_ipaclient_realm: NOLIMIT.INT
-nlc_ipaclient_password: qwqwt6rNW5QbhKQkhDAMD
-nlc_ipaclient_server: ix-sto1-ipa01.nolimit.int
-nlc_ipaclient_domain: nolimit.int
-nlc_ipaclient_hostname: "{{ ansible_facts['hostname'] }}"
-nlc_ipaclient_ipaddress: "{{ ansible_facts['eth0']['ipv4']['address'] }}"
-nlc_ipaclient_server1: 10.8.10.233
-nlc_ipaclient_server2: 10.8.10.234

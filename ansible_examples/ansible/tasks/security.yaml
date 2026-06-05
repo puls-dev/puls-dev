@@ -1,4 +1,0 @@
----
-- name: Import nlc_default role
-  ansible.builtin.import_role:
-    name: nlc_default

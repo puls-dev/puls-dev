@@ -1,2 +1,0 @@
-# This file is managed by Ansible; changes may be overwritten
-%admin ALL=(ALL) NOPASSWD: ALL

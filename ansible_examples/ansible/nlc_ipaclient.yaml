@@ -1,6 +1,0 @@
----
-- name: Setup IPA Client role
-  hosts: all
-  become: true
-  roles:
-    - nlc_ipaclient
