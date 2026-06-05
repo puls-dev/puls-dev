@@ -89,6 +89,15 @@ export class GCPVMBuilder extends BaseBuilder {
     return this;
   }
 
+  getDiff(existing: any) {
+    const diffs = [];
+    const liveMachineType = existing.machineType?.split("/").pop();
+    if (liveMachineType !== undefined && liveMachineType !== this._machineType) {
+      diffs.push({ field: "machineType", declared: this._machineType, live: liveMachineType });
+    }
+    return diffs;
+  }
+
   protected async checkPort(ip: string, port: number): Promise<boolean> {
     return checkPort(ip, port);
   }

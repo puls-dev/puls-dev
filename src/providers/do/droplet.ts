@@ -119,6 +119,17 @@ export class DropletBuilder extends BaseBuilder {
     return this;
   }
 
+  getDiff(existing: any) {
+    const diffs = [];
+    if (existing.size_slug !== this.config.size) {
+      diffs.push({ field: "size", declared: this.config.size, live: existing.size_slug });
+    }
+    if (existing.region?.slug !== this.config.region) {
+      diffs.push({ field: "region", declared: this.config.region, live: existing.region?.slug });
+    }
+    return diffs;
+  }
+
   protected async checkPort(ip: string, port: number): Promise<boolean> {
     return checkPort(ip, port);
   }

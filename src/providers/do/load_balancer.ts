@@ -139,6 +139,14 @@ export class LoadBalancerBuilder extends BaseBuilder {
     return match.id;
   }
 
+  getDiff(existing: any) {
+    const diffs = [];
+    if (existing.region?.slug !== this._region) {
+      diffs.push({ field: "region", declared: this._region, live: existing.region?.slug });
+    }
+    return diffs;
+  }
+
   async deploy() {
     const dryRun = this.isDryRunActive();
     const existing = await this.discoveryPromise;

@@ -1,0 +1,119 @@
+name: 'Puls'
+description: 'Run a Puls infrastructure-as-code command and optionally post the output as a PR comment.'
+author: 'puls-dev'
+
+branding:
+  icon: 'zap'
+  color: 'blue'
+
+inputs:
+  command:
+    description: 'Command to run: plan, deploy, destroy, diff'
+    required: false
+    default: 'plan'
+  stack-file:
+    description: 'Path to the stack TypeScript file (e.g. infra/production.ts)'
+    required: true
+  node-version:
+    description: 'Node.js version'
+    required: false
+    default: '20'
+  post-comment:
+    description: 'Post plan/diff output as a PR comment. Requires GITHUB_TOKEN in env.'
+    required: false
+    default: 'true'
+  fail-on-drift:
+    description: 'Exit with code 1 when drift is detected (diff command only)'
+    required: false
+    default: 'false'
+
+outputs:
+  has-drift:
+    description: 'true if drift was detected (diff command only)'
+    value: ${{ steps.run-puls.outputs.has-drift }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Run puls ${{ inputs.command }}
+      id: run-puls
+      shell: bash
+      run: |
+        FAIL_FLAG=""
+        if [[ "${{ inputs.fail-on-drift }}" == "true" ]]; then
+          FAIL_FLAG="--fail-on-drift"
+        fi
+
+        set +e
+        OUTPUT=$(npx puls ${{ inputs.command }} ${{ inputs.stack-file }} $FAIL_FLAG 2>&1)
+        EXIT_CODE=$?
+        set -e
+
+        echo "$OUTPUT"
+
+        # Expose output for downstream steps
+        {
+          echo "output<<PULS_EOF"
+          echo "$OUTPUT"
+          echo "PULS_EOF"
+        } >> "$GITHUB_OUTPUT"
+
+        if [[ $EXIT_CODE -ne 0 && "${{ inputs.fail-on-drift }}" == "true" ]]; then
+          echo "has-drift=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "has-drift=false" >> "$GITHUB_OUTPUT"
+        fi
+
+        exit $EXIT_CODE
+
+    - name: Post PR comment
+      # Only post on pull_request events when post-comment is enabled
+      if: >
+        inputs.post-comment == 'true' &&
+        (inputs.command == 'plan' || inputs.command == 'diff') &&
+        github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+      run: |
+        MARKER="<!-- puls-action: ${{ inputs.stack-file }} -->"
+        COMMAND="${{ inputs.command }}"
+        OUTPUT="${{ steps.run-puls.outputs.output }}"
+        PR_NUMBER="${{ github.event.pull_request.number }}"
+        REPO="${{ github.repository }}"
+
+        # Build comment body
+        BODY="${MARKER}
+        ## Puls \`${COMMAND}\` — \`${{ inputs.stack-file }}\`
+
+        \`\`\`
+        ${OUTPUT}
+        \`\`\`
+
+        *Run by [\`${{ github.actor }}\`](https://github.com/${{ github.actor }}) on commit \`${{ github.sha }}\`*"
+
+        # Delete any previous comment for this stack file on this PR
+        EXISTING_ID=$(gh api \
+          "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+          --jq ".[] | select(.body | startswith(\"${MARKER}\")) | .id" \
+          2>/dev/null | head -1)
+
+        if [[ -n "$EXISTING_ID" ]]; then
+          gh api --method DELETE "repos/${REPO}/issues/comments/${EXISTING_ID}" > /dev/null 2>&1 || true
+        fi
+
+        # Post new comment
+        gh pr comment "$PR_NUMBER" \
+          --repo "$REPO" \
+          --body "$BODY"

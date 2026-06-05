@@ -38,12 +38,19 @@ class MyFirstStack extends Stack {
 
 ## The `puls` CLI
 
-`puls-dev` ships a `puls` binary that gives you three commands without ever editing source:
+`puls-dev` ships a `puls` binary. Run the one-time shell setup so you never need `npx` again:
 
 ```bash
-puls plan    my-first-stack.ts   # dry-run — prints what would change, no API writes
+npx puls install-shell
+```
+
+This creates a tiny launcher at `~/.puls/bin/puls` and adds it to your PATH in `~/.zshrc` / `~/.bashrc` / `~/.config/fish/config.fish`. After sourcing your shell config (or opening a new terminal), `puls` is available everywhere:
+
+```bash
+puls plan    my-first-stack.ts   # dry-run - prints what would change, no API writes
 puls deploy  my-first-stack.ts   # apply the stack
 puls destroy my-first-stack.ts   # tear down the stack
+puls diff    my-first-stack.ts   # compare declared intent vs live cloud state
 ```
 
 **Always run `plan` first.** It activates dry-run mode automatically regardless of what `dryRun` is set to in your decorator.
@@ -51,14 +58,19 @@ puls destroy my-first-stack.ts   # tear down the stack
 Additional flags:
 
 ```bash
-puls deploy  my-stack.ts --parallel   # enable parallel resource execution
-puls deploy  my-stack.ts --dry-run    # force dry-run on any command
+puls deploy  my-stack.ts --parallel        # enable parallel resource execution
+puls deploy  my-stack.ts --dry-run         # force dry-run on any command
+puls diff    my-stack.ts --fail-on-drift   # exit 1 if any resource has drifted
 puls --version
 puls --help
 ```
 
+To remove the shell integration: `puls uninstall-shell`
+
 > **Note:** `puls` requires [tsx](https://github.com/privatenumber/tsx) to execute TypeScript files.
 > It is installed automatically as a dev dependency: `npm install --save-dev tsx`
+>
+> In CI pipelines always use `npx puls` — `install-shell` is for local development only.
 
 ### Running without the CLI
 

@@ -576,6 +576,60 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="resource-adoption/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resource Adoption
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="drift-detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Drift Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -590,10 +644,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
         
           
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
             
   
   
@@ -611,8 +665,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -961,7 +1015,7 @@
 </tr>
 <tr>
 <td><strong>Proxmox</strong></td>
-<td>VM (clone, cloud-init, provision, immutable replace)</td>
+<td>VM (clone, cloud-init, provision, cluster-aware node selection, replace)</td>
 </tr>
 <tr>
 <td><strong>DigitalOcean</strong></td>
@@ -969,7 +1023,11 @@
 </tr>
 <tr>
 <td><strong>Firebase</strong></td>
-<td>Hosting</td>
+<td>Hosting, Functions, Firestore (Indexes &amp; Rules), Storage (Rules/CORS), Auth, Remote Config, App Check</td>
+</tr>
+<tr>
+<td><strong>Google Cloud</strong></td>
+<td>Cloud Run, Cloud SQL, Secret Manager, Pub/Sub, Cloud DNS, IAM (Service Accounts &amp; Bindings)</td>
 </tr>
 </tbody>
 </table>
@@ -1017,7 +1075,7 @@
 <h2 id="install">Install</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>npm<span class="w"> </span>install<span class="w"> </span>puls-dev
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env<span class="w">  </span><span class="c1"># fill in your credentials</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>npx<span class="w"> </span>tsx<span class="w"> </span>your-stack.ts
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>npx<span class="w"> </span>puls<span class="w"> </span>deploy<span class="w"> </span>your-stack.ts
 </code></pre></div>
 <p>Requires Node 20+.</p>
 

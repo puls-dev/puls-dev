@@ -93,6 +93,14 @@ export class EC2VMBuilder extends BaseBuilder {
     return this;
   }
 
+  getDiff(existing: any) {
+    const diffs = [];
+    if (existing.InstanceType !== this._instanceType) {
+      diffs.push({ field: "instanceType", declared: this._instanceType, live: existing.InstanceType });
+    }
+    return diffs;
+  }
+
   protected async checkPort(ip: string, port: number): Promise<boolean> {
     return checkPort(ip, port);
   }

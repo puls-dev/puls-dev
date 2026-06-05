@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { installShell, uninstallShell } from "./install-shell.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,20 +33,26 @@ function getVersion(): string {
 
 const HELP = `
 Usage:
-  puls plan    <file>   Dry-run the stack — prints what would change, no API writes
-  puls deploy  <file>   Deploy the stack
-  puls destroy <file>   Destroy the stack
+  puls plan             <file>   Dry-run the stack - prints what would change, no API writes
+  puls deploy           <file>   Deploy the stack
+  puls destroy          <file>   Destroy the stack
+  puls diff             <file>   Compare declared intent against live cloud state
+  puls install-shell             Add puls to your shell so you never need npx again
+  puls uninstall-shell           Remove the puls shell integration
 
 Options:
-  --parallel   Enable parallel resource execution
-  --dry-run    Force dry-run mode (alias: same as plan)
-  --version    Print version and exit
-  --help       Print this help and exit
+  --parallel       Enable parallel resource execution
+  --dry-run        Force dry-run mode (alias: same as plan)
+  --fail-on-drift  Exit with code 1 if drift is detected (diff command only)
+  --version        Print version and exit
+  --help           Print this help and exit
 
 Examples:
+  npx puls install-shell         # one-time setup — then just use "puls" directly
   puls plan    infra/staging.ts
   puls deploy  infra/staging.ts --parallel
   puls destroy infra/staging.ts
+  puls diff    infra/staging.ts --fail-on-drift
 `.trim();
 
 let parsed: ReturnType<typeof parseArgs>;
@@ -53,10 +60,11 @@ try {
   parsed = parseArgs({
     args: process.argv.slice(2),
     options: {
-      parallel:  { type: "boolean" },
+      parallel: { type: "boolean" },
       "dry-run": { type: "boolean" },
-      version:   { type: "boolean", short: "v" },
-      help:      { type: "boolean", short: "h" },
+      "fail-on-drift": { type: "boolean" },
+      version: { type: "boolean", short: "v" },
+      help: { type: "boolean", short: "h" },
     },
     allowPositionals: true,
     strict: true,
@@ -81,13 +89,22 @@ if (values.help || positionals.length === 0) {
 
 const [command, userFile] = positionals;
 
-const COMMANDS = ["plan", "deploy", "destroy"] as const;
+const COMMANDS = ["plan", "deploy", "destroy", "diff", "install-shell", "uninstall-shell"] as const;
 type Command = (typeof COMMANDS)[number];
 
 if (!COMMANDS.includes(command as Command)) {
-  console.error(`Error: Unknown command "${command}". Expected: plan, deploy, or destroy.`);
-  console.error('Run "puls --help" for usage.');
+  console.error(`Error: Unknown command "${command}". Run "puls --help" for usage.`);
   process.exit(1);
+}
+
+// Shell management commands run directly — no stack file needed
+if (command === "install-shell") {
+  installShell();
+  process.exit(0);
+}
+if (command === "uninstall-shell") {
+  uninstallShell();
+  process.exit(0);
 }
 
 if (!userFile) {
@@ -111,8 +128,16 @@ if (command === "destroy") {
   childEnv.PULS_MODE = "destroy";
 }
 
+if (command === "diff") {
+  childEnv.PULS_MODE = "diff";
+}
+
 if (values.parallel) {
   childEnv.PULS_PARALLEL = "true";
+}
+
+if (values["fail-on-drift"]) {
+  childEnv.PULS_FAIL_ON_DRIFT = "true";
 }
 
 const tsxBin = findTsx() ?? "tsx";

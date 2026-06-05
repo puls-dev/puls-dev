@@ -33,6 +33,15 @@ export class VPCBuilder extends BaseBuilder {
     return this;
   }
 
+  getDiff(existing: any) {
+    const diffs = [];
+    // region and ip_range are immutable after creation
+    if (this._description !== undefined && existing.description !== this._description) {
+      diffs.push({ field: "description", declared: this._description, live: existing.description });
+    }
+    return diffs;
+  }
+
   private async discoverVpc(name: string): Promise<any> {
     try {
       const api = getDoApi();

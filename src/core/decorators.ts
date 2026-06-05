@@ -43,7 +43,7 @@ function applyConfig(opts: ProviderOpts) {
       },
     });
   }
-  // CLI env-var overrides — applied last so `puls plan/destroy/--parallel` wins over decorator options
+  // CLI env-var overrides - applied last so `puls plan/destroy/--parallel` wins over decorator options
   if (process.env.PULS_DRY_RUN === "true") Config.set({ dryRun: true });
   if (process.env.PULS_PARALLEL === "true") Config.set({ parallel: true });
 }
@@ -113,6 +113,13 @@ export function Deploy(opts: ProviderOpts = {}) {
           Stack._register(constructor, instance, r);
           if (mode === "destroy") {
             if (typeof instance.destroy === "function") await instance.destroy();
+          } else if (mode === "diff") {
+            if (typeof instance.diff === "function") {
+              const result = await instance.diff();
+              if (process.env.PULS_FAIL_ON_DRIFT === "true" && result?.hasDrift) {
+                process.exitCode = 1;
+              }
+            }
           } else {
             if (typeof instance.deploy === "function") await instance.deploy();
           }
@@ -125,6 +132,13 @@ export function Deploy(opts: ProviderOpts = {}) {
       Promise.resolve().then(async () => {
         if (mode === "destroy") {
           if (typeof instance.destroy === "function") await instance.destroy();
+        } else if (mode === "diff") {
+          if (typeof instance.diff === "function") {
+            const result = await instance.diff();
+            if (process.env.PULS_FAIL_ON_DRIFT === "true" && result?.hasDrift) {
+              process.exitCode = 1;
+            }
+          }
         } else {
           if (typeof instance.deploy === "function") await instance.deploy();
         }

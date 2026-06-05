@@ -37,9 +37,10 @@ Running the same stack twice is always safe. Resources that already match are sk
 | Provider | Resources |
 |----------|-----------|
 | **AWS** | Route53, ACM, CloudFront, S3, Lambda, API Gateway, ECS/Fargate, RDS, SQS |
-| **Proxmox** | VM (clone, cloud-init, provision, immutable replace) |
+| **Proxmox** | VM (clone, cloud-init, provision, cluster-aware node selection, replace) |
 | **DigitalOcean** | Droplet, Domain, Firewall, Certificate, LoadBalancer |
-| **Firebase** | Hosting |
+| **Firebase** | Hosting, Functions, Firestore (Indexes & Rules), Storage (Rules/CORS), Auth, Remote Config, App Check |
+| **Google Cloud** | Cloud Run, Cloud SQL, Secret Manager, Pub/Sub, Cloud DNS, IAM (Service Accounts & Bindings) |
 
 ---
 
@@ -95,7 +96,7 @@ Have questions or want to contribute? Join the conversation on Gitter|Matrix: **
 ```bash
 npm install puls-dev
 cp .env.example .env  # fill in your credentials
-npx tsx your-stack.ts
+npx puls deploy your-stack.ts
 ```
 
 Requires Node 20+.

@@ -2,70 +2,82 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://pulsdev.io/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/concepts/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/contributing/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/decorators/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
+    </url>
+    <url>
+         <loc>https://pulsdev.io/drift-detection/</loc>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/getting-started/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
+    </url>
+    <url>
+         <loc>https://pulsdev.io/github-actions/</loc>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/hooks/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/multiregion/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/parallel-deployment/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
+    </url>
+    <url>
+         <loc>https://pulsdev.io/resource-adoption/</loc>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/roadmap/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/secrets/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/stack-outputs/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/why/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/providers/aws/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/providers/digitalocean/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/providers/firebase/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/providers/gcp/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/providers/proxmox/</loc>
-         <lastmod>2026-06-04</lastmod>
+         <lastmod>2026-06-05</lastmod>
     </url>
 </urlset>

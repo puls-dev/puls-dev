@@ -3,6 +3,7 @@ import { BaseBuilder } from "./resource.js";
 import { Config } from "./config.js";
 import { resourceContextStorage } from "./context.js";
 import { resolvedSecrets } from "./secret.js";
+import type { StackDiff, ResourceDiff, ResourceStatus } from "../types/diff.js";
 
 async function withRedactedConsole<T>(
   secrets: Set<string>,
@@ -30,7 +31,7 @@ async function withRedactedConsole<T>(
           (s) => s && s.length >= 3 && str.includes(s),
         );
         if (hasSecret) return redact(str);
-      } catch {}
+      } catch { }
       return arg;
     });
     originalLog(...redactedArgs);
@@ -130,6 +131,43 @@ function printOutputs(stackName: string, outputs: Record<string, any>) {
   console.log(`  └${line}┘`);
 }
 
+function printDiff(diff: StackDiff): void {
+  console.log(`\n🔍 Diff: ${diff.stackName}`);
+
+  const propWidth = Math.max(...diff.resources.map((r) => r.prop.length), 4);
+  const nameWidth = Math.max(...diff.resources.map((r) => r.resource.length), 8);
+
+  for (const r of diff.resources) {
+    const prop = r.prop.padEnd(propWidth);
+    const name = r.resource.padEnd(nameWidth);
+    if (r.status === "in-sync") {
+      console.log(`   ${prop}  ${name}  ✅ in-sync`);
+    } else if (r.status === "adopted") {
+      console.log(`   ${prop}  ${name}  🔗 adopted`);
+    } else if (r.status === "missing") {
+      console.log(`   ${prop}  ${name}  ❌ missing  (will create)`);
+    } else {
+      console.log(`   ${prop}  ${name}  ⚠️  drift`);
+      const fieldWidth = Math.max(...r.changes.map((c) => String(c.field).length), 8);
+      for (const c of r.changes) {
+        const field = String(c.field).padEnd(fieldWidth);
+        console.log(`      └─ ${field}  ${String(c.declared)}  →  ${c.live}`);
+      }
+    }
+  }
+
+  const driftCount = diff.resources.filter((r) => r.status === "drift").length;
+  const missingCount = diff.resources.filter((r) => r.status === "missing").length;
+  if (driftCount === 0 && missingCount === 0) {
+    console.log(`\n   ✅ All ${diff.resources.length} resources are in sync.`);
+  } else {
+    const parts: string[] = [];
+    if (driftCount > 0) parts.push(`${driftCount} drifted`);
+    if (missingCount > 0) parts.push(`${missingCount} missing`);
+    console.log(`\n   ⚠️  ${parts.join(", ")} out of ${diff.resources.length} resources.`);
+  }
+}
+
 export abstract class Stack {
   /** @internal - called by @Deploy to register the instance for cross-stack references. */
   static _register(cls: Function, instance: Stack, region?: string): void {
@@ -160,6 +198,58 @@ export abstract class Stack {
         `Stack "${cls.name}" ${region ? `for region "${region}" ` : ""}is not registered. Make sure it is decorated with @Deploy and its module is imported before referencing it.`,
       );
     return instance as T;
+  }
+
+  /**
+   * Compares every declared resource against its live cloud state without
+   * making any API writes. Returns a structured `StackDiff` and prints a
+   * formatted report to the console.
+   *
+   * Field-level drift is surfaced for providers that implement `getDiff()`.
+   * Resources with no `getDiff()` override show only existence status
+   * (missing / in-sync / adopted).
+   */
+  async diff(): Promise<StackDiff> {
+    const props = Object.getOwnPropertyNames(this);
+    const entries: { prop: string; resource: BaseBuilder }[] = [];
+
+    for (const prop of props) {
+      const val = (this as Record<string, unknown>)[prop];
+      if (val instanceof BaseBuilder) {
+        entries.push({ prop, resource: val });
+      } else if (Array.isArray(val)) {
+        for (const item of val) {
+          if (item instanceof BaseBuilder) {
+            entries.push({ prop, resource: item });
+          }
+        }
+      }
+    }
+
+    const resources: ResourceDiff[] = [];
+
+    for (const { prop, resource } of entries) {
+      const existing = await resource.discoveryPromise;
+      let status: ResourceStatus;
+      let changes = resource.getDiff(existing ?? {});
+
+      if (!existing) {
+        status = "missing";
+        changes = [];
+      } else if ((existing as any)._adopted === true) {
+        status = "adopted";
+        changes = [];
+      } else {
+        status = changes.length > 0 ? "drift" : "in-sync";
+      }
+
+      resources.push({ prop, resource: resource.name, status, changes });
+    }
+
+    const hasDrift = resources.some((r) => r.status === "drift" || r.status === "missing");
+    const result: StackDiff = { stackName: this.constructor.name, resources, hasDrift };
+    printDiff(result);
+    return result;
   }
 
   async deploy(): Promise<Record<string, any>> {
@@ -224,7 +314,7 @@ export abstract class Stack {
             resource._deployPromise = (async () => {
               try {
                 // Yield so the map() loop finishes assigning all _deployPromise values before
-                // any task checks its dependencies — a dependency that appears later in the list
+                // any task checks its dependencies - a dependency that appears later in the list
                 // would otherwise have an undefined _deployPromise and be silently skipped.
                 await Promise.resolve();
                 if (controller.signal.aborted) {

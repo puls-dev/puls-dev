@@ -1,10 +1,12 @@
 import { Config } from "./config.js";
+import type { FieldDiff } from "../types/diff.js";
 
 export abstract class BaseBuilder {
   protected isProtected: boolean = false;
   protected localDryRun: boolean | null = null;
   protected discoveryPromise!: Promise<any>;
   protected sidecars: BaseBuilder[] = [];
+  protected _adoptedId: string | null = null;
   
   /** @internal */
   _deployPromise!: Promise<any>;
@@ -27,6 +29,59 @@ export abstract class BaseBuilder {
 
   protect() {
     this.isProtected = true;
+    return this;
+  }
+
+  /**
+   * Adopt an existing cloud resource by its provider ID, bringing it under
+   * Puls management without recreating it. If name-based discovery finds the
+   * resource, that result wins; adoptId only kicks in when discovery returns
+   * null (i.e. the resource was created outside this stack or with a different
+   * naming convention).
+   *
+   * Outputs that depend on live API response fields (e.g. `out.host`) won't be
+   * resolved automatically — chain `.adoptOutput(key, value)` for each one you
+   * need for cross-stack wiring.
+   */
+  adoptId(id: string) {
+    this._adoptedId = id;
+    const original = this.discoveryPromise;
+    this.discoveryPromise = original.then((found: any) => {
+      if (!found) {
+        (this as any).out?.id?.resolve?.(id);
+        return { id, status: "adopted", _adopted: true };
+      }
+      return found;
+    });
+    return this;
+  }
+
+  /**
+   * Pre-resolve a named output on this builder. Use alongside `adoptId` to
+   * supply known connection details (host, port, uri, etc.) so downstream
+   * resources can reference them before this builder deploys.
+   *
+   * @example
+   *   db = DO.Database("prod-db")
+   *     .adoptId("abc123")
+   *     .adoptOutput("host", "db.internal.example.com")
+   *     .adoptOutput("uri", "postgres://...");
+   */
+  /**
+   * Returns field-level differences between declared intent and live cloud state.
+   * Called by `Stack.diff()` for each resource that exists. Override in provider
+   * builders to surface meaningful drift fields. The default returns an empty array
+   * (no field-level diff available).
+   */
+  getDiff(_existing: any): FieldDiff[] {
+    return [];
+  }
+
+  adoptOutput(key: string, value: any) {
+    const out = (this as any).out;
+    if (typeof out?.[key]?.resolve === "function") {
+      out[key].resolve(value);
+    }
     return this;
   }
 
@@ -150,7 +205,8 @@ export abstract class BaseBuilder {
 
   async destroy(): Promise<any> {
     const dryRun = this.isDryRunActive();
-    console.log(`\n🗑️  Destroying "${this.name}"...`);
+    const adoptedSuffix = this._adoptedId ? ` [adopted id=${this._adoptedId}]` : "";
+    console.log(`\n🗑️  Destroying "${this.name}"${adoptedSuffix}...`);
     console.log(
       `   ✅ [${dryRun ? "PLAN" : "OK"}] Resource "${this.name}" marked for destruction.`,
     );

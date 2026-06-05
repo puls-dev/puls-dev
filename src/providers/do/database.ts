@@ -71,6 +71,26 @@ export class DatabaseBuilder extends BaseBuilder {
     return this;
   }
 
+  getDiff(existing: any) {
+    const diffs = [];
+    if (existing.engine !== this._engine) {
+      diffs.push({ field: "engine", declared: this._engine, live: existing.engine });
+    }
+    if (existing.version !== this._version) {
+      diffs.push({ field: "version", declared: this._version, live: existing.version });
+    }
+    if (existing.size !== this._size) {
+      diffs.push({ field: "size", declared: this._size, live: existing.size });
+    }
+    if (existing.region !== this._region) {
+      diffs.push({ field: "region", declared: this._region, live: existing.region });
+    }
+    if (existing.num_nodes !== this._nodes) {
+      diffs.push({ field: "nodes", declared: this._nodes, live: existing.num_nodes });
+    }
+    return diffs;
+  }
+
   private async discoverCluster(name: string): Promise<any> {
     try {
       const api = getDoApi();

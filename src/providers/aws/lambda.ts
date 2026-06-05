@@ -94,6 +94,31 @@ export class LambdaBuilder extends BaseBuilder {
     return this;
   }
 
+  getDiff(existing: any) {
+    const diffs = [];
+    if (existing.Runtime !== this._runtime) {
+      diffs.push({ field: "runtime", declared: this._runtime, live: existing.Runtime });
+    }
+    if (existing.Handler !== this._handler) {
+      diffs.push({ field: "handler", declared: this._handler, live: existing.Handler });
+    }
+    if (existing.MemorySize !== this._memory) {
+      diffs.push({ field: "memory", declared: `${this._memory} MB`, live: `${existing.MemorySize} MB` });
+    }
+    if (existing.Timeout !== this._timeout) {
+      diffs.push({ field: "timeout", declared: `${this._timeout}s`, live: `${existing.Timeout}s` });
+    }
+    const liveEnv = existing.Environment?.Variables ?? {};
+    const declaredKeys = Object.keys(this._env);
+    const liveKeys = Object.keys(liveEnv);
+    const allKeys = new Set([...declaredKeys, ...liveKeys]);
+    const envDrift = [...allKeys].filter((k) => String((this._env as any)[k]) !== String(liveEnv[k]));
+    if (envDrift.length > 0) {
+      diffs.push({ field: "env", declared: `${declaredKeys.length} vars`, live: `${liveKeys.length} vars (${envDrift.length} changed)` });
+    }
+    return diffs;
+  }
+
   private async ensureRole(): Promise<string> {
     if (this._roleBuilder) {
       return await this._roleBuilder.out.arn.get();

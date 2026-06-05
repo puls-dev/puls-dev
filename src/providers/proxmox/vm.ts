@@ -46,6 +46,9 @@ export class VMBuilder extends ProxmoxBaseBuilder {
         try {
           const config = await pm.get<any>(`/nodes/${match.node}/qemu/${match.vmid}/config`);
           match.description = config.description ?? "";
+          match.cfgCores = config.cores;
+          match.cfgMemory = config.memory;
+          match.cfgMachine = config.machine ?? "q35";
         } catch (err: any) {
           console.warn(`   ⚠️  Could not fetch VM config for ${match.vmid}: ${err.message}`);
           match.description = "";
@@ -110,6 +113,20 @@ export class VMBuilder extends ProxmoxBaseBuilder {
   forceConfigCheck() {
     this._forceConfigCheck = true;
     return this;
+  }
+
+  getDiff(existing: any) {
+    const diffs = [];
+    if (existing.cfgCores !== undefined && existing.cfgCores !== this._cores) {
+      diffs.push({ field: "cores", declared: this._cores, live: existing.cfgCores });
+    }
+    if (existing.cfgMemory !== undefined && existing.cfgMemory !== this._memory) {
+      diffs.push({ field: "memory", declared: `${this._memory} MB`, live: `${existing.cfgMemory} MB` });
+    }
+    if (existing.cfgMachine !== undefined && this._machine !== existing.cfgMachine) {
+      diffs.push({ field: "machine", declared: this._machine, live: existing.cfgMachine });
+    }
+    return diffs;
   }
 
   async deploy() {

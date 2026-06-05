@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://pulsdev.io/secrets/">
+        <link rel="canonical" href="https://pulsdev.io/resource-adoption/">
       
       
-        <link rel="prev" href="../hooks/">
+        <link rel="prev" href="../parallel-deployment/">
       
       
-        <link rel="next" href="../multiregion/">
+        <link rel="next" href="../drift-detection/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Secrets at Deploy Time - Pulsdev.io</title>
+        <title>Resource Adoption - Pulsdev.io</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#secrets-at-deploy-time" class="md-skip">
+        <a href="#resource-adoption" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Secrets at Deploy Time
+              Resource Adoption
             
           </span>
         </div>
@@ -393,37 +393,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Secrets at Deploy Time
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../secrets/" class="md-nav__link">
         
   
   
@@ -439,98 +412,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#the-secret-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The Secret API
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-to-use-secrets-in-stacks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How to Use Secrets in Stacks
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="How to Use Secrets in Stacks">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#example-dynamic-database-provisioning" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example: Dynamic Database Provisioning
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-secrets-behave-in-dry-run" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How Secrets Behave in Dry-Run
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-multiple-stacks-in-one-process" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running Multiple Stacks in One Process
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#zero-dependency-architecture" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Zero-Dependency Architecture
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -593,10 +474,37 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../resource-adoption/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resource Adoption
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -612,6 +520,81 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic usage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cross-stack-wiring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-stack wiring
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#behavior-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behavior reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full example
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -923,10 +906,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-secret-api" class="md-nav__link">
+  <a href="#the-problem" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Secret API
+        The problem
       
     </span>
   </a>
@@ -934,38 +917,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-use-secrets-in-stacks" class="md-nav__link">
+  <a href="#basic-usage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How to Use Secrets in Stacks
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="How to Use Secrets in Stacks">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#example-dynamic-database-provisioning" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example: Dynamic Database Provisioning
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-secrets-behave-in-dry-run" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How Secrets Behave in Dry-Run
+        Basic usage
       
     </span>
   </a>
@@ -973,10 +928,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-multiple-stacks-in-one-process" class="md-nav__link">
+  <a href="#cross-stack-wiring" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Running Multiple Stacks in One Process
+        Cross-stack wiring
       
     </span>
   </a>
@@ -984,10 +939,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#zero-dependency-architecture" class="md-nav__link">
+  <a href="#behavior-reference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Zero-Dependency Architecture
+        Behavior reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full example
       
     </span>
   </a>
@@ -1014,74 +980,84 @@
   
 
 
-<h1 id="secrets-at-deploy-time">Secrets at Deploy Time</h1>
-<p>In Puls, managing sensitive credentials (like API keys, private tokens, and database passwords) should be secure and friction-free. Rather than hardcoding credentials into committed git files or managing complex, out-of-sync local <code>.env</code> files, Puls supports <strong>Secrets at Deploy Time</strong>.</p>
-<p>With this feature, you can dynamically retrieve secrets from secure cloud vaults <em>during the deployment phase</em> and pass them directly into resource parameters.</p>
+<h1 id="resource-adoption">Resource Adoption</h1>
+<p>Bring existing cloud infrastructure under Puls management without recreating it.</p>
 <hr />
-<h2 id="the-secret-api">The <code>Secret</code> API</h2>
-<p>Puls provides a universal <code>Secret</code> class that acts as a secure, lazy wrapper. It supports multiple secret stores out of the box:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Secret</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1">// 1. Local environment variable (with optional fallback)</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kd">const</span><span class="w"> </span><span class="nx">stripeKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Secret</span><span class="p">.</span><span class="nx">env</span><span class="p">(</span><span class="s2">&quot;STRIPE_API_KEY&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;fallback-key&quot;</span><span class="p">);</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1">// 2. AWS Secrets Manager</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="kd">const</span><span class="w"> </span><span class="nx">dbPassword</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Secret</span><span class="p">.</span><span class="nx">aws</span><span class="p">(</span><span class="s2">&quot;prod/database/password&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;us-east-1&quot;</span><span class="w"> </span><span class="p">});</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1">// 3. AWS SSM Parameter Store</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="kd">const</span><span class="w"> </span><span class="nx">apiKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Secret</span><span class="p">.</span><span class="nx">ssm</span><span class="p">(</span><span class="s2">&quot;/prod/api/token&quot;</span><span class="p">);</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="c1">// 4. GCP Secret Manager</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="kd">const</span><span class="w"> </span><span class="nx">jwtSecret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Secret</span><span class="p">.</span><span class="nx">gcp</span><span class="p">(</span><span class="s2">&quot;jwt-private-key&quot;</span><span class="p">);</span>
+<h2 id="the-problem">The problem</h2>
+<p>Some resources were created before Puls existed in your project - manually in the cloud console, by a different tool, or by a team that didn't know about the stack. Puls' normal discovery is name-based: if it can't find the resource by name, it creates one. Adoption gives you a way to say <em>"this already exists - here's its ID, don't touch it."</em></p>
+<hr />
+<h2 id="basic-usage">Basic usage</h2>
+<p>Chain <code>.adoptId(id)</code> on any builder. If name-based discovery returns nothing, Puls uses the provided ID as the resource's identity and skips creation entirely.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">token</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.DO_TOKEN</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">class</span><span class="w"> </span><span class="nx">Infra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">DO</span><span class="p">.</span><span class="nx">Database</span><span class="p">(</span><span class="s2">&quot;prod-db&quot;</span><span class="p">).</span><span class="nx">adoptId</span><span class="p">(</span><span class="s2">&quot;a1b2c3d4-existing-cluster-uuid&quot;</span><span class="p">);</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
 </code></pre></div>
+<p>Running this stack:
+- <strong>Discovered by name</strong> → normal update path, <code>adoptId</code> is a no-op
+- <strong>Not found by name</strong> → treated as existing with <code>id = "a1b2c3d4-..."</code>, creation is skipped</p>
+<p>Configuration mutations (firewall rules, size changes, etc.) still apply in both cases - adoption only prevents recreation.</p>
 <hr />
-<h2 id="how-to-use-secrets-in-stacks">How to Use Secrets in Stacks</h2>
-<p>You can pass a <code>Secret</code> directly into any resource builder input that expects a string, an Output, or a Secret. The framework handles dynamic dependency resolving automatically under the hood.</p>
-<h3 id="example-dynamic-database-provisioning">Example: Dynamic Database Provisioning</h3>
-<p>In the following example, the DigitalOcean database password is securely retrieved from GCP Secret Manager at deploy time:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="p">,</span><span class="w"> </span><span class="nx">Secret</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">DO</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/do&quot;</span><span class="p">;</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="kd">class</span><span class="w"> </span><span class="nx">CloudStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="c1">// Pull database password dynamically from GCP Secret Manager</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">DO</span><span class="p">.</span><span class="nx">Database</span><span class="p">(</span><span class="s2">&quot;prod-db-cluster&quot;</span><span class="p">)</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="p">.</span><span class="nx">engine</span><span class="p">(</span><span class="s2">&quot;pg&quot;</span><span class="p">)</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="p">.</span><span class="nx">version</span><span class="p">(</span><span class="s2">&quot;15&quot;</span><span class="p">)</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="p">.</span><span class="nx">size</span><span class="p">(</span><span class="s2">&quot;db-s-1vcpu-1gb&quot;</span><span class="p">);</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="c1">// You can also pass dynamic secrets to environment variables, API endpoints, etc.</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">}</span>
+<h2 id="cross-stack-wiring">Cross-stack wiring</h2>
+<p><code>out.id</code> is resolved automatically from the provided ID. Other outputs (<code>out.host</code>, <code>out.uri</code>, <code>out.port</code>, etc.) depend on fields in the live API response. When adoption kicks in those fields aren't fetched, so chain <code>.adoptOutput(key, value)</code> for each one you need downstream.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">token</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.DO_TOKEN</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">class</span><span class="w"> </span><span class="nx">Infra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">DO</span><span class="p">.</span><span class="nx">Database</span><span class="p">(</span><span class="s2">&quot;prod-db&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="p">.</span><span class="nx">adoptId</span><span class="p">(</span><span class="s2">&quot;a1b2c3d4-existing-cluster-uuid&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="p">.</span><span class="nx">adoptOutput</span><span class="p">(</span><span class="s2">&quot;host&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;private-db.internal.example.com&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="p">.</span><span class="nx">adoptOutput</span><span class="p">(</span><span class="s2">&quot;port&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">25060</span><span class="p">)</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="p">.</span><span class="nx">adoptOutput</span><span class="p">(</span><span class="s2">&quot;uri&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;postgresql://doadmin:pass@private-db.internal.example.com:25060/defaultdb?sslmode=require&quot;</span><span class="p">);</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="c1">// out.uri is resolved immediately - no wait, no hang</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span><span class="nx">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">DO</span><span class="p">.</span><span class="nx">App</span><span class="p">(</span><span class="s2">&quot;prod-api&quot;</span><span class="p">).</span><span class="nx">env</span><span class="p">(</span><span class="s2">&quot;DATABASE_URL&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">db</span><span class="p">.</span><span class="nx">out</span><span class="p">.</span><span class="nx">uri</span><span class="p">);</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="p">}</span>
 </code></pre></div>
+<p><code>.adoptOutput</code> is safe to call even if the builder doesn't have that output key - it silently no-ops.</p>
 <hr />
-<h2 id="how-secrets-behave-in-dry-run">How Secrets Behave in Dry-Run</h2>
-<p>Testing your infrastructure shouldn't require configuring real cloud credentials locally. Puls respects your <code>.dryRun</code> configurations completely:</p>
-<ul>
-<li>When <code>dryRun: true</code> is active, the dynamic secret fetcher <strong>intercepts any API calls</strong> and immediately resolves to a secure placeholder string:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="sb">`[SECRET:name]`</span>
-</code></pre></div></li>
-<li>No network requests are made, no cloud SDKs are initialized, and no billing tokens are consumed. This allows developers to test full stacks in their local terminal with zero friction:</li>
-</ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>🔍<span class="w"> </span><span class="o">[</span>DRY<span class="w"> </span>RUN<span class="o">]</span><span class="w"> </span>Finalizing<span class="w"> </span>GCP<span class="w"> </span>VM<span class="w"> </span><span class="s2">&quot;my-gcp-vm&quot;</span>...
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">   </span>└─<span class="w"> </span>Environment:
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">      </span>└─<span class="w"> </span>STRIPE_API_KEY:<span class="w"> </span><span class="o">[</span>SECRET:STRIPE_API_KEY<span class="o">]</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">      </span>└─<span class="w"> </span>DB_PASSWORD:<span class="w"> </span><span class="o">[</span>SECRET:prod/database/password<span class="o">]</span>
+<h2 id="behavior-reference">Behavior reference</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>What Puls does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Discovery finds the resource by name</td>
+<td>Normal idempotent update; <code>adoptId</code> is ignored</td>
+</tr>
+<tr>
+<td>Discovery finds nothing, <code>adoptId</code> set</td>
+<td>Resource treated as existing; creation skipped; <code>out.id</code> resolved</td>
+</tr>
+<tr>
+<td><code>adoptOutput</code> called</td>
+<td>Named output resolved immediately, available for downstream wiring</td>
+</tr>
+<tr>
+<td><code>destroy()</code> called on adopted resource</td>
+<td>Destroyed normally; log line notes the adopted ID</td>
+</tr>
+<tr>
+<td>Dry run</td>
+<td>"Already exists" plan printed, no API writes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="full-example">Full example</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.PROD</span><span class="p">,</span><span class="w"> </span><span class="nx">token</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.DO_TOKEN</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">class</span><span class="w"> </span><span class="nx">Migration</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="c1">// VM was created by hand - adopt it, configure DNS, don&#39;t recreate</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nx">legacyApp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ix-legacy-app&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="p">.</span><span class="nx">adoptId</span><span class="p">(</span><span class="s2">&quot;105&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="p">.</span><span class="nx">adoptOutput</span><span class="p">(</span><span class="s2">&quot;ip&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;10.8.10.105&quot;</span><span class="p">);</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="nx">dns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">DO</span><span class="p">.</span><span class="nx">Domain</span><span class="p">(</span><span class="s2">&quot;example.com&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="p">.</span><span class="nx">pointer</span><span class="p">(</span><span class="s2">&quot;legacy&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">legacyApp</span><span class="p">.</span><span class="nx">out</span><span class="p">.</span><span class="nx">ip</span><span class="p">);</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">}</span>
 </code></pre></div>
-<hr />
-<h2 id="running-multiple-stacks-in-one-process">Running Multiple Stacks in One Process</h2>
-<p>When you run more than one <code>Stack.deploy()</code> call sequentially inside the same Node.js process, Puls carries resolved secret values forward into each subsequent run's console-redaction filter by default. This is usually safe, but if you want a clean slate between runs you can clear the accumulated secret set:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">clearResolvedSecrets</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">await</span><span class="w"> </span><span class="nx">StackA</span><span class="p">.</span><span class="nx">deploy</span><span class="p">();</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nx">clearResolvedSecrets</span><span class="p">();</span><span class="w"> </span><span class="c1">// wipe resolved values before the next stack</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="k">await</span><span class="w"> </span><span class="nx">StackB</span><span class="p">.</span><span class="nx">deploy</span><span class="p">();</span>
-</code></pre></div>
-<p>This is only relevant when sequentially deploying multiple stacks in a single script. Individual stack runs are always isolated - each deployment creates its own redaction context so secrets from one stack can never leak into another stack's logs.</p>
-<hr />
-<h2 id="zero-dependency-architecture">Zero-Dependency Architecture</h2>
-<p>To keep the Puls core package ultra-lightweight and prevent startup crashes, <strong>dynamic imports are used under the hood</strong>. </p>
-<p>The heavy AWS SDK or GCP credentials library is <em>only</em> imported if and when you explicitly call <code>Secret.aws()</code>, <code>Secret.ssm()</code>, or <code>Secret.gcp()</code>. If you are only deploying to DigitalOcean or Proxmox, you do not need to install AWS or Google packages!</p>
 
 
 

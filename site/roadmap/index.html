@@ -474,6 +474,60 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../resource-adoption/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resource Adoption
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../drift-detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Drift Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -488,10 +542,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
         
           
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
             
   
   
@@ -509,8 +563,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1387,13 +1441,13 @@
 <h2 id="roadmap-gap-analysis-tech-debt-planned-improvements">Roadmap Gap Analysis (Tech Debt / Planned Improvements)</h2>
 <p>A version-controlled analysis of internal tech debt and feature gaps. Gaps are addressed opportunistically.</p>
 <ul>
-<li>[x] <strong>Gap 1: Output<T> Not Exported</strong> — <code>Output&lt;T&gt;</code> is missing from public API index in <code>src/index.ts</code>. Resolving this enables clean public imports for developer-built custom types and cross-stack variables.</li>
-<li>[x] <strong>Gap 2: Generic Retry &amp; Backoff Engine</strong> — Implement a shared <code>withRetry</code> or exponential backoff utility across all providers to handle transient network/API throttling errors gracefully under heavy parallel deployments.</li>
-<li>[ ] <strong>Gap 3: Resource Import &amp; Adoption</strong> — Provide an <code>.adoptId()</code> mechanism on <code>BaseBuilder</code> to allow existing, out-of-band cloud infrastructure to be safely imported under Puls management without recreation.</li>
-<li>[x] <strong>Gap 4: Shell Script Provisioning Deprecation</strong> — Explicitly document the deprecation of <code>.sh</code> script provisioning (in favor of Ansible/Puppet playbooks) to avoid user migration confusion.</li>
-<li>[ ] <strong>Gap 5: Advanced Drift Detection &amp; diff</strong> — Clarify stateless tag/note-based metadata tracking in architecture docs, and design a formal <code>Stack.diff()</code> structural diff engine comparing declared settings against live cloud properties.</li>
-<li>[x] <strong>Gap 6: Checker Integration Completeness</strong> — Newer providers (GCP, Firebase) lack <code>list.ts</code> implementations, causing <code>@Check</code> to silently skip them. Resolve by providing complete <code>list.ts</code> inventory engines for GCP and Firebase.</li>
-<li>[ ] <strong>Gap 7: Provider Plugin &amp; Decoupling API</strong> — Establish a standard <code>registerProvider()</code> hook and split core framework utilities into an independent <code>@puls-dev/core</code> package to enable community-built custom providers.</li>
+<li>[x] <strong>Gap 1: Output<T> Not Exported</strong> - <code>Output&lt;T&gt;</code> is missing from public API index in <code>src/index.ts</code>. Resolving this enables clean public imports for developer-built custom types and cross-stack variables.</li>
+<li>[x] <strong>Gap 2: Generic Retry &amp; Backoff Engine</strong> - Implement a shared <code>withRetry</code> or exponential backoff utility across all providers to handle transient network/API throttling errors gracefully under heavy parallel deployments.</li>
+<li>[x] <strong>Gap 3: Resource Import &amp; Adoption</strong> - Provide an <code>.adoptId()</code> mechanism on <code>BaseBuilder</code> to allow existing, out-of-band cloud infrastructure to be safely imported under Puls management without recreation.</li>
+<li>[x] <strong>Gap 4: Shell Script Provisioning Deprecation</strong> - Explicitly document the deprecation of <code>.sh</code> script provisioning (in favor of Ansible/Puppet playbooks) to avoid user migration confusion.</li>
+<li>[x] <strong>Gap 5: Advanced Drift Detection &amp; diff</strong> - Clarify stateless tag/note-based metadata tracking in architecture docs, and design a formal <code>Stack.diff()</code> structural diff engine comparing declared settings against live cloud properties.</li>
+<li>[x] <strong>Gap 6: Checker Integration Completeness</strong> - Newer providers (GCP, Firebase) lack <code>list.ts</code> implementations, causing <code>@Check</code> to silently skip them. Resolve by providing complete <code>list.ts</code> inventory engines for GCP and Firebase.</li>
+<li>[ ] <strong>Gap 7: Provider Plugin &amp; Decoupling API</strong> - Establish a standard <code>registerProvider()</code> hook and split core framework utilities into an independent <code>@puls-dev/core</code> package to enable community-built custom providers.</li>
 </ul>
 <hr />
 <h2 id="breaking-changes-migration-notes">Breaking Changes &amp; Migration Notes</h2>

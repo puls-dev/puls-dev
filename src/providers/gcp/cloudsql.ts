@@ -78,6 +78,27 @@ export class GCPCloudSQLBuilder extends BaseBuilder {
     return this;
   }
 
+  getDiff(existing: any) {
+    const diffs = [];
+    const declaredDbVersion = `${this._engine.toUpperCase()}_${this._engineVersion}`;
+    if (existing.databaseVersion !== declaredDbVersion) {
+      diffs.push({ field: "databaseVersion", declared: declaredDbVersion, live: existing.databaseVersion });
+    }
+    const liveTier = existing.settings?.tier;
+    if (liveTier !== undefined && liveTier !== this._tier) {
+      diffs.push({ field: "tier", declared: this._tier, live: liveTier });
+    }
+    const liveDiskSize = existing.settings?.dataDiskSizeGb;
+    if (liveDiskSize !== undefined && Number(liveDiskSize) !== this._storage) {
+      diffs.push({ field: "storage", declared: `${this._storage} GB`, live: `${liveDiskSize} GB` });
+    }
+    const isPublic = (existing.settings?.ipConfiguration?.authorizedNetworks ?? []).length > 0;
+    if (isPublic !== this._publicAccess) {
+      diffs.push({ field: "publicAccess", declared: this._publicAccess, live: isPublic });
+    }
+    return diffs;
+  }
+
   private async discoverInstance(): Promise<any> {
     try {
       const project = getProjectId();

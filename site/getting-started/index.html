@@ -628,6 +628,60 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../resource-adoption/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resource Adoption
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../drift-detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Drift Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -642,10 +696,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
         
           
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
             
   
   
@@ -663,8 +717,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_10">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1054,64 +1108,71 @@
 <a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">}</span>
 </code></pre></div>
 <h2 id="the-puls-cli">The <code>puls</code> CLI</h2>
-<p><code>puls-dev</code> ships a <code>puls</code> binary that gives you three commands without ever editing source:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>puls<span class="w"> </span>plan<span class="w">    </span>my-first-stack.ts<span class="w">   </span><span class="c1"># dry-run — prints what would change, no API writes</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>puls<span class="w"> </span>deploy<span class="w">  </span>my-first-stack.ts<span class="w">   </span><span class="c1"># apply the stack</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>puls<span class="w"> </span>destroy<span class="w"> </span>my-first-stack.ts<span class="w">   </span><span class="c1"># tear down the stack</span>
+<p><code>puls-dev</code> ships a <code>puls</code> binary. Run the one-time shell setup so you never need <code>npx</code> again:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>npx<span class="w"> </span>puls<span class="w"> </span>install-shell
+</code></pre></div>
+<p>This creates a tiny launcher at <code>~/.puls/bin/puls</code> and adds it to your PATH in <code>~/.zshrc</code> / <code>~/.bashrc</code> / <code>~/.config/fish/config.fish</code>. After sourcing your shell config (or opening a new terminal), <code>puls</code> is available everywhere:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>puls<span class="w"> </span>plan<span class="w">    </span>my-first-stack.ts<span class="w">   </span><span class="c1"># dry-run - prints what would change, no API writes</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>puls<span class="w"> </span>deploy<span class="w">  </span>my-first-stack.ts<span class="w">   </span><span class="c1"># apply the stack</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>puls<span class="w"> </span>destroy<span class="w"> </span>my-first-stack.ts<span class="w">   </span><span class="c1"># tear down the stack</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>puls<span class="w"> </span>diff<span class="w">    </span>my-first-stack.ts<span class="w">   </span><span class="c1"># compare declared intent vs live cloud state</span>
 </code></pre></div>
 <p><strong>Always run <code>plan</code> first.</strong> It activates dry-run mode automatically regardless of what <code>dryRun</code> is set to in your decorator.</p>
 <p>Additional flags:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>puls<span class="w"> </span>deploy<span class="w">  </span>my-stack.ts<span class="w"> </span>--parallel<span class="w">   </span><span class="c1"># enable parallel resource execution</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>puls<span class="w"> </span>deploy<span class="w">  </span>my-stack.ts<span class="w"> </span>--dry-run<span class="w">    </span><span class="c1"># force dry-run on any command</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>puls<span class="w"> </span>--version
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>puls<span class="w"> </span>--help
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>puls<span class="w"> </span>deploy<span class="w">  </span>my-stack.ts<span class="w"> </span>--parallel<span class="w">        </span><span class="c1"># enable parallel resource execution</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>puls<span class="w"> </span>deploy<span class="w">  </span>my-stack.ts<span class="w"> </span>--dry-run<span class="w">         </span><span class="c1"># force dry-run on any command</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>puls<span class="w"> </span>diff<span class="w">    </span>my-stack.ts<span class="w"> </span>--fail-on-drift<span class="w">   </span><span class="c1"># exit 1 if any resource has drifted</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>puls<span class="w"> </span>--version
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>puls<span class="w"> </span>--help
 </code></pre></div>
+<p>To remove the shell integration: <code>puls uninstall-shell</code></p>
 <blockquote>
 <p><strong>Note:</strong> <code>puls</code> requires <a href="https://github.com/privatenumber/tsx">tsx</a> to execute TypeScript files.
 It is installed automatically as a dev dependency: <code>npm install --save-dev tsx</code></p>
+<p>In CI pipelines always use <code>npx puls</code> — <code>install-shell</code> is for local development only.</p>
 </blockquote>
 <h3 id="running-without-the-cli">Running without the CLI</h3>
 <p>You can still run stack files directly if you prefer:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>npx<span class="w"> </span>tsx<span class="w"> </span>my-first-stack.ts
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>npx<span class="w"> </span>tsx<span class="w"> </span>my-first-stack.ts
 </code></pre></div>
 <p>Use the <code>dryRun</code> decorator option to control mode in that case:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="kt">REGION.EU_CENTRAL_1</span><span class="p">,</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">})</span><span class="w">  </span><span class="c1">// safe - no API writes</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="kt">REGION.EU_CENTRAL_1</span><span class="p">,</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">})</span><span class="w">  </span><span class="c1">// safe - no API writes</span>
 </code></pre></div>
 <h2 id="dry-run-output">Dry run output</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>🏗️  Deploying Stack: MyFirstStack
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>⚡ Finalizing Lambda Function &quot;hello-world&quot;...
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>   📝 [PLAN] Create function &quot;hello-world&quot;
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>      └─ Runtime: nodejs20.x | Handler: index.handler
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>      └─ Memory: 128MB | Timeout: 30s
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>      └─ Code: ./functions/hello
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>🏗️  Deploying Stack: MyFirstStack
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>⚡ Finalizing Lambda Function &quot;hello-world&quot;...
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>   📝 [PLAN] Create function &quot;hello-world&quot;
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>      └─ Runtime: nodejs20.x | Handler: index.handler
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>      └─ Memory: 128MB | Timeout: 30s
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>      └─ Code: ./functions/hello
 </code></pre></div>
 <h2 id="env-file">Env file</h2>
 <p>Create <code>.env</code> in the project root with credentials for the providers you use:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># DigitalOcean</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nv">DO_TOKEN</span><span class="o">=</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># AWS (standard SDK env vars)</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="nv">AWS_REGION</span><span class="o">=</span>us-east-1
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="c1"># Proxmox</span>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="nv">PROXMOX_URL</span><span class="o">=</span>https://pve.example.com:8006
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="nv">PROXMOX_USER</span><span class="o">=</span>root@pam
-<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="nv">PROXMOX_TOKEN_NAME</span><span class="o">=</span>puls
-<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="nv">PROXMOX_TOKEN_SECRET</span><span class="o">=</span>
-<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="nv">PROXMOX_NODES</span><span class="o">=</span>pve1,pve2
-<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="nv">PROXMOX_DNS_DOMAIN</span><span class="o">=</span>internal.example.com
-<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="nv">PROXMOX_DNS_SERVERS</span><span class="o">=</span><span class="m">10</span>.0.0.1
-<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>
-<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="c1"># Firebase</span>
-<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="nv">FIREBASE_SA</span><span class="o">=</span>./firebase/service-account.json
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># DigitalOcean</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nv">DO_TOKEN</span><span class="o">=</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># AWS (standard SDK env vars)</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="nv">AWS_REGION</span><span class="o">=</span>us-east-1
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="c1"># Proxmox</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="nv">PROXMOX_URL</span><span class="o">=</span>https://pve.example.com:8006
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="nv">PROXMOX_USER</span><span class="o">=</span>root@pam
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="nv">PROXMOX_TOKEN_NAME</span><span class="o">=</span>puls
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="nv">PROXMOX_TOKEN_SECRET</span><span class="o">=</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="nv">PROXMOX_NODES</span><span class="o">=</span>pve1,pve2
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="nv">PROXMOX_DNS_DOMAIN</span><span class="o">=</span>internal.example.com
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="nv">PROXMOX_DNS_SERVERS</span><span class="o">=</span><span class="m">10</span>.0.0.1
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="c1"># Firebase</span>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="nv">FIREBASE_SA</span><span class="o">=</span>./firebase/service-account.json
 </code></pre></div>
 <p>All stack files start with <code>import "dotenv/config"</code> to load this file.</p>
 <h2 id="idempotency">Idempotency</h2>
 <p>Running the same stack twice is always safe. Puls discovers existing state before every deploy and skips resources that already match. You'll see:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>✅ Function &quot;hello-world&quot; already exists
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>✅ Function &quot;hello-world&quot; already exists
 </code></pre></div>
 <p>instead of an error or a duplicate.</p>
 <h2 id="provider-setup">Provider setup</h2>

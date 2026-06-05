@@ -87,6 +87,35 @@ export class FirebaseFunctionsBuilder extends BaseBuilder {
     return this;
   }
 
+  getDiff(existing: any) {
+    const diffs = [];
+    const liveRuntime = existing.buildConfig?.runtime;
+    if (liveRuntime !== undefined && liveRuntime !== this._runtime) {
+      diffs.push({ field: "runtime", declared: this._runtime, live: liveRuntime });
+    }
+    const liveEntryPoint = existing.buildConfig?.entryPoint;
+    if (liveEntryPoint !== undefined && liveEntryPoint !== this._entryPoint) {
+      diffs.push({ field: "entryPoint", declared: this._entryPoint, live: liveEntryPoint });
+    }
+    const liveMemory = existing.serviceConfig?.availableMemory;
+    if (liveMemory !== undefined && liveMemory !== this._memory) {
+      diffs.push({ field: "memory", declared: this._memory, live: liveMemory });
+    }
+    const liveTimeout = existing.serviceConfig?.timeoutSeconds;
+    if (liveTimeout !== undefined && liveTimeout !== this._timeout) {
+      diffs.push({ field: "timeout", declared: `${this._timeout}s`, live: `${liveTimeout}s` });
+    }
+    const liveMax = existing.serviceConfig?.maxInstanceCount;
+    if (liveMax !== undefined && liveMax !== this._maxInstances) {
+      diffs.push({ field: "maxInstances", declared: this._maxInstances, live: liveMax });
+    }
+    const liveMin = existing.serviceConfig?.minInstanceCount ?? 0;
+    if (liveMin !== this._minInstances) {
+      diffs.push({ field: "minInstances", declared: this._minInstances, live: liveMin });
+    }
+    return diffs;
+  }
+
   private fnPath() {
     return `/projects/${getProjectId()}/locations/${this._region}/functions/${this.name}`;
   }

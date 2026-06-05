@@ -86,7 +86,7 @@ clearResolvedSecrets(); // wipe resolved values before the next stack
 await StackB.deploy();
 ```
 
-This is only relevant when sequentially deploying multiple stacks in a single script. Individual stack runs are always isolated — each deployment creates its own redaction context so secrets from one stack can never leak into another stack's logs.
+This is only relevant when sequentially deploying multiple stacks in a single script. Individual stack runs are always isolated - each deployment creates its own redaction context so secrets from one stack can never leak into another stack's logs.
 
 ---
 

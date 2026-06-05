@@ -73,6 +73,27 @@ export class RDSBuilder extends BaseBuilder {
     this._publicAccess = enabled;
     return this;
   }
+
+  getDiff(existing: any) {
+    const diffs = [];
+    if (existing.Engine !== this._engine) {
+      diffs.push({ field: "engine", declared: this._engine, live: existing.Engine });
+    }
+    if (existing.EngineVersion !== this._engineVersion) {
+      diffs.push({ field: "engineVersion", declared: this._engineVersion, live: existing.EngineVersion });
+    }
+    if (existing.DBInstanceClass !== this._instanceClass) {
+      diffs.push({ field: "instanceClass", declared: this._instanceClass, live: existing.DBInstanceClass });
+    }
+    if (existing.AllocatedStorage !== this._storage) {
+      diffs.push({ field: "storage", declared: `${this._storage} GB`, live: `${existing.AllocatedStorage} GB` });
+    }
+    if (existing.PubliclyAccessible !== this._publicAccess) {
+      diffs.push({ field: "publicAccess", declared: this._publicAccess, live: existing.PubliclyAccessible });
+    }
+    return diffs;
+  }
+
   database(name: string) {
     this._dbName = name;
     return this;

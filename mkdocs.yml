@@ -43,6 +43,8 @@ nav:
   - Secrets at Deploy Time: secrets.md
   - Multi-Region Deployments: multiregion.md
   - Parallel Deployments: parallel-deployment.md
+  - Resource Adoption: resource-adoption.md
+  - Drift Detection: drift-detection.md
   - Providers:
       - AWS: providers/aws.md
       - Proxmox: providers/proxmox.md

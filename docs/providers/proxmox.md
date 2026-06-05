@@ -28,7 +28,7 @@ export const CONFIG = {
     dnsDomain: process.env.PROXMOX_DNS_DOMAIN,
     dnsServers: process.env.PROXMOX_DNS_SERVERS?.split(','),
     verifySsl: false,
-    sshUser: "ubuntu",   // optional — overrides the default SSH user for provisioning
+    sshUser: "ubuntu",   // optional - overrides the default SSH user for provisioning
   },
 };
 ```

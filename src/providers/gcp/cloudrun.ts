@@ -75,6 +75,37 @@ export class GCPCloudRunBuilder extends BaseBuilder {
     return this;
   }
 
+  getDiff(existing: any) {
+    const diffs = [];
+    const container = existing.template?.containers?.[0];
+    const scaling = existing.template?.scaling ?? {};
+    const targetIngress = this._public ? "INGRESS_TRAFFIC_ALL" : "INGRESS_TRAFFIC_INTERNAL_ONLY";
+    if (container?.image !== this._image) {
+      diffs.push({ field: "image", declared: this._image, live: container?.image });
+    }
+    if (container?.ports?.[0]?.containerPort !== this._port) {
+      diffs.push({ field: "port", declared: this._port, live: container?.ports?.[0]?.containerPort });
+    }
+    if (container?.resources?.limits?.cpu !== formatCpu(this._cpu)) {
+      diffs.push({ field: "cpu", declared: formatCpu(this._cpu), live: container?.resources?.limits?.cpu });
+    }
+    if (container?.resources?.limits?.memory !== formatMemory(this._memory)) {
+      diffs.push({ field: "memory", declared: formatMemory(this._memory), live: container?.resources?.limits?.memory });
+    }
+    const minDeclared = this._minInstances ?? 0;
+    const maxDeclared = this._maxInstances ?? 100;
+    if ((scaling.minInstanceCount ?? 0) !== minDeclared) {
+      diffs.push({ field: "minInstances", declared: minDeclared, live: scaling.minInstanceCount ?? 0 });
+    }
+    if ((scaling.maxInstanceCount ?? 100) !== maxDeclared) {
+      diffs.push({ field: "maxInstances", declared: maxDeclared, live: scaling.maxInstanceCount ?? 100 });
+    }
+    if (existing.ingress !== targetIngress) {
+      diffs.push({ field: "public", declared: this._public, live: existing.ingress === "INGRESS_TRAFFIC_ALL" });
+    }
+    return diffs;
+  }
+
   private async discoverService(): Promise<any> {
     try {
       const project = getProjectId();
