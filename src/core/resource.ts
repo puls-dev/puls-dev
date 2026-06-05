@@ -11,6 +11,10 @@ export abstract class BaseBuilder {
   /** @internal */
   _deployPromise!: Promise<any>;
   /** @internal */
+  async _resolveDiscovery(): Promise<any> {
+    return this.discoveryPromise;
+  }
+  /** @internal */
   _destroyPromise?: Promise<any>;
   /** @internal */
   _dependencies: BaseBuilder[] = [];

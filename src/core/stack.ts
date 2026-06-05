@@ -229,7 +229,7 @@ export abstract class Stack {
     const resources: ResourceDiff[] = [];
 
     for (const { prop, resource } of entries) {
-      const existing = await resource.discoveryPromise;
+      const existing = await resource._resolveDiscovery();
       let status: ResourceStatus;
       let changes = resource.getDiff(existing ?? {});
 
