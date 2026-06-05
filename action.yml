@@ -1,45 +1,45 @@
-name: 'Puls'
-description: 'Run a Puls infrastructure-as-code command and optionally post the output as a PR comment.'
-author: 'puls-dev'
+name: "Pulsdev.io"
+description: "Run a Puls infrastructure-as-code command and optionally post the output as a PR comment."
+author: "puls-dev"
 
 branding:
-  icon: 'zap'
-  color: 'blue'
+  icon: "zap"
+  color: "blue"
 
 inputs:
   command:
-    description: 'Command to run: plan, deploy, destroy, diff'
+    description: "Command to run: plan, deploy, destroy, diff"
     required: false
-    default: 'plan'
+    default: "plan"
   stack-file:
-    description: 'Path to the stack TypeScript file (e.g. infra/production.ts)'
+    description: "Path to the stack TypeScript file (e.g. infra/production.ts)"
     required: true
   node-version:
-    description: 'Node.js version'
+    description: "Node.js version"
     required: false
-    default: '20'
+    default: "20"
   post-comment:
-    description: 'Post plan/diff output as a PR comment. Requires GITHUB_TOKEN in env.'
+    description: "Post plan/diff output as a PR comment. Requires GITHUB_TOKEN in env."
     required: false
-    default: 'true'
+    default: "true"
   fail-on-drift:
-    description: 'Exit with code 1 when drift is detected (diff command only)'
+    description: "Exit with code 1 when drift is detected (diff command only)"
     required: false
-    default: 'false'
+    default: "false"
 
 outputs:
   has-drift:
-    description: 'true if drift was detected (diff command only)'
+    description: "true if drift was detected (diff command only)"
     value: ${{ steps.run-puls.outputs.has-drift }}
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
-        cache: 'npm'
+        cache: "npm"
 
     - name: Install dependencies
       shell: bash
