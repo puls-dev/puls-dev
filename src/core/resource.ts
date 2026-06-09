@@ -81,6 +81,8 @@ export abstract class BaseBuilder {
     return [];
   }
 
+  forceConfigCheck?(): void;
+
   adoptOutput(key: string, value: any) {
     const out = (this as any).out;
     if (typeof out?.[key]?.resolve === "function") {

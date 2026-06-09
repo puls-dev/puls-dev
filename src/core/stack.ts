@@ -200,6 +200,11 @@ export abstract class Stack {
     return instance as T;
   }
 
+  beforeDeploy?(): Promise<void> | void;
+  afterDeploy?(outputs: Record<string, any>): Promise<void> | void;
+  beforeDestroy?(): Promise<void> | void;
+  afterDestroy?(outputs: Record<string, any>): Promise<void> | void;
+
   /**
    * Compares every declared resource against its live cloud state without
    * making any API writes. Returns a structured `StackDiff` and prints a
@@ -269,9 +274,9 @@ export abstract class Stack {
         console.log(`\n🏗️  Deploying Stack: ${this.constructor.name}`);
 
         // Stack-level beforeDeploy hook
-        if (typeof (this as any).beforeDeploy === "function") {
+        if (this.beforeDeploy) {
           console.log(`   ⚡ Running Stack-level beforeDeploy hook...`);
-          await (this as any).beforeDeploy();
+          await this.beforeDeploy();
         }
 
         const props = Object.getOwnPropertyNames(this);
@@ -290,8 +295,8 @@ export abstract class Stack {
             if (isProtected) val.protect();
 
             const forceConfigCheck = Reflect.getMetadata("forceConfigCheck", this, prop);
-            if (forceConfigCheck && typeof (val as any).forceConfigCheck === "function") {
-              (val as any).forceConfigCheck();
+            if (forceConfigCheck) {
+              val.forceConfigCheck?.();
             }
           } else if (Array.isArray(val)) {
             const isProtected = Reflect.getMetadata("protected", this, prop);
@@ -300,8 +305,8 @@ export abstract class Stack {
               if (item instanceof BaseBuilder) {
                 resources.push({ prop, resource: item });
                 if (isProtected) item.protect();
-                if (forceConfigCheck && typeof (item as any).forceConfigCheck === "function") {
-                  (item as any).forceConfigCheck();
+                if (forceConfigCheck) {
+                  item.forceConfigCheck?.();
                 }
               }
             }
@@ -404,9 +409,9 @@ export abstract class Stack {
         printOutputs(this.constructor.name, outputs);
 
         // Stack-level afterDeploy hook
-        if (typeof (this as any).afterDeploy === "function") {
+        if (this.afterDeploy) {
           console.log(`   ⚡ Running Stack-level afterDeploy hook...`);
-          await (this as any).afterDeploy(outputs);
+          await this.afterDeploy(outputs);
         }
 
         return outputs;
@@ -430,9 +435,9 @@ export abstract class Stack {
         console.log(`\n💥 Tearing down Stack: ${this.constructor.name}`);
 
         // Stack-level beforeDestroy hook
-        if (typeof (this as any).beforeDestroy === "function") {
+        if (this.beforeDestroy) {
           console.log(`   ⚡ Running Stack-level beforeDestroy hook...`);
-          await (this as any).beforeDestroy();
+          await this.beforeDestroy();
         }
 
         const props = Object.getOwnPropertyNames(this).reverse();
@@ -543,9 +548,9 @@ export abstract class Stack {
         printOutputs(this.constructor.name, outputs);
 
         // Stack-level afterDestroy hook
-        if (typeof (this as any).afterDestroy === "function") {
+        if (this.afterDestroy) {
           console.log(`   ⚡ Running Stack-level afterDestroy hook...`);
-          await (this as any).afterDestroy(outputs);
+          await this.afterDestroy(outputs);
         }
 
         return outputs;
