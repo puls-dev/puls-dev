@@ -95,7 +95,7 @@ runs:
 
         # Build comment body
         BODY="${MARKER}
-        ## Puls \`${COMMAND}\` — \`${{ inputs.stack-file }}\`
+        ## Puls \`${COMMAND}\`- \`${{ inputs.stack-file }}\`
 
         \`\`\`
         ${OUTPUT}

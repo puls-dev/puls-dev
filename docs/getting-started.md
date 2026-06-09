@@ -70,7 +70,7 @@ To remove the shell integration: `puls uninstall-shell`
 > **Note:** `puls` requires [tsx](https://github.com/privatenumber/tsx) to execute TypeScript files.
 > It is installed automatically as a dev dependency: `npm install --save-dev tsx`
 >
-> In CI pipelines always use `npx puls` — `install-shell` is for local development only.
+> In CI pipelines always use `npx puls`- `install-shell` is for local development only.
 
 ### Running without the CLI
 

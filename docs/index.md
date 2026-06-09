@@ -41,6 +41,7 @@ Running the same stack twice is always safe. Resources that already match are sk
 | **DigitalOcean** | Droplet, Domain, Firewall, Certificate, LoadBalancer |
 | **Firebase** | Hosting, Functions, Firestore (Indexes & Rules), Storage (Rules/CORS), Auth, Remote Config, App Check |
 | **Google Cloud** | Cloud Run, Cloud SQL, Secret Manager, Pub/Sub, Cloud DNS, IAM (Service Accounts & Bindings) |
+| **Cloudflare** | Zone, DNS Records, KV Namespaces, R2 Buckets, Workers |
 
 ---
 

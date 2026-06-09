@@ -1,11 +1,11 @@
-import { test, describe, beforeEach, afterEach, mock } from 'node:test';
-import assert from 'node:assert';
-import { RDSClient } from '@aws-sdk/client-rds';
-import { EC2Client } from '@aws-sdk/client-ec2';
-import { RDSBuilder } from './rds.js';
-import { Config } from '../../core/config.js';
+import { test, describe, beforeEach, afterEach, mock } from "node:test";
+import assert from "node:assert";
+import { RDSClient } from "@aws-sdk/client-rds";
+import { EC2Client } from "@aws-sdk/client-ec2";
+import { RDSBuilder } from "./rds.js";
+import { Config } from "../../core/config.js";
 
-describe('RDSBuilder Unit Tests', () => {
+describe("RDSBuilder Unit Tests", () => {
   let originalRdsSend: typeof RDSClient.prototype.send;
   let originalEc2Send: typeof EC2Client.prototype.send;
   let rdsCalls: { commandName: string; input: any }[] = [];
@@ -22,7 +22,7 @@ describe('RDSBuilder Unit Tests', () => {
       calls.push({ commandName, input: command.input });
       const handler = responses[commandName];
       if (handler) {
-        if (typeof handler === 'function') return handler(command.input);
+        if (typeof handler === "function") return handler(command.input);
         if (handler instanceof Error) throw handler;
         return handler;
       }
@@ -31,9 +31,11 @@ describe('RDSBuilder Unit Tests', () => {
   }
 
   beforeEach(() => {
-    Config.set({ dryRun: false, providers: { aws: { region: 'us-east-1' } } });
-    rdsCalls = []; ec2Calls = [];
-    mockRdsResponses = {}; mockEc2Responses = {};
+    Config.set({ dryRun: false, providers: { aws: { region: "us-east-1" } } });
+    rdsCalls = [];
+    ec2Calls = [];
+    mockRdsResponses = {};
+    mockEc2Responses = {};
 
     originalRdsSend = RDSClient.prototype.send;
     originalEc2Send = EC2Client.prototype.send;
@@ -48,197 +50,224 @@ describe('RDSBuilder Unit Tests', () => {
     mock.restoreAll();
   });
 
-  test('returns null when DB instance is not found during discovery', async () => {
-    const err = new Error('not found');
-    err.name = 'DBInstanceNotFound';
-    mockRdsResponses['DescribeDBInstancesCommand'] = err;
+  test("returns null when DB instance is not found during discovery", async () => {
+    const err = new Error("not found");
+    err.name = "DBInstanceNotFound";
+    mockRdsResponses["DescribeDBInstancesCommand"] = err;
 
-    const builder = new RDSBuilder('my-db');
+    const builder = new RDSBuilder("my-db");
     const result = await (builder as any).discoveryPromise;
 
     assert.strictEqual(result, null);
-    assert.strictEqual(rdsCalls[0].commandName, 'DescribeDBInstancesCommand');
+    assert.strictEqual(rdsCalls[0].commandName, "DescribeDBInstancesCommand");
   });
 
-  test('discovers existing instance and populates resolved fields', async () => {
-    mockRdsResponses['DescribeDBInstancesCommand'] = {
+  test("discovers existing instance and populates resolved fields", async () => {
+    mockRdsResponses["DescribeDBInstancesCommand"] = {
       DBInstances: [
         {
-          DBInstanceIdentifier: 'my-db',
-          DBInstanceStatus: 'available',
-          DBInstanceArn: 'arn:aws:rds:us-east-1:123:db:my-db',
-          Endpoint: { Address: 'my-db.xyz.us-east-1.rds.amazonaws.com', Port: 5432 },
+          DBInstanceIdentifier: "my-db",
+          DBInstanceStatus: "available",
+          DBInstanceArn: "arn:aws:rds:us-east-1:123:db:my-db",
+          Endpoint: {
+            Address: "my-db.xyz.us-east-1.rds.amazonaws.com",
+            Port: 5432,
+          },
         },
       ],
     };
 
-    const builder = new RDSBuilder('my-db');
+    const builder = new RDSBuilder("my-db");
     const result = await (builder as any).discoveryPromise;
 
     assert.ok(result);
-    assert.strictEqual(builder.resolvedArn, 'arn:aws:rds:us-east-1:123:db:my-db');
-    assert.strictEqual(builder.resolvedEndpoint, 'my-db.xyz.us-east-1.rds.amazonaws.com');
+    assert.strictEqual(
+      builder.resolvedArn,
+      "arn:aws:rds:us-east-1:123:db:my-db",
+    );
+    assert.strictEqual(
+      builder.resolvedEndpoint,
+      "my-db.xyz.us-east-1.rds.amazonaws.com",
+    );
     assert.strictEqual(builder.resolvedPort, 5432);
   });
 
-  test('performs dry-run without any write API calls', async () => {
-    Config.set({ dryRun: true, providers: { aws: { region: 'us-east-1' } } });
-    const err = new Error('not found');
-    err.name = 'DBInstanceNotFound';
-    mockRdsResponses['DescribeDBInstancesCommand'] = err;
+  test("performs dry-run without any write API calls", async () => {
+    Config.set({ dryRun: true, providers: { aws: { region: "us-east-1" } } });
+    const err = new Error("not found");
+    err.name = "DBInstanceNotFound";
+    mockRdsResponses["DescribeDBInstancesCommand"] = err;
 
-    const builder = new RDSBuilder('my-db');
-    builder.engine({ engine: 'postgres', version: '16' }).size('db.t3.micro').storage(20);
+    const builder = new RDSBuilder("my-db");
+    builder
+      .engine({ engine: "postgres", version: "16" })
+      .size("db.t3.micro")
+      .storage(20);
 
     const result = await builder.deploy();
 
     assert.ok(result);
-    assert.ok(result.endpoint!.includes('DRYRUN'));
+    assert.ok(result.endpoint!.includes("DRYRUN"));
     assert.strictEqual(result.port, 5432);
 
-    const writeCalls = rdsCalls.filter((c) => !c.commandName.startsWith('Describe'));
+    const writeCalls = rdsCalls.filter(
+      (c) => !c.commandName.startsWith("Describe"),
+    );
     assert.strictEqual(writeCalls.length, 0);
   });
 
-  test('creates new DB instance with subnet group and security group', async () => {
-    const err = new Error('not found');
-    err.name = 'DBInstanceNotFound';
-    mockRdsResponses['DescribeDBInstancesCommand'] = err;
+  test("creates new DB instance with subnet group and security group", async () => {
+    const err = new Error("not found");
+    err.name = "DBInstanceNotFound";
+    mockRdsResponses["DescribeDBInstancesCommand"] = err;
 
     // ensureSubnetGroup
-    const noGroup = new Error('not found');
-    noGroup.name = 'DBSubnetGroupNotFoundFault';
-    mockRdsResponses['DescribeDBSubnetGroupsCommand'] = noGroup;
-    mockRdsResponses['CreateDBSubnetGroupCommand'] = {};
+    const noGroup = new Error("not found");
+    noGroup.name = "DBSubnetGroupNotFoundFault";
+    mockRdsResponses["DescribeDBSubnetGroupsCommand"] = noGroup;
+    mockRdsResponses["CreateDBSubnetGroupCommand"] = {};
 
     // ensureSecurityGroup
-    mockEc2Responses['DescribeVpcsCommand'] = { Vpcs: [{ VpcId: 'vpc-1', CidrBlock: '10.0.0.0/16' }] };
-    mockEc2Responses['DescribeSubnetsCommand'] = { Subnets: [{ SubnetId: 'subnet-1' }] };
-    mockEc2Responses['DescribeSecurityGroupsCommand'] = { SecurityGroups: [] };
-    mockEc2Responses['CreateSecurityGroupCommand'] = { GroupId: 'sg-1' };
+    mockEc2Responses["DescribeVpcsCommand"] = {
+      Vpcs: [{ VpcId: "vpc-1", CidrBlock: "10.0.0.0/16" }],
+    };
+    mockEc2Responses["DescribeSubnetsCommand"] = {
+      Subnets: [{ SubnetId: "subnet-1" }],
+    };
+    mockEc2Responses["DescribeSecurityGroupsCommand"] = { SecurityGroups: [] };
+    mockEc2Responses["CreateSecurityGroupCommand"] = { GroupId: "sg-1" };
 
-    // CreateDBInstance — return available immediately so the waitFor resolves
-    mockRdsResponses['CreateDBInstanceCommand'] = {};
+    // CreateDBInstance- return available immediately so the waitFor resolves
+    mockRdsResponses["CreateDBInstanceCommand"] = {};
     let describeCount = 0;
-    mockRdsResponses['DescribeDBInstancesCommand'] = (input: any) => {
+    mockRdsResponses["DescribeDBInstancesCommand"] = (input: any) => {
       describeCount++;
       if (describeCount === 1) {
-        // First call: discovery in constructor — instance not found
-        const notFound = new Error('not found');
-        notFound.name = 'DBInstanceNotFound';
+        // First call: discovery in constructor- instance not found
+        const notFound = new Error("not found");
+        notFound.name = "DBInstanceNotFound";
         throw notFound;
       }
-      // Subsequent calls: waitFor polling — instance now available
+      // Subsequent calls: waitFor polling- instance now available
       return {
         DBInstances: [
           {
-            DBInstanceIdentifier: 'my-db',
-            DBInstanceStatus: 'available',
-            DBInstanceArn: 'arn:aws:rds:us-east-1:123:db:my-db',
-            Endpoint: { Address: 'my-db.xyz.rds.amazonaws.com', Port: 5432 },
+            DBInstanceIdentifier: "my-db",
+            DBInstanceStatus: "available",
+            DBInstanceArn: "arn:aws:rds:us-east-1:123:db:my-db",
+            Endpoint: { Address: "my-db.xyz.rds.amazonaws.com", Port: 5432 },
           },
         ],
       };
     };
 
     // Fast-forward poll timer
-    mock.method(global, 'setTimeout', (fn: any) => fn());
+    mock.method(global, "setTimeout", (fn: any) => fn());
 
-    const builder = new RDSBuilder('my-db');
+    const builder = new RDSBuilder("my-db");
     builder
-      .engine({ engine: 'postgres', version: '16' })
-      .size('db.t3.small')
+      .engine({ engine: "postgres", version: "16" })
+      .size("db.t3.small")
       .storage(40)
-      .credentials('admin', 'secret');
+      .credentials("admin", "secret");
 
     const result = await builder.deploy();
 
     assert.ok(result);
 
-    const createCall = rdsCalls.find((c) => c.commandName === 'CreateDBInstanceCommand');
+    const createCall = rdsCalls.find(
+      (c) => c.commandName === "CreateDBInstanceCommand",
+    );
     assert.ok(createCall);
-    assert.strictEqual(createCall.input.DBInstanceIdentifier, 'my-db');
-    assert.strictEqual(createCall.input.Engine, 'postgres');
-    assert.strictEqual(createCall.input.EngineVersion, '16');
-    assert.strictEqual(createCall.input.DBInstanceClass, 'db.t3.small');
+    assert.strictEqual(createCall.input.DBInstanceIdentifier, "my-db");
+    assert.strictEqual(createCall.input.Engine, "postgres");
+    assert.strictEqual(createCall.input.EngineVersion, "16");
+    assert.strictEqual(createCall.input.DBInstanceClass, "db.t3.small");
     assert.strictEqual(createCall.input.AllocatedStorage, 40);
   });
 
-  test('modifies existing instance on update', async () => {
-    mockRdsResponses['DescribeDBInstancesCommand'] = {
+  test("modifies existing instance on update", async () => {
+    mockRdsResponses["DescribeDBInstancesCommand"] = {
       DBInstances: [
         {
-          DBInstanceIdentifier: 'my-db',
-          DBInstanceStatus: 'available',
-          DBInstanceArn: 'arn:aws:rds:us-east-1:123:db:my-db',
-          Endpoint: { Address: 'my-db.xyz.rds.amazonaws.com', Port: 5432 },
+          DBInstanceIdentifier: "my-db",
+          DBInstanceStatus: "available",
+          DBInstanceArn: "arn:aws:rds:us-east-1:123:db:my-db",
+          Endpoint: { Address: "my-db.xyz.rds.amazonaws.com", Port: 5432 },
         },
       ],
     };
 
     // ensureSubnetGroup (existing)
-    mockRdsResponses['DescribeDBSubnetGroupsCommand'] = {
-      DBSubnetGroups: [{ DBSubnetGroupName: 'puls-my-db-subnet-group' }],
+    mockRdsResponses["DescribeDBSubnetGroupsCommand"] = {
+      DBSubnetGroups: [{ DBSubnetGroupName: "puls-my-db-subnet-group" }],
     };
 
-    const builder = new RDSBuilder('my-db');
+    const builder = new RDSBuilder("my-db");
     builder
-      .engine({ engine: 'postgres', version: '16' })
-      .size('db.t3.medium')
-      .subnets(['subnet-1'])
-      .securityGroups(['sg-1'])
-      .credentials('admin', 'secret');
+      .engine({ engine: "postgres", version: "16" })
+      .size("db.t3.medium")
+      .subnets(["subnet-1"])
+      .securityGroups(["sg-1"])
+      .credentials("admin", "secret");
 
     await builder.deploy();
 
-    const modifyCall = rdsCalls.find((c) => c.commandName === 'ModifyDBInstanceCommand');
+    const modifyCall = rdsCalls.find(
+      (c) => c.commandName === "ModifyDBInstanceCommand",
+    );
     assert.ok(modifyCall);
-    assert.strictEqual(modifyCall.input.DBInstanceClass, 'db.t3.medium');
+    assert.strictEqual(modifyCall.input.DBInstanceClass, "db.t3.medium");
     assert.strictEqual(modifyCall.input.ApplyImmediately, true);
   });
 
-  test('deletes instance on destroy', async () => {
-    mockRdsResponses['DescribeDBInstancesCommand'] = {
+  test("deletes instance on destroy", async () => {
+    mockRdsResponses["DescribeDBInstancesCommand"] = {
       DBInstances: [
         {
-          DBInstanceIdentifier: 'my-db',
-          DBInstanceStatus: 'available',
-          DBInstanceArn: 'arn:aws:rds:us-east-1:123:db:my-db',
-          Endpoint: { Address: 'my-db.xyz.rds.amazonaws.com', Port: 5432 },
+          DBInstanceIdentifier: "my-db",
+          DBInstanceStatus: "available",
+          DBInstanceArn: "arn:aws:rds:us-east-1:123:db:my-db",
+          Endpoint: { Address: "my-db.xyz.rds.amazonaws.com", Port: 5432 },
         },
       ],
     };
 
-    const builder = new RDSBuilder('my-db');
+    const builder = new RDSBuilder("my-db");
     await (builder as any).discoveryPromise;
 
     const result = await builder.destroy();
-    assert.deepStrictEqual(result, { destroyed: 'my-db' });
+    assert.deepStrictEqual(result, { destroyed: "my-db" });
 
-    const deleteCall = rdsCalls.find((c) => c.commandName === 'DeleteDBInstanceCommand');
+    const deleteCall = rdsCalls.find(
+      (c) => c.commandName === "DeleteDBInstanceCommand",
+    );
     assert.ok(deleteCall);
-    assert.strictEqual(deleteCall.input.DBInstanceIdentifier, 'my-db');
+    assert.strictEqual(deleteCall.input.DBInstanceIdentifier, "my-db");
     assert.strictEqual(deleteCall.input.SkipFinalSnapshot, true);
   });
 
-  test('getDiff returns field changes against live state', () => {
-    const err = new Error('not found');
-    err.name = 'DBInstanceNotFound';
-    mockRdsResponses['DescribeDBInstancesCommand'] = err;
+  test("getDiff returns field changes against live state", () => {
+    const err = new Error("not found");
+    err.name = "DBInstanceNotFound";
+    mockRdsResponses["DescribeDBInstancesCommand"] = err;
 
-    const builder = new RDSBuilder('my-db');
-    builder.engine({ engine: 'postgres', version: '16' }).size('db.t3.small').storage(40);
+    const builder = new RDSBuilder("my-db");
+    builder
+      .engine({ engine: "postgres", version: "16" })
+      .size("db.t3.small")
+      .storage(40);
 
     const diffs = builder.getDiff({
-      Engine: 'postgres',
-      EngineVersion: '15',        // differs
-      DBInstanceClass: 'db.t3.micro', // differs
+      Engine: "postgres",
+      EngineVersion: "15", // differs
+      DBInstanceClass: "db.t3.micro", // differs
       AllocatedStorage: 40,
       PubliclyAccessible: false,
     });
 
     assert.strictEqual(diffs.length, 2);
-    assert.ok(diffs.some((d) => d.field === 'engineVersion'));
-    assert.ok(diffs.some((d) => d.field === 'instanceClass'));
+    assert.ok(diffs.some((d) => d.field === "engineVersion"));
+    assert.ok(diffs.some((d) => d.field === "instanceClass"));
   });
 });

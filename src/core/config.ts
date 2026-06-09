@@ -37,6 +37,10 @@ export interface GlobalConfig {
       region?: string;
       sshUser?: string;
     };
+    cloudflare?: {
+      token: string;
+      accountId?: string;
+    };
   };
 }
 

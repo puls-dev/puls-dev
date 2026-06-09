@@ -7,7 +7,7 @@ export abstract class BaseBuilder {
   protected discoveryPromise!: Promise<any>;
   protected sidecars: BaseBuilder[] = [];
   protected _adoptedId: string | null = null;
-  
+
   /** @internal */
   _deployPromise!: Promise<any>;
   /** @internal */
@@ -44,7 +44,7 @@ export abstract class BaseBuilder {
    * naming convention).
    *
    * Outputs that depend on live API response fields (e.g. `out.host`) won't be
-   * resolved automatically — chain `.adoptOutput(key, value)` for each one you
+   * resolved automatically- chain `.adoptOutput(key, value)` for each one you
    * need for cross-stack wiring.
    */
   adoptId(id: string) {
@@ -211,7 +211,9 @@ export abstract class BaseBuilder {
 
   async destroy(): Promise<any> {
     const dryRun = this.isDryRunActive();
-    const adoptedSuffix = this._adoptedId ? ` [adopted id=${this._adoptedId}]` : "";
+    const adoptedSuffix = this._adoptedId
+      ? ` [adopted id=${this._adoptedId}]`
+      : "";
     console.log(`\n🗑️  Destroying "${this.name}"${adoptedSuffix}...`);
     console.log(
       `   ✅ [${dryRun ? "PLAN" : "OK"}] Resource "${this.name}" marked for destruction.`,
@@ -233,7 +235,9 @@ export type BuilderGroup<B extends BaseBuilder> = B[] & {
     : B[K];
 };
 
-export function createBuilderArray<T extends BaseBuilder>(builders: T[]): BuilderGroup<T> {
+export function createBuilderArray<T extends BaseBuilder>(
+  builders: T[],
+): BuilderGroup<T> {
   return new Proxy(builders, {
     get(target, prop, receiver) {
       if (prop in target) {

@@ -2,9 +2,9 @@
 
 Puls ships a composite GitHub Action that brings the standard IaC workflow to any repo:
 
-- **Plan on PR** — runs `puls plan` and posts the output as a comment on every pull request that touches your infra files
-- **Deploy on merge** — runs `puls deploy` automatically when changes land on `main`
-- **Drift detection** — runs `puls diff` on a schedule or in CI, fails the build if live state has drifted from declared intent
+- **Plan on PR**- runs `puls plan` and posts the output as a comment on every pull request that touches your infra files
+- **Deploy on merge**- runs `puls deploy` automatically when changes land on `main`
+- **Drift detection**- runs `puls diff` on a schedule or in CI, fails the build if live state has drifted from declared intent
 
 No third-party SaaS required. Just add a workflow file and your provider secrets.
 
@@ -33,7 +33,7 @@ Create `.github/workflows/puls-plan.yml` and `.github/workflows/puls-deploy.yml`
 
 ### Plan on pull request
 
-Posts the full plan output as a PR comment every time infra files change. The comment is updated in place on subsequent pushes — one comment per stack file per PR.
+Posts the full plan output as a PR comment every time infra files change. The comment is updated in place on subsequent pushes- one comment per stack file per PR.
 
 ```yaml
 # .github/workflows/puls-plan.yml
@@ -71,7 +71,7 @@ jobs:
 The comment looks like this on your PR:
 
 ```
-## Puls `plan` — `infra/production.ts`
+## Puls `plan`- `infra/production.ts`
 
 🌐 Finalizing DNS for "example.com"...
    ✅ A  app.example.com is up to date (→ 1.2.3.4)
@@ -119,7 +119,7 @@ jobs:
 
 ### Drift detection on a schedule
 
-Runs `puls diff` nightly and fails the workflow if any resource has drifted from declared intent — useful for catching manual console changes.
+Runs `puls diff` nightly and fails the workflow if any resource has drifted from declared intent- useful for catching manual console changes.
 
 ```yaml
 # .github/workflows/puls-drift.yml
@@ -172,7 +172,7 @@ jobs:
 
 ## Multiple stacks
 
-Run the action multiple times in the same workflow — each stack file gets its own PR comment (keyed by the `stack-file` path):
+Run the action multiple times in the same workflow- each stack file gets its own PR comment (keyed by the `stack-file` path):
 
 ```yaml
 steps:

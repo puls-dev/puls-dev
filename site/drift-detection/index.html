@@ -857,6 +857,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../providers/cloudflare/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloudflare
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1108,11 +1136,11 @@
 </tr>
 <tr>
 <td><code>missing</code></td>
-<td>Resource not found in the cloud — deploy would create it</td>
+<td>Resource not found in the cloud- deploy would create it</td>
 </tr>
 <tr>
 <td><code>adopted</code></td>
-<td>Resource was imported via <code>.adoptId()</code> — not expected to match</td>
+<td>Resource was imported via <code>.adoptId()</code>- not expected to match</td>
 </tr>
 </tbody>
 </table>
@@ -1204,15 +1232,15 @@
 <tbody>
 <tr>
 <td><code>field</code></td>
-<td><code>string</code> — the property name that differs</td>
+<td><code>string</code>- the property name that differs</td>
 </tr>
 <tr>
 <td><code>declared</code></td>
-<td><code>any</code> — what the stack declares</td>
+<td><code>any</code>- what the stack declares</td>
 </tr>
 <tr>
 <td><code>live</code></td>
-<td><code>any</code> — what the cloud currently has</td>
+<td><code>any</code>- what the cloud currently has</td>
 </tr>
 </tbody>
 </table>
@@ -1293,7 +1321,7 @@
 <p>Providers not in the table (S3, Route53, CloudFront, Firestore, Firebase Auth, etc.) report <code>in-sync</code> or <code>missing</code> only - no field breakdown. Field-level diff can be added incrementally by overriding <code>getDiff(existing)</code> on any builder.</p>
 <hr />
 <h2 id="adding-field-level-diff-to-a-custom-builder">Adding field-level diff to a custom builder</h2>
-<p>Override <code>getDiff(existing)</code> in your builder class. <code>existing</code> is whatever the builder's <code>discoveryPromise</code> resolved to — the raw API response.</p>
+<p>Override <code>getDiff(existing)</code> in your builder class. <code>existing</code> is whatever the builder's <code>discoveryPromise</code> resolved to- the raw API response.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">BaseBuilder</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">FieldDiff</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
@@ -1315,7 +1343,7 @@
 <a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">  </span><span class="p">}</span>
 <a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="p">}</span>
 </code></pre></div>
-<p>Return an empty array for any field that is immutable after creation (e.g. engine type, region) — the diff will skip it silently.</p>
+<p>Return an empty array for any field that is immutable after creation (e.g. engine type, region)- the diff will skip it silently.</p>
 
 
 

@@ -1,6 +1,6 @@
 {
   "name": "puls-dev",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "Intent-driven infrastructure-as-code with eager discovery and no state files.",
   "type": "module",
   "main": "./dist/index.js",
@@ -30,6 +30,10 @@
     "./gcp": {
       "types": "./dist/providers/gcp/index.d.ts",
       "default": "./dist/providers/gcp/index.js"
+    },
+    "./cloudflare": {
+      "types": "./dist/providers/cloudflare/index.d.ts",
+      "default": "./dist/providers/cloudflare/index.js"
     }
   },
   "files": [

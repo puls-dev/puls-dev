@@ -24,7 +24,9 @@ function findTsx(): string | null {
 
 function getVersion(): string {
   try {
-    const pkg = require(path.join(__dirname, "../../package.json")) as { version: string };
+    const pkg = require(path.join(__dirname, "../../package.json")) as {
+      version: string;
+    };
     return pkg.version;
   } catch {
     return "unknown";
@@ -48,7 +50,7 @@ Options:
   --help           Print this help and exit
 
 Examples:
-  npx puls install-shell         # one-time setup — then just use "puls" directly
+  npx puls install-shell         # one-time setup- then just use "puls" directly
   puls plan    infra/staging.ts
   puls deploy  infra/staging.ts --parallel
   puls destroy infra/staging.ts
@@ -89,15 +91,24 @@ if (values.help || positionals.length === 0) {
 
 const [command, userFile] = positionals;
 
-const COMMANDS = ["plan", "deploy", "destroy", "diff", "install-shell", "uninstall-shell"] as const;
+const COMMANDS = [
+  "plan",
+  "deploy",
+  "destroy",
+  "diff",
+  "install-shell",
+  "uninstall-shell",
+] as const;
 type Command = (typeof COMMANDS)[number];
 
 if (!COMMANDS.includes(command as Command)) {
-  console.error(`Error: Unknown command "${command}". Run "puls --help" for usage.`);
+  console.error(
+    `Error: Unknown command "${command}". Run "puls --help" for usage.`,
+  );
   process.exit(1);
 }
 
-// Shell management commands run directly — no stack file needed
+// Shell management commands run directly- no stack file needed
 if (command === "install-shell") {
   installShell();
   process.exit(0);
@@ -151,9 +162,9 @@ child.on("error", (err: NodeJS.ErrnoException) => {
   if (err.code === "ENOENT") {
     console.error(
       "Error: Could not find tsx. Install it in your project:\n\n" +
-      "  npm install --save-dev tsx\n\n" +
-      "or globally:\n\n" +
-      "  npm install -g tsx"
+        "  npm install --save-dev tsx\n\n" +
+        "or globally:\n\n" +
+        "  npm install -g tsx",
     );
   } else {
     console.error(`Error spawning tsx: ${err.message}`);

@@ -49,8 +49,8 @@ Status meanings:
 |--------|---------|
 | `in-sync` | Live state matches declared intent |
 | `drift` | One or more fields differ from what is declared |
-| `missing` | Resource not found in the cloud — deploy would create it |
-| `adopted` | Resource was imported via `.adoptId()` — not expected to match |
+| `missing` | Resource not found in the cloud- deploy would create it |
+| `adopted` | Resource was imported via `.adoptId()`- not expected to match |
 
 ---
 
@@ -96,9 +96,9 @@ if (diff.hasDrift) {
 
 | Field | Type |
 |-------|------|
-| `field` | `string` — the property name that differs |
-| `declared` | `any` — what the stack declares |
-| `live` | `any` — what the cloud currently has |
+| `field` | `string`- the property name that differs |
+| `declared` | `any`- what the stack declares |
+| `live` | `any`- what the cloud currently has |
 
 ---
 
@@ -127,7 +127,7 @@ Providers not in the table (S3, Route53, CloudFront, Firestore, Firebase Auth, e
 
 ## Adding field-level diff to a custom builder
 
-Override `getDiff(existing)` in your builder class. `existing` is whatever the builder's `discoveryPromise` resolved to — the raw API response.
+Override `getDiff(existing)` in your builder class. `existing` is whatever the builder's `discoveryPromise` resolved to- the raw API response.
 
 ```typescript
 import { BaseBuilder } from "puls-dev";
@@ -152,5 +152,4 @@ export class MyBuilder extends BaseBuilder {
 }
 ```
 
-Return an empty array for any field that is immutable after creation (e.g. engine type, region) — the diff will skip it silently.
-
+Return an empty array for any field that is immutable after creation (e.g. engine type, region)- the diff will skip it silently.

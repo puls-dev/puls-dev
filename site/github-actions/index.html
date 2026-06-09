@@ -712,6 +712,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../providers/cloudflare/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloudflare
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -955,9 +983,9 @@
 <h1 id="github-actions-integration">GitHub Actions Integration</h1>
 <p>Puls ships a composite GitHub Action that brings the standard IaC workflow to any repo:</p>
 <ul>
-<li><strong>Plan on PR</strong> — runs <code>puls plan</code> and posts the output as a comment on every pull request that touches your infra files</li>
-<li><strong>Deploy on merge</strong> — runs <code>puls deploy</code> automatically when changes land on <code>main</code></li>
-<li><strong>Drift detection</strong> — runs <code>puls diff</code> on a schedule or in CI, fails the build if live state has drifted from declared intent</li>
+<li><strong>Plan on PR</strong>- runs <code>puls plan</code> and posts the output as a comment on every pull request that touches your infra files</li>
+<li><strong>Deploy on merge</strong>- runs <code>puls deploy</code> automatically when changes land on <code>main</code></li>
+<li><strong>Drift detection</strong>- runs <code>puls diff</code> on a schedule or in CI, fails the build if live state has drifted from declared intent</li>
 </ul>
 <p>No third-party SaaS required. Just add a workflow file and your provider secrets.</p>
 <hr />
@@ -995,7 +1023,7 @@
 <hr />
 <h2 id="workflow-templates">Workflow templates</h2>
 <h3 id="plan-on-pull-request">Plan on pull request</h3>
-<p>Posts the full plan output as a PR comment every time infra files change. The comment is updated in place on subsequent pushes — one comment per stack file per PR.</p>
+<p>Posts the full plan output as a PR comment every time infra files change. The comment is updated in place on subsequent pushes- one comment per stack file per PR.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># .github/workflows/puls-plan.yml</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Puls Plan</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
@@ -1028,7 +1056,7 @@
 <a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">          </span><span class="c1"># AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}</span>
 </code></pre></div>
 <p>The comment looks like this on your PR:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>## Puls `plan` — `infra/production.ts`
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>## Puls `plan`- `infra/production.ts`
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>🌐 Finalizing DNS for &quot;example.com&quot;...
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>   ✅ A  app.example.com is up to date (→ 1.2.3.4)
@@ -1070,7 +1098,7 @@
 <a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">          </span><span class="c1"># AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}</span>
 </code></pre></div>
 <h3 id="drift-detection-on-a-schedule">Drift detection on a schedule</h3>
-<p>Runs <code>puls diff</code> nightly and fails the workflow if any resource has drifted from declared intent — useful for catching manual console changes.</p>
+<p>Runs <code>puls diff</code> nightly and fails the workflow if any resource has drifted from declared intent- useful for catching manual console changes.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># .github/workflows/puls-drift.yml</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Puls Drift Check</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
@@ -1153,7 +1181,7 @@
 </table>
 <hr />
 <h2 id="multiple-stacks">Multiple stacks</h2>
-<p>Run the action multiple times in the same workflow — each stack file gets its own PR comment (keyed by the <code>stack-file</code> path):</p>
+<p>Run the action multiple times in the same workflow- each stack file gets its own PR comment (keyed by the <code>stack-file</code> path):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">steps</span><span class="p">:</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>

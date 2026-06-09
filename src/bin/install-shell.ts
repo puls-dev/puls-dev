@@ -56,7 +56,9 @@ export function installShell(): void {
   // 2. Detect shell config
   const detected = detectShellConfig();
   if (!detected) {
-    console.log(`\n⚠️  Could not detect your shell from $SHELL="${process.env.SHELL ?? ""}".`);
+    console.log(
+      `\n⚠️  Could not detect your shell from $SHELL="${process.env.SHELL ?? ""}".`,
+    );
     console.log(`   Add this line manually to your shell config:\n`);
     console.log(`     export PATH="$HOME/.puls/bin:$PATH"\n`);
     return;
@@ -106,41 +108,49 @@ export function uninstallShell(): void {
       fs.rmdirSync(launcherDir);
       fs.rmdirSync(path.join(home, ".puls"));
     } catch {
-      // Non-empty dirs left behind (user may have other files) — that's fine
+      // Non-empty dirs left behind (user may have other files)- that's fine
     }
   } else {
-    console.log(`   Launcher not found at ${launcherPath} — nothing to remove.`);
+    console.log(`   Launcher not found at ${launcherPath}- nothing to remove.`);
   }
 
   // 2. Remove PATH line from shell config
   const detected = detectShellConfig();
   if (!detected) {
-    console.log(`\n⚠️  Could not detect shell config. Remove the puls PATH line manually.`);
+    console.log(
+      `\n⚠️  Could not detect shell config. Remove the puls PATH line manually.`,
+    );
     return;
   }
 
   const { configFile } = detected;
   if (!fs.existsSync(configFile)) {
-    console.log(`   Shell config not found at ${configFile} — nothing to clean up.`);
+    console.log(
+      `   Shell config not found at ${configFile}- nothing to clean up.`,
+    );
     return;
   }
 
   const content = fs.readFileSync(configFile, "utf8");
   if (!content.includes(MARKER)) {
-    console.log(`   Shell config at ${configFile} has no puls entry — nothing to remove.`);
+    console.log(
+      `   Shell config at ${configFile} has no puls entry- nothing to remove.`,
+    );
     return;
   }
 
   // Remove the marker line and the PATH line that follows it
   const cleaned = content
     .split("\n")
-    .reduce<{ out: string[]; skip: boolean }>((acc, line) => {
-      if (line.trim() === MARKER) return { out: acc.out, skip: true };
-      if (acc.skip) return { out: acc.out, skip: false }; // skip the PATH line
-      return { out: [...acc.out, line], skip: false };
-    }, { out: [], skip: false })
-    .out
-    .join("\n")
+    .reduce<{ out: string[]; skip: boolean }>(
+      (acc, line) => {
+        if (line.trim() === MARKER) return { out: acc.out, skip: true };
+        if (acc.skip) return { out: acc.out, skip: false }; // skip the PATH line
+        return { out: [...acc.out, line], skip: false };
+      },
+      { out: [], skip: false },
+    )
+    .out.join("\n")
     .replace(/\n{3,}/g, "\n\n"); // collapse triple+ blank lines
 
   fs.writeFileSync(configFile, cleaned, "utf8");

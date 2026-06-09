@@ -1,12 +1,12 @@
 # Pulsdev.io
 
-**Intent-driven infrastructure-as-code. Describe what you want — Puls figures out create, update, or skip.**
+**Intent-driven infrastructure-as-code. Describe what you want- Puls figures out create, update, or skip.**
 
 [Live Documentation](https://pulsdev.io/) | [GitHub Actions](docs/github-actions.md) | Matrix|Gitter: **pulsdev.io** ([Join](https://matrix.to/#/#pulsdevio:gitter.im))
 
 > [!IMPORTANT]
 > **Active Pre-1.0 Development**
-> `pulsdev.io` is under active development. APIs and features are evolving — we welcome feedback, bug reports, and contributions!
+> `pulsdev.io` is under active development. APIs and features are evolving- we welcome feedback, bug reports, and contributions!
 
 ```typescript
 @Deploy({ proxmox: CONFIG.STAGING })
@@ -20,7 +20,7 @@ class GameInfra extends Stack {
 }
 ```
 
-No state files. No plan step. Runs against real APIs — idempotent by default.
+No state files. No plan step. Runs against real APIs- idempotent by default.
 
 ---
 
@@ -34,7 +34,7 @@ Declare resource  →  Discovery fires immediately (async)
                   →  deploy() awaits discovery, diffs, acts
 ```
 
-Running the same stack twice is always safe — existing resources are detected and skipped or updated in place.
+Running the same stack twice is always safe- existing resources are detected and skipped or updated in place.
 
 ---
 
@@ -44,7 +44,7 @@ Running the same stack twice is always safe — existing resources are detected 
 npm install puls-dev
 ```
 
-**One-time shell setup** — so you never have to type `npx puls` again:
+**One-time shell setup**- so you never have to type `npx puls` again:
 
 ```bash
 npx puls install-shell
@@ -57,7 +57,7 @@ This adds a `puls` launcher to `~/.puls/bin` and wires it into your shell config
 ## CLI
 
 ```bash
-puls plan    infra/stack.ts          # dry-run — prints what would change, no API writes
+puls plan    infra/stack.ts          # dry-run- prints what would change, no API writes
 puls deploy  infra/stack.ts          # apply the stack
 puls destroy infra/stack.ts          # tear down the stack
 puls diff    infra/stack.ts          # compare declared intent vs live cloud state
@@ -67,7 +67,7 @@ puls install-shell                   # one-time shell setup
 puls uninstall-shell                 # remove shell integration
 ```
 
-Always run `plan` before `deploy` — it activates dry-run mode automatically.
+Always run `plan` before `deploy`- it activates dry-run mode automatically.
 
 ---
 
@@ -155,7 +155,7 @@ class StagingInfra extends Stack {
 
 ### Drift detection
 
-`Stack.diff()` compares every declared resource against its live cloud state — no API writes, structured output:
+`Stack.diff()` compares every declared resource against its live cloud state- no API writes, structured output:
 
 ```bash
 puls diff infra/production.ts
@@ -211,7 +211,7 @@ class Infra extends Stack {
 }
 ```
 
-Outputs resolve lazily — downstream resources unblock the moment their dependency finishes deploying.
+Outputs resolve lazily- downstream resources unblock the moment their dependency finishes deploying.
 
 ### Dry run / plan
 
@@ -220,7 +220,7 @@ Outputs resolve lazily — downstream resources unblock the moment their depende
 class MyStack extends Stack { ... }
 ```
 
-Or via the CLI: `puls plan infra/stack.ts` — no config change required.
+Or via the CLI: `puls plan infra/stack.ts`- no config change required.
 
 ### Protected resources
 
@@ -240,7 +240,7 @@ db = Proxmox.VM("ix-db01")...;  // Puls will refuse to modify or destroy this
 | `@Destroy` | Tear down all resources in the stack |
 | `@DryRun` | Shorthand for `@Deploy({ dryRun: true })` |
 | `@Protected` | Block changes/destruction of that resource |
-| `@Check` | Inventory query — lists all live resources across providers |
+| `@Check` | Inventory query- lists all live resources across providers |
 
 ---
 

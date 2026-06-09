@@ -23,6 +23,10 @@ type ProviderOpts = {
     verifySsl?: boolean;
     sshUser?: string;
   };
+  cloudflare?: {
+    token: string;
+    accountId?: string;
+  };
 };
 
 function applyConfig(opts: ProviderOpts) {
@@ -35,6 +39,8 @@ function applyConfig(opts: ProviderOpts) {
     Config.set({ providers: { aws: { region: opts.region } } });
   if (opts.proxmox)
     Config.set({ providers: { proxmox: opts.proxmox } });
+  if (opts.cloudflare)
+    Config.set({ providers: { cloudflare: opts.cloudflare } });
   if (opts.firebase) {
     const sa = JSON.parse(readFileSync(opts.firebase, "utf8"));
     Config.set({

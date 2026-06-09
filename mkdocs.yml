@@ -51,5 +51,6 @@ nav:
       - DigitalOcean: providers/digitalocean.md
       - Firebase: providers/firebase.md
       - GCP: providers/gcp.md
+      - Cloudflare: providers/cloudflare.md
   - Contributing: contributing.md
   - Roadmap: roadmap.md
