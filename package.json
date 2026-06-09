@@ -44,7 +44,7 @@
     "build": "tsc",
     "postbuild": "node -e \"const fs=require('fs'),f='dist/bin/puls.js',c=fs.readFileSync(f,'utf8');if(!c.startsWith('#!'))fs.writeFileSync(f,'#!/usr/bin/env node\\n'+c);\" && chmod +x dist/bin/puls.js",
     "prepublishOnly": "npm run build",
-    "test": "tsx --test \"src/**/*.test.ts\""
+    "test": "find src -name '*.test.ts' | xargs tsx --test --test-concurrency=1"
   },
   "keywords": [
     "iac",

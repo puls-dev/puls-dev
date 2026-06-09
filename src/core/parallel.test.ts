@@ -228,14 +228,16 @@ describe("Parallel Resource Deployment Unit Tests", () => {
   });
 
   test("decorator option propagation sets configuration values", async () => {
-    // Clear parallel flag
     Config.set({ parallel: false });
-    
-    // We define a decorated simple stack
+
     @Deploy({ parallel: true })
     class SimpleDecoStack extends Stack {}
 
-    // Verify decorator correctly updated global configuration to true
     assert.strictEqual(Config.isParallelActive(), true);
+
+    // @Deploy fires an async stack.deploy() that escapes this test's scope.
+    // Waiting here lets it complete before the test runner serializes results,
+    // preventing IPC stream corruption on the way back to the parent process.
+    await new Promise<void>(resolve => setTimeout(resolve, 50));
   });
 });
