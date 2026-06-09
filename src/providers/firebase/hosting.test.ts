@@ -1,6 +1,8 @@
 import { test, describe, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
+import { gzipSync } from 'node:zlib';
 import { GoogleAuth } from 'google-auth-library';
 import { FirebaseHostingBuilder } from './hosting.js';
 import { Config } from '../../core/config.js';
