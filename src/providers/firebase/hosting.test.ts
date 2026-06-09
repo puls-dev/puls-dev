@@ -197,9 +197,11 @@ describe('FirebaseHostingBuilder Unit Tests', () => {
 
     const populateCall = fetchCalls.find(c => c.method === 'POST' && c.url.endsWith('/versions/v111:populateFiles'));
     assert.ok(populateCall);
-    assert.deepStrictEqual(populateCall.body.files, {
-      '/index.html': '8bde9ea78d892f46c76f95e789dfe2000427a3fb3abff9afd8f6b31456703c1d'
-    });
+    // Hosting hashes the gzip-compressed content. gzipSync embeds a platform-specific OS byte
+    // in the gzip header, so the hash differs between macOS and Linux. Compute it the same way
+    // the production code does so the assertion is always correct regardless of platform.
+    const expectedHash = createHash('sha256').update(gzipSync(Buffer.from('hello from index.html'))).digest('hex');
+    assert.deepStrictEqual(populateCall.body.files, { '/index.html': expectedHash });
 
     const uploadCall = fetchCalls.find(c => c.method === 'POST' && c.url.includes('/upload/v111/mock-hash-index'));
     assert.ok(uploadCall);
