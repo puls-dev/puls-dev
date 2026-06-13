@@ -41,6 +41,14 @@ export interface GlobalConfig {
       token: string;
       accountId?: string;
     };
+    azure?: {
+      clientId: string;
+      clientSecret: string;
+      tenantId: string;
+      subscriptionId: string;
+      defaultLocation?: string;
+      sshUser?: string;
+    };
   };
 }
 

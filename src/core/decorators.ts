@@ -27,6 +27,14 @@ type ProviderOpts = {
     token: string;
     accountId?: string;
   };
+  azure?: {
+    clientId: string;
+    clientSecret: string;
+    tenantId: string;
+    subscriptionId: string;
+    defaultLocation?: string;
+    sshUser?: string;
+  };
 };
 
 function applyConfig(opts: ProviderOpts) {
@@ -41,6 +49,8 @@ function applyConfig(opts: ProviderOpts) {
     Config.set({ providers: { proxmox: opts.proxmox } });
   if (opts.cloudflare)
     Config.set({ providers: { cloudflare: opts.cloudflare } });
+  if (opts.azure)
+    Config.set({ providers: { azure: opts.azure } });
   if (opts.firebase) {
     const sa = JSON.parse(readFileSync(opts.firebase, "utf8"));
     Config.set({

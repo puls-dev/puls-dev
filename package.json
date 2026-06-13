@@ -34,6 +34,10 @@
     "./cloudflare": {
       "types": "./dist/providers/cloudflare/index.d.ts",
       "default": "./dist/providers/cloudflare/index.js"
+    },
+    "./azure": {
+      "types": "./dist/providers/azure/index.d.ts",
+      "default": "./dist/providers/azure/index.js"
     }
   },
   "files": [

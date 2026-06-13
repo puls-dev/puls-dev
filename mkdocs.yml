@@ -52,5 +52,6 @@ nav:
       - Firebase: providers/firebase.md
       - GCP: providers/gcp.md
       - Cloudflare: providers/cloudflare.md
+      - Azure: providers/azure.md
   - Contributing: contributing.md
   - Roadmap: roadmap.md
