@@ -120,8 +120,19 @@ PROXMOX_NODES=pve1,pve2
 PROXMOX_DNS_DOMAIN=internal.example.com
 PROXMOX_DNS_SERVERS=10.0.0.1
 
-# Firebase
+# Firebase / GCP
 FIREBASE_SA=./firebase/service-account.json
+GCP_SA=./gcp/service-account.json
+
+# Cloudflare
+CLOUDFLARE_TOKEN=
+CLOUDFLARE_ACCOUNT_ID=
+
+# Azure
+AZURE_CLIENT_ID=
+AZURE_CLIENT_SECRET=
+AZURE_TENANT_ID=
+AZURE_SUBSCRIPTION_ID=
 ```
 
 All stack files start with `import "dotenv/config"` to load this file.
@@ -141,6 +152,9 @@ instead of an error or a duplicate.
 See the individual provider pages for credentials and constants. Note that you can always [define your own custom types and constants](concepts.md#extensibility--custom-types) if the built-in ones don't suit your needs.
 
 - [AWS](providers/aws.md)
-- [Proxmox](providers/proxmox.md)
+- [Azure](providers/azure.md)
+- [Cloudflare](providers/cloudflare.md)
 - [DigitalOcean](providers/digitalocean.md)
 - [Firebase](providers/firebase.md)
+- [GCP](providers/gcp.md)
+- [Proxmox](providers/proxmox.md)

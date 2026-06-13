@@ -28,6 +28,9 @@ class MyStack extends Stack { ... }
 | `token` | `string` | DigitalOcean API token |
 | `region` | `string` | AWS region |
 | `proxmox` | `ProxmoxConfig` | Full Proxmox connection config |
+| `firebase` | `string` | Path to service account JSON key file |
+| `cloudflare` | `CloudflareConfig` | Cloudflare token & account ID config |
+| `azure` | `AzureConfig` | Azure Service Principal connection config |
 
 ## @DryRun
 

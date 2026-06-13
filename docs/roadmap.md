@@ -90,10 +90,10 @@ class EdgeStack extends Stack {
 }
 ```
 
-- [ ] **Zone + DNS** - hosted zone discovery, full record type support (mirrors Route53 implementation)
-- [ ] **Workers** - deploy a Worker script with routes and env bindings
-- [ ] **KV** - key-value namespace management
-- [ ] **R2** - S3-compatible object storage; useful as a cheaper CloudFront+S3 alternative
+- [x] **Zone + DNS** - hosted zone discovery, full record type support (mirrors Route53 implementation)
+- [x] **Workers** - deploy a Worker script with routes and env bindings
+- [x] **KV** - key-value namespace management
+- [x] **R2** - S3-compatible object storage; useful as a cheaper CloudFront+S3 alternative
 - [ ] **Pages** - static site hosting with preview deployments
 
 ### Hetzner Cloud
@@ -108,11 +108,11 @@ Popular self-hosting alternative to DigitalOcean - similar API shape, easy to ad
 ### Microsoft Azure
 Enterprise cloud provider - critical for corporate environments. Needs resource group management, VM provisioning, and active directory support.
 
-- [ ] **Resource Groups** - basic resource lifecycle boundary
-- [ ] **Azure App Service (`Azure.AppService`)** - PaaS web app provisioning with slots support
-- [ ] **Azure Virtual Machines (`Azure.VM`)** - Compute instances with private virtual network support and universal playbook provisioning
+- [x] **Resource Groups** - basic resource lifecycle boundary
+- [x] **Azure App Service (`Azure.AppService`)** - PaaS web app provisioning with slots support
+- [x] **Azure Virtual Machines (`Azure.VM`)** - Compute instances with private virtual network support and universal playbook provisioning
 - [ ] **Azure SQL Database (`Azure.SQL`)** - Managed databases with automated failover groups
-- [ ] **Azure Blob Storage (`Azure.BlobStorage`)** - Massively scalable object storage
+- [x] **Azure Blob Storage (`Azure.BlobStorage`)** - Massively scalable object storage
 
 ### Akamai
 Enterprise CDN/edge - complex enough to warrant a dedicated maintainer; community-driven.

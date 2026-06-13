@@ -1,6 +1,6 @@
 {
   "name": "puls-dev",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "Intent-driven infrastructure-as-code with eager discovery and no state files.",
   "type": "module",
   "main": "./dist/index.js",

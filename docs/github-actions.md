@@ -22,6 +22,8 @@ In your GitHub repo go to **Settings → Secrets and variables → Actions** and
 | AWS | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` |
 | Proxmox | `PROXMOX_URL`, `PROXMOX_USER`, `PROXMOX_TOKEN_NAME`, `PROXMOX_TOKEN_SECRET` |
 | GCP / Firebase | `GCP_SA` (path or JSON content of service account file) |
+| Cloudflare | `CLOUDFLARE_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` |
+| Azure | `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` |
 
 ### 2. Add the workflow files
 

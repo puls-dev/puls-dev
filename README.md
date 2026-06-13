@@ -76,6 +76,8 @@ Always run `plan` before `deploy`- it activates dry-run mode automatically.
 | Provider | Resources |
 |----------|-----------|
 | **AWS** | EC2, RDS, Lambda, ECS/Fargate, API Gateway, S3, CloudFront, Route53, ACM, SQS, SNS, IAM, CloudWatch, SecretsManager |
+| **Azure** | Resource Groups, Blob Storage, App Service, Virtual Machines |
+| **Cloudflare** | Zone, DNS Records, KV Namespaces, R2 Buckets, Workers |
 | **DigitalOcean** | Droplet, Domain (full DNS), Firewall, Certificate, LoadBalancer, Database, App Platform, VPC, Spaces |
 | **GCP** | Compute VM, Cloud Run, Cloud SQL, Secret Manager, Pub/Sub, Cloud DNS, IAM |
 | **Firebase** | Hosting, Functions, Firestore, Storage, Auth, RemoteConfig, App Check |
@@ -146,6 +148,41 @@ class StagingInfra extends Stack {
   app = Proxmox.VM("ix-app01").image(OS.UBUNTU_24_04).cores(4).memory(8192)
          .ip("10.8.10.51").vlan(2010).sshKey(KEYS)
          .provision("config/default.yaml");
+}
+```
+
+### Azure
+
+```typescript
+import "dotenv/config";
+import { Stack, Deploy } from "puls-dev";
+import { Azure } from "puls-dev/azure";
+
+@Deploy({})
+class AzureStack extends Stack {
+  group   = Azure.ResourceGroup("my-app-rg").location("eastus");
+  storage = Azure.BlobStorage("mystorageacct").resourceGroup(this.group).containerName("uploads");
+  web     = Azure.AppService("my-web-app").resourceGroup(this.group).sku("B1").runtime("NODE|20-lts");
+}
+```
+
+### Cloudflare
+
+```typescript
+import "dotenv/config";
+import { Stack, Deploy } from "puls-dev";
+import { CF } from "puls-dev/cloudflare";
+
+@Deploy({})
+class CloudflareStack extends Stack {
+  zone   = CF.Zone("example.com")
+            .pointer("www", "1.2.3.4", true)
+            .txt("verification", "token123");
+  bucket = CF.R2("app-media");
+  worker = CF.Worker("api-worker")
+            .script("./dist/worker.js")
+            .r2("MEDIA", this.bucket)
+            .route("api.example.com/*");
 }
 ```
 
@@ -264,6 +301,16 @@ PROXMOX_NODES=pve1,pve2
 
 # GCP / Firebase
 GCP_SA=./service-account.json
+
+# Cloudflare
+CLOUDFLARE_TOKEN=
+CLOUDFLARE_ACCOUNT_ID=
+
+# Azure
+AZURE_CLIENT_ID=
+AZURE_CLIENT_SECRET=
+AZURE_TENANT_ID=
+AZURE_SUBSCRIPTION_ID=
 ```
 
 Requires Node 20+.

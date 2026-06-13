@@ -76,6 +76,10 @@ All outputs live under `.out` on each builder - this avoids conflicts with the b
 | DigitalOcean   | `DropletBuilder`| `.out.ip`         | `Output<string>`                       |
 | DigitalOcean   | `DropletBuilder`| `.out.id`         | `Output<number>`                       |
 | AWS            | `Route53Builder`| `.out.zone`       | `Output<{ name: string; id: string }>` |
+| GCP            | `VMBuilder`     | `.out.ip`         | `Output<string>`                       |
+| GCP            | `VMBuilder`     | `.out.id`         | `Output<string>`                       |
+| Azure          | `AzureVMBuilder`| `.out.ip`         | `Output<string>`                       |
+| Azure          | `AzureVMBuilder`| `.out.id`         | `Output<string>`                       |
 
 ---
 

@@ -48,7 +48,7 @@ A new provider must implement:
 6. **Constants** - a types file with named environments, images, sizes, etc.
 7. **Sane defaults** - a resource declared with only a name should be deployable
 
-The existing providers (AWS, DigitalOcean, Proxmox, Firebase) are the reference implementation. When in doubt, look at how they do it.
+The existing providers (AWS, Azure, Cloudflare, DigitalOcean, GCP, Firebase, Proxmox) are the reference implementation. When in doubt, look at how they do it.
 
 ---
 
