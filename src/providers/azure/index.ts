@@ -3,6 +3,10 @@ import { ResourceGroupBuilder } from "./resource_group.js";
 import { BlobStorageBuilder } from "./blob_storage.js";
 import { AppServiceBuilder } from "./app_service.js";
 import { AzureVMBuilder } from "./vm.js";
+import { AzureSQLBuilder } from "./sql.js";
+import { AzureNetworkBuilder } from "./network.js";
+import { AzureDNSBuilder } from "./dns.js";
+import { AzureFunctionBuilder } from "./function.js";
 
 export const Azure = {
   init: (opts: {
@@ -24,6 +28,19 @@ export const Azure = {
   BlobStorage: (name: string) => new BlobStorageBuilder(name),
   AppService: (name: string) => new AppServiceBuilder(name),
   VM: (name: string) => new AzureVMBuilder(name),
+  SQL: (name: string) => new AzureSQLBuilder(name),
+  VirtualNetwork: (name: string) => new AzureNetworkBuilder(name),
+  DNS: (name: string) => new AzureDNSBuilder(name),
+  Function: (name: string) => new AzureFunctionBuilder(name),
 };
 
-export { ResourceGroupBuilder, BlobStorageBuilder, AppServiceBuilder, AzureVMBuilder };
+export {
+  ResourceGroupBuilder,
+  BlobStorageBuilder,
+  AppServiceBuilder,
+  AzureVMBuilder,
+  AzureSQLBuilder,
+  AzureNetworkBuilder,
+  AzureDNSBuilder,
+  AzureFunctionBuilder,
+};

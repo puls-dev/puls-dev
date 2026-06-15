@@ -682,6 +682,33 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../github-actions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub Actions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -696,10 +723,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_13" >
         
           
-          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="">
             
   
   
@@ -717,8 +744,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_12">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1222,8 +1249,19 @@ It is installed automatically as a dev dependency: <code>npm install --save-dev 
 <a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="nv">PROXMOX_DNS_DOMAIN</span><span class="o">=</span>internal.example.com
 <a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="nv">PROXMOX_DNS_SERVERS</span><span class="o">=</span><span class="m">10</span>.0.0.1
 <a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>
-<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="c1"># Firebase</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="c1"># Firebase / GCP</span>
 <a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="nv">FIREBASE_SA</span><span class="o">=</span>./firebase/service-account.json
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="nv">GCP_SA</span><span class="o">=</span>./gcp/service-account.json
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="c1"># Cloudflare</span>
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="nv">CLOUDFLARE_TOKEN</span><span class="o">=</span>
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="nv">CLOUDFLARE_ACCOUNT_ID</span><span class="o">=</span>
+<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a>
+<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a><span class="c1"># Azure</span>
+<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a><span class="nv">AZURE_CLIENT_ID</span><span class="o">=</span>
+<a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a><span class="nv">AZURE_CLIENT_SECRET</span><span class="o">=</span>
+<a id="__codelineno-9-29" name="__codelineno-9-29" href="#__codelineno-9-29"></a><span class="nv">AZURE_TENANT_ID</span><span class="o">=</span>
+<a id="__codelineno-9-30" name="__codelineno-9-30" href="#__codelineno-9-30"></a><span class="nv">AZURE_SUBSCRIPTION_ID</span><span class="o">=</span>
 </code></pre></div>
 <p>All stack files start with <code>import "dotenv/config"</code> to load this file.</p>
 <h2 id="idempotency">Idempotency</h2>
@@ -1235,9 +1273,12 @@ It is installed automatically as a dev dependency: <code>npm install --save-dev 
 <p>See the individual provider pages for credentials and constants. Note that you can always <a href="../concepts/#extensibility--custom-types">define your own custom types and constants</a> if the built-in ones don't suit your needs.</p>
 <ul>
 <li><a href="../providers/aws/">AWS</a></li>
-<li><a href="../providers/proxmox/">Proxmox</a></li>
+<li><a href="../providers/azure/">Azure</a></li>
+<li><a href="../providers/cloudflare/">Cloudflare</a></li>
 <li><a href="../providers/digitalocean/">DigitalOcean</a></li>
 <li><a href="../providers/firebase/">Firebase</a></li>
+<li><a href="../providers/gcp/">GCP</a></li>
+<li><a href="../providers/proxmox/">Proxmox</a></li>
 </ul>
 
 

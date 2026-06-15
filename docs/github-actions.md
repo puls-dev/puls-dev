@@ -204,8 +204,8 @@ steps:
 The same `diff` command is available from the CLI without GitHub:
 
 ```bash
-npx puls diff infra/production.ts
+puls diff infra/production.ts
 
 # Exit 1 if drift detected (useful in pre-push hooks)
-npx puls diff infra/production.ts --fail-on-drift
+puls diff infra/production.ts --fail-on-drift
 ```

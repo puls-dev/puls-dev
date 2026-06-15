@@ -11,8 +11,11 @@ export interface AzureConfig {
   sshUser?: string;
 }
 
-let cachedToken: string | null = null;
-let tokenExpiry = 0;
+interface TokenCacheEntry {
+  token: string;
+  expiry: number;
+}
+const tokenCache = new Map<string, TokenCacheEntry>();
 
 export function resolveAzureConfig(): AzureConfig {
   const isOffline = Config.isOfflineMode() || Config.isGlobalDryRun();
@@ -45,14 +48,15 @@ export function resolveAzureConfig(): AzureConfig {
   );
 }
 
-export async function getAzureToken(): Promise<string> {
+export async function getAzureToken(scope = "https://management.azure.com/.default"): Promise<string> {
   if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
     return "mock-azure-token";
   }
 
   const now = Date.now();
-  if (cachedToken && now < tokenExpiry - 60000) {
-    return cachedToken;
+  const cached = tokenCache.get(scope);
+  if (cached && now < cached.expiry - 60000) {
+    return cached.token;
   }
 
   const { clientId, clientSecret, tenantId } = resolveAzureConfig();
@@ -61,7 +65,7 @@ export async function getAzureToken(): Promise<string> {
     grant_type: "client_credentials",
     client_id: clientId,
     client_secret: clientSecret,
-    scope: "https://management.azure.com/.default",
+    scope,
   });
 
   const res = await fetch(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`, {
@@ -77,10 +81,13 @@ export async function getAzureToken(): Promise<string> {
   }
 
   const data = (await res.json()) as { access_token: string; expires_in: number };
-  cachedToken = data.access_token;
-  tokenExpiry = now + data.expires_in * 1000;
+  const token = data.access_token;
+  tokenCache.set(scope, {
+    token,
+    expiry: now + data.expires_in * 1000,
+  });
 
-  return cachedToken;
+  return token;
 }
 
 function createAzureOfflineMock(method: string, path: string, body?: unknown): any {
@@ -96,7 +103,10 @@ function createAzureOfflineMock(method: string, path: string, body?: unknown): a
           path.includes("/providers/Microsoft.Web/sites/") ||
           path.includes("/providers/Microsoft.Network/networkInterfaces/") ||
           path.includes("/providers/Microsoft.Network/virtualNetworks/") ||
-          path.includes("/providers/Microsoft.Network/publicIPAddresses/")));
+          path.includes("/providers/Microsoft.Network/publicIPAddresses/") ||
+          path.includes("/providers/Microsoft.Sql/servers/") ||
+          path.includes("/providers/Microsoft.Network/dnsZones/") ||
+          path.includes("/providers/Microsoft.Network/networkSecurityGroups/")));
 
     // Check if it's querying list vs specific resource
     const parts = path.split("/");
@@ -112,6 +122,10 @@ function createAzureOfflineMock(method: string, path: string, body?: unknown): a
       lastPart !== "networkInterfaces" &&
       lastPart !== "virtualNetworks" &&
       lastPart !== "publicIPAddresses" &&
+      lastPart !== "servers" &&
+      lastPart !== "dnsZones" &&
+      lastPart !== "networkSecurityGroups" &&
+      lastPart !== "databases" &&
       secondLastPart !== "providers" &&
       !path.endsWith("/containers");
 

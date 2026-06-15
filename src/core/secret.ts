@@ -116,4 +116,34 @@ export class Secret extends Output<string> {
       return Buffer.from(payload.payload.data, "base64").toString("utf8");
     });
   }
+
+  /**
+   * Fetches a secret from Azure Key Vault.
+   * Uses dynamic imports so Azure config/fetch tools are only loaded if this helper is actually called.
+   */
+  static azure(secretName: string, vaultName: string): Secret {
+    return new Secret(secretName, async () => {
+      const { getAzureToken } = await import("../providers/azure/api.js");
+      const isOffline = Config.isOfflineMode() || Config.isGlobalDryRun();
+      if (isOffline) {
+        return "mock-azure-vault-secret-value";
+      }
+
+      const token = await getAzureToken("https://vault.azure.net/.default");
+      const url = `https://${vaultName}.vault.azure.net/secrets/${secretName}?api-version=7.4`;
+
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Azure Key Vault Secret "${secretName}" fetch failed: ${res.status} ${await res.text()}`);
+      }
+
+      const data = (await res.json()) as { value: string };
+      return data.value;
+    });
+  }
 }

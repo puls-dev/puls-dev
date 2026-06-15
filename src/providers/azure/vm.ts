@@ -8,6 +8,7 @@ import { getAzureApi, resolveAzureConfig } from "./api.js";
 import { checkPort, runProvisioner } from "../../core/provisioner.js";
 import { getFileHash } from "../proxmox/hash.js";
 import { ResourceGroupBuilder } from "./resource_group.js";
+import { AzureNetworkBuilder } from "./network.js";
 
 function parseAzureTagsForProvision(val?: string): Record<string, string> {
   if (!val) return {};
@@ -49,6 +50,7 @@ export class AzureVMBuilder extends BaseBuilder {
   };
 
   private _resourceGroup?: ResourceGroupBuilder;
+  private _network?: AzureNetworkBuilder;
   private _location?: string;
   private _size: string = "Standard_B1s";
   private _imagePublisher: string = "Canonical";
@@ -72,6 +74,12 @@ export class AzureVMBuilder extends BaseBuilder {
     this._resourceGroup = rg;
     this.dependsOn(rg);
     this.discoveryPromise = this.discoverVM();
+    return this;
+  }
+
+  network(net: AzureNetworkBuilder) {
+    this._network = net;
+    this.dependsOn(net);
     return this;
   }
 
@@ -251,18 +259,20 @@ export class AzureVMBuilder extends BaseBuilder {
       console.log(`\n🚀 Deploying VM network dependencies for "${this.vmName}"...`);
 
       // 1. Create Virtual Network
-      const vnetName = `vnet-${this.vmName}`;
-      await api.put(
-        `/subscriptions/${sub}/resourceGroups/${rg}/providers/Microsoft.Network/virtualNetworks/${vnetName}`,
-        {
-          location: loc,
-          properties: {
-            addressSpace: { addressPrefixes: ["10.0.0.0/16"] },
-            subnets: [{ name: "default", properties: { addressPrefix: "10.0.0.0/24" } }],
+      if (!this._network) {
+        const vnetName = `vnet-${this.vmName}`;
+        await api.put(
+          `/subscriptions/${sub}/resourceGroups/${rg}/providers/Microsoft.Network/virtualNetworks/${vnetName}`,
+          {
+            location: loc,
+            properties: {
+              addressSpace: { addressPrefixes: ["10.0.0.0/16"] },
+              subnets: [{ name: "default", properties: { addressPrefix: "10.0.0.0/24" } }],
+            },
           },
-        },
-        "2021-05-01"
-      );
+          "2021-05-01"
+        );
+      }
 
       // 2. Create Public IP
       const ipName = `ip-${this.vmName}`;
@@ -278,6 +288,10 @@ export class AzureVMBuilder extends BaseBuilder {
 
       // 3. Create NIC
       const nicName = `nic-${this.vmName}`;
+      const subnetId = this._network
+        ? await this._network.out.subnetId.get()
+        : `/subscriptions/${sub}/resourceGroups/${rg}/providers/Microsoft.Network/virtualNetworks/vnet-${this.vmName}/subnets/default`;
+
       const nicRes = await api.put<any>(
         `/subscriptions/${sub}/resourceGroups/${rg}/providers/Microsoft.Network/networkInterfaces/${nicName}`,
         {
@@ -288,7 +302,7 @@ export class AzureVMBuilder extends BaseBuilder {
                 name: "ipconfig1",
                 properties: {
                   subnet: {
-                    id: `/subscriptions/${sub}/resourceGroups/${rg}/providers/Microsoft.Network/virtualNetworks/${vnetName}/subnets/default`,
+                    id: subnetId,
                   },
                   publicIPAddress: { id: ipRes.id },
                 },
@@ -449,13 +463,15 @@ export class AzureVMBuilder extends BaseBuilder {
     } catch {}
 
     // Delete VNet
-    try {
-      await api.delete(
-        `/subscriptions/${sub}/resourceGroups/${rg}/providers/Microsoft.Network/virtualNetworks/vnet-${this.vmName}`,
-        "2021-05-01"
-      );
-      console.log(`   🗑️  Removed Virtual Network "vnet-${this.vmName}"`);
-    } catch {}
+    if (!this._network) {
+      try {
+        await api.delete(
+          `/subscriptions/${sub}/resourceGroups/${rg}/providers/Microsoft.Network/virtualNetworks/vnet-${this.vmName}`,
+          "2021-05-01"
+        );
+        console.log(`   🗑️  Removed Virtual Network "vnet-${this.vmName}"`);
+      } catch {}
+    }
 
     await this.destroySidecars();
     return { destroyed: this.vmName };

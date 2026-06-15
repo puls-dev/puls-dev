@@ -45,6 +45,7 @@ nav:
   - Parallel Deployments: parallel-deployment.md
   - Resource Adoption: resource-adoption.md
   - Drift Detection: drift-detection.md
+  - GitHub Actions: github-actions.md
   - Providers:
       - AWS: providers/aws.md
       - Proxmox: providers/proxmox.md

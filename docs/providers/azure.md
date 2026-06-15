@@ -1,6 +1,6 @@
 # Microsoft Azure Provider
 
-The Microsoft Azure provider (`puls-dev/azure`) allows you to declaratively provision Resource Groups, Blob Storage, App Services (Web Apps), and Virtual Machines with private networks and universal playbook provisioning.
+The Microsoft Azure provider (`puls-dev/azure`) allows you to declaratively provision Resource Groups, Blob Storage, App Services (Web Apps), logical SQL Databases, standalone Virtual Networks (VNet/Subnet/NSG), DNS zones & record sets, serverless Consumption Function Apps, and direct Azure Key Vault integration.
 
 ## Setup
 
@@ -63,37 +63,78 @@ const storage = Azure.BlobStorage("mystorageacct")
 
 ---
 
-## App Service (Web Apps)
+## SQL Database
 
-Deploy a Linux App Service Web App and its parent App Service Plan.
+Declaratively configure a logical SQL Server and database.
 
 ```typescript
-Azure.AppService("my-web-app")
+const db = Azure.SQL("my-sql-server")
   .resourceGroup(group)
-  .sku("B1") // App Service Plan Sku (e.g. F1, B1, P1v2)
-  .runtime("NODE|18-lts") // Linux FX version runtime
-  .planName("my-app-service-plan"); // default plan-my-web-app
+  .database("my-db") // default: defaultdb
+  .sku("Basic") // default: Basic (low-cost tier)
+  .credentials("dbadmin", Secret.env("DB_PASSWORD")); // username and Secret password
 ```
 
 ---
 
-## Virtual Machines
+## Virtual Network
 
-Provision Virtual Machines with automatic networking sidecar creation (Virtual Network, Subnet, Public IP, and Network Interface Card) and Ansible playbook provisioning.
+Create standalone Virtual Networks (VNet) with associated Subnets and Network Security Groups (NSG) configured with standard inbound rules (e.g. allowing port 22 for SSH).
 
 ```typescript
-Azure.VM("my-prod-server")
+const network = Azure.VirtualNetwork("my-vnet")
   .resourceGroup(group)
-  .size("Standard_B2s") // default Standard_B1s
-  .image("Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest")
-  .sshKey("~/.ssh/id_rsa.pub") // path to public SSH key file or contents
-  .sshUser("azureuser") // default: azureuser
-  .provision("playbooks/nginx.yaml")
-  .forceConfigCheck(); // force Ansible run
+  .addressSpace(["10.0.0.0/16"])
+  .subnet("web-subnet", "10.0.0.0/24");
 ```
 
-### Stateless Change-Aware Provisioning
-Applied playbook hashes are stored directly in the Virtual Machine's **Resource Tags** (using tag `puls-provision`). On every deployment, Puls checks VM tags to determine which playbooks have changed and executes only the new or modified playbooks over SSH, maintaining a 100% stateless configuration footprint.
+### VM Custom Network Binding
+You can assign VMs directly to a standalone Virtual Network rather than letting Puls auto-create network sidecars:
+
+```typescript
+const server = Azure.VM("app-server")
+  .resourceGroup(group)
+  .network(network) // binds VM directly to 'web-subnet' of 'my-vnet'
+  .sshKey("~/.ssh/id_rsa.pub");
+```
+
+---
+
+## DNS Zones
+
+Manage DNS zones and record sets (`A`, `AAAA`, `CNAME`, `MX`, `TXT`) with relative domain name resolution.
+
+```typescript
+const dns = Azure.DNS("mycompany.com")
+  .resourceGroup(group)
+  .pointer("www", "1.2.3.4") // A record
+  .cname("blog", "gh-pages.github.com") // CNAME
+  .txt("verify", "token123");
+```
+
+---
+
+## Function Apps
+
+Deploy serverless Consumption Plan Function Apps.
+
+```typescript
+const func = Azure.Function("my-func-app")
+  .resourceGroup(group)
+  .storage(storage) // binds required storage account
+  .runtime("node") // default worker runtime
+  .env("API_KEY", "secret-value");
+```
+
+---
+
+## Key Vault Secrets
+
+Retrieve secrets securely from Azure Key Vault at deploy time without storing them in code or version control:
+
+```typescript
+const password = Secret.azure("db-password", "my-vault-name");
+```
 
 ---
 
@@ -101,7 +142,7 @@ Applied playbook hashes are stored directly in the Virtual Machine's **Resource 
 
 ```typescript
 import "dotenv/config";
-import { Stack, Deploy } from "puls-dev";
+import { Stack, Deploy, Secret } from "puls-dev";
 import { Azure } from "puls-dev/azure";
 
 @Deploy({ dryRun: false })
@@ -110,23 +151,35 @@ class AzureInfrastructure extends Stack {
   group = Azure.ResourceGroup("my-enterprise-rg")
     .location("westeurope");
 
-  // 2. Storage
+  // 2. Standalone Network
+  network = Azure.VirtualNetwork("prod-vnet")
+    .resourceGroup(this.group)
+    .subnet("default", "10.0.0.0/24");
+
+  // 3. Storage Account
   storage = Azure.BlobStorage("pulsassets")
     .resourceGroup(this.group)
     .containerName("media");
 
-  // 3. Web Service
-  api = Azure.AppService("enterprise-api")
+  // 4. SQL Server with Key Vault password
+  dbPass = Secret.azure("sql-password", "my-kv-vault");
+  db = Azure.SQL("enterprise-db-server")
     .resourceGroup(this.group)
-    .sku("B1")
-    .runtime("NODE|20-lts");
+    .database("prod-db")
+    .credentials("dbadmin", this.dbPass);
 
-  // 4. Compute VM
+  // 5. Function App
+  api = Azure.Function("enterprise-api")
+    .resourceGroup(this.group)
+    .storage(this.storage)
+    .runtime("node");
+
+  // 6. Compute VM linked to Custom Network
   server = Azure.VM("db-replica")
     .resourceGroup(this.group)
+    .network(this.network)
     .size("Standard_B2s")
-    .sshKey("~/.ssh/azure.pub")
-    .provision("playbooks/db-replica.yaml");
+    .sshKey("~/.ssh/azure.pub");
 }
 ```
 
@@ -136,7 +189,9 @@ class AzureInfrastructure extends Stack {
 
 Running a stack teardown (`npx puls destroy`) for Azure:
 
-1. Deletes the Virtual Machines and cleans up their network interface cards (NICs), public IP resources, and Virtual Networks (VNets).
-2. Deletes the App Service Web Apps and App Service Plans.
-3. Deletes the Storage Accounts and containers.
-4. Deletes the parent Resource Groups.
+1. Deletes the Virtual Machines and cleans up their network interfaces, public IPs, and custom VNets.
+2. Deletes the logical SQL servers and databases.
+3. Deletes the Function Apps and App Service Plans.
+4. Deletes the Storage Accounts and containers.
+5. Deletes DNS Zones.
+6. Deletes the parent Resource Groups.

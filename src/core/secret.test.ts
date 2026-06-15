@@ -75,11 +75,13 @@ describe("Secrets at Deploy Time Unit Tests", () => {
     const s2 = Secret.aws("some/aws/secret");
     const s3 = Secret.ssm("/some/ssm/param");
     const s4 = Secret.gcp("some-gcp-secret");
+    const s5 = Secret.azure("some-azure-secret", "some-vault");
 
     assert.strictEqual(await s1.get(), "[SECRET:SOME_ENV]");
     assert.strictEqual(await s2.get(), "[SECRET:some/aws/secret]");
     assert.strictEqual(await s3.get(), "[SECRET:/some/ssm/param]");
     assert.strictEqual(await s4.get(), "[SECRET:some-gcp-secret]");
+    assert.strictEqual(await s5.get(), "[SECRET:some-azure-secret]");
   });
 
   test("Secret.aws resolves value using mocked AWS Secrets Manager", async () => {
@@ -182,5 +184,65 @@ describe("Secrets at Deploy Time Unit Tests", () => {
         fs.unlinkSync(dummySaPath);
       } catch {}
     }
+  });
+
+  test("Secret.azure resolves value using mocked fetch and getAzureToken", async () => {
+    Config.set({
+      providers: {
+        azure: {
+          clientId: "my-client",
+          clientSecret: "my-secret",
+          tenantId: "my-tenant",
+          subscriptionId: "my-sub",
+        },
+      },
+    });
+
+    const originalFetch = globalThis.fetch;
+    let requestedUrl = "";
+    let authHeader = "";
+
+    globalThis.fetch = (async (url: string, init?: RequestInit) => {
+      requestedUrl = url;
+      authHeader = (init?.headers as any)?.["Authorization"] ?? "";
+
+      if (url.includes("login.microsoftonline.com")) {
+        return {
+          ok: true,
+          status: 200,
+          text: async () => JSON.stringify({ access_token: "mocked-azure-kv-token", expires_in: 3600 }),
+          json: async () => ({ access_token: "mocked-azure-kv-token", expires_in: 3600 }),
+        } as Response;
+      }
+
+      if (url.includes("vault.azure.net")) {
+        return {
+          ok: true,
+          status: 200,
+          text: async () => JSON.stringify({ value: "my-azure-vault-secret-payload" }),
+          json: async () => ({ value: "my-azure-vault-secret-payload" }),
+        } as Response;
+      }
+
+      return { ok: false, status: 400 } as Response;
+    }) as any;
+
+    try {
+      const secret = Secret.azure("db-password", "my-kv-vault");
+      const val = await secret.get();
+
+      assert.strictEqual(val, "my-azure-vault-secret-payload");
+      assert.strictEqual(requestedUrl, "https://my-kv-vault.vault.azure.net/secrets/db-password?api-version=7.4");
+      assert.strictEqual(authHeader, "Bearer mocked-azure-kv-token");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test("Secret.azure returns mock value when offline is true", async () => {
+    Config.set({ offline: true });
+    const secret = Secret.azure("db-password", "my-kv-vault");
+    const val = await secret.get();
+    assert.strictEqual(val, "mock-azure-vault-secret-value");
   });
 });
