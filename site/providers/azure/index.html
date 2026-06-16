@@ -901,10 +901,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#app-service-web-apps" class="md-nav__link">
+  <a href="#sql-database" class="md-nav__link">
     <span class="md-ellipsis">
       
-        App Service (Web Apps)
+        SQL Database
       
     </span>
   </a>
@@ -912,22 +912,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#virtual-machines" class="md-nav__link">
+  <a href="#virtual-network" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Virtual Machines
+        Virtual Network
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Virtual Machines">
+    <nav class="md-nav" aria-label="Virtual Network">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#stateless-change-aware-provisioning" class="md-nav__link">
+  <a href="#vm-custom-network-binding" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stateless Change-Aware Provisioning
+        VM Custom Network Binding
       
     </span>
   </a>
@@ -936,6 +936,39 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dns-zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNS Zones
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#function-apps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function Apps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-vault-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Vault Secrets
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1119,10 +1152,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#app-service-web-apps" class="md-nav__link">
+  <a href="#sql-database" class="md-nav__link">
     <span class="md-ellipsis">
       
-        App Service (Web Apps)
+        SQL Database
       
     </span>
   </a>
@@ -1130,22 +1163,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#virtual-machines" class="md-nav__link">
+  <a href="#virtual-network" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Virtual Machines
+        Virtual Network
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Virtual Machines">
+    <nav class="md-nav" aria-label="Virtual Network">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#stateless-change-aware-provisioning" class="md-nav__link">
+  <a href="#vm-custom-network-binding" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stateless Change-Aware Provisioning
+        VM Custom Network Binding
       
     </span>
   </a>
@@ -1154,6 +1187,39 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dns-zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNS Zones
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#function-apps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function Apps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-vault-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Vault Secrets
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1200,7 +1266,7 @@
 
 
 <h1 id="microsoft-azure-provider">Microsoft Azure Provider</h1>
-<p>The Microsoft Azure provider (<code>puls-dev/azure</code>) allows you to declaratively provision Resource Groups, Blob Storage, App Services (Web Apps), and Virtual Machines with private networks and universal playbook provisioning.</p>
+<p>The Microsoft Azure provider (<code>puls-dev/azure</code>) allows you to declaratively provision Resource Groups, Blob Storage, App Services (Web Apps), logical SQL Databases, standalone Virtual Networks (VNet/Subnet/NSG), DNS zones &amp; record sets, serverless Consumption Function Apps, and direct Azure Key Vault integration.</p>
 <h2 id="setup">Setup</h2>
 <p>Authentication uses an <strong>Azure Active Directory Service Principal</strong> with access to your subscription.</p>
 <h3 id="environment-configuration">Environment Configuration</h3>
@@ -1244,66 +1310,104 @@
 Azure Storage Account names must be globally unique, lowercase, alphanumeric, and between 3-24 characters.</p>
 </blockquote>
 <hr />
-<h2 id="app-service-web-apps">App Service (Web Apps)</h2>
-<p>Deploy a Linux App Service Web App and its parent App Service Plan.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">Azure</span><span class="p">.</span><span class="nx">AppService</span><span class="p">(</span><span class="s2">&quot;my-web-app&quot;</span><span class="p">)</span>
+<h2 id="sql-database">SQL Database</h2>
+<p>Declaratively configure a logical SQL Server and database.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nx">SQL</span><span class="p">(</span><span class="s2">&quot;my-sql-server&quot;</span><span class="p">)</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">resourceGroup</span><span class="p">(</span><span class="nx">group</span><span class="p">)</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">sku</span><span class="p">(</span><span class="s2">&quot;B1&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// App Service Plan Sku (e.g. F1, B1, P1v2)</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">runtime</span><span class="p">(</span><span class="s2">&quot;NODE|18-lts&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// Linux FX version runtime</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">planName</span><span class="p">(</span><span class="s2">&quot;my-app-service-plan&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// default plan-my-web-app</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">database</span><span class="p">(</span><span class="s2">&quot;my-db&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// default: defaultdb</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">sku</span><span class="p">(</span><span class="s2">&quot;Basic&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// default: Basic (low-cost tier)</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">credentials</span><span class="p">(</span><span class="s2">&quot;dbadmin&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">Secret</span><span class="p">.</span><span class="nx">env</span><span class="p">(</span><span class="s2">&quot;DB_PASSWORD&quot;</span><span class="p">));</span><span class="w"> </span><span class="c1">// username and Secret password</span>
 </code></pre></div>
 <hr />
-<h2 id="virtual-machines">Virtual Machines</h2>
-<p>Provision Virtual Machines with automatic networking sidecar creation (Virtual Network, Subnet, Public IP, and Network Interface Card) and Ansible playbook provisioning.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nx">Azure</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;my-prod-server&quot;</span><span class="p">)</span>
+<h2 id="virtual-network">Virtual Network</h2>
+<p>Create standalone Virtual Networks (VNet) with associated Subnets and Network Security Groups (NSG) configured with standard inbound rules (e.g. allowing port 22 for SSH).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">network</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nx">VirtualNetwork</span><span class="p">(</span><span class="s2">&quot;my-vnet&quot;</span><span class="p">)</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">resourceGroup</span><span class="p">(</span><span class="nx">group</span><span class="p">)</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">size</span><span class="p">(</span><span class="s2">&quot;Standard_B2s&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// default Standard_B1s</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">image</span><span class="p">(</span><span class="s2">&quot;Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest&quot;</span><span class="p">)</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="s2">&quot;~/.ssh/id_rsa.pub&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// path to public SSH key file or contents</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span><span class="p">.</span><span class="nx">sshUser</span><span class="p">(</span><span class="s2">&quot;azureuser&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// default: azureuser</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;playbooks/nginx.yaml&quot;</span><span class="p">)</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span><span class="p">.</span><span class="nx">forceConfigCheck</span><span class="p">();</span><span class="w"> </span><span class="c1">// force Ansible run</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">addressSpace</span><span class="p">([</span><span class="s2">&quot;10.0.0.0/16&quot;</span><span class="p">])</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">subnet</span><span class="p">(</span><span class="s2">&quot;web-subnet&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;10.0.0.0/24&quot;</span><span class="p">);</span>
 </code></pre></div>
-<h3 id="stateless-change-aware-provisioning">Stateless Change-Aware Provisioning</h3>
-<p>Applied playbook hashes are stored directly in the Virtual Machine's <strong>Resource Tags</strong> (using tag <code>puls-provision</code>). On every deployment, Puls checks VM tags to determine which playbooks have changed and executes only the new or modified playbooks over SSH, maintaining a 100% stateless configuration footprint.</p>
+<h3 id="vm-custom-network-binding">VM Custom Network Binding</h3>
+<p>You can assign VMs directly to a standalone Virtual Network rather than letting Puls auto-create network sidecars:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;app-server&quot;</span><span class="p">)</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">resourceGroup</span><span class="p">(</span><span class="nx">group</span><span class="p">)</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">network</span><span class="p">(</span><span class="nx">network</span><span class="p">)</span><span class="w"> </span><span class="c1">// binds VM directly to &#39;web-subnet&#39; of &#39;my-vnet&#39;</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="s2">&quot;~/.ssh/id_rsa.pub&quot;</span><span class="p">);</span>
+</code></pre></div>
+<hr />
+<h2 id="dns-zones">DNS Zones</h2>
+<p>Manage DNS zones and record sets (<code>A</code>, <code>AAAA</code>, <code>CNAME</code>, <code>MX</code>, <code>TXT</code>) with relative domain name resolution.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">dns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nx">DNS</span><span class="p">(</span><span class="s2">&quot;mycompany.com&quot;</span><span class="p">)</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">resourceGroup</span><span class="p">(</span><span class="nx">group</span><span class="p">)</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">pointer</span><span class="p">(</span><span class="s2">&quot;www&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;1.2.3.4&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// A record</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">cname</span><span class="p">(</span><span class="s2">&quot;blog&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;gh-pages.github.com&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// CNAME</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">txt</span><span class="p">(</span><span class="s2">&quot;verify&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;token123&quot;</span><span class="p">);</span>
+</code></pre></div>
+<hr />
+<h2 id="function-apps">Function Apps</h2>
+<p>Deploy serverless Consumption Plan Function Apps.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nb">Function</span><span class="p">(</span><span class="s2">&quot;my-func-app&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">resourceGroup</span><span class="p">(</span><span class="nx">group</span><span class="p">)</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">storage</span><span class="p">(</span><span class="nx">storage</span><span class="p">)</span><span class="w"> </span><span class="c1">// binds required storage account</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">runtime</span><span class="p">(</span><span class="s2">&quot;node&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// default worker runtime</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">env</span><span class="p">(</span><span class="s2">&quot;API_KEY&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;secret-value&quot;</span><span class="p">);</span>
+</code></pre></div>
+<hr />
+<h2 id="key-vault-secrets">Key Vault Secrets</h2>
+<p>Retrieve secrets securely from Azure Key Vault at deploy time without storing them in code or version control:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Secret</span><span class="p">.</span><span class="nx">azure</span><span class="p">(</span><span class="s2">&quot;db-password&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;my-vault-name&quot;</span><span class="p">);</span>
+</code></pre></div>
 <hr />
 <h2 id="full-example">Full Example</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;dotenv/config&quot;</span><span class="p">;</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Azure</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/azure&quot;</span><span class="p">;</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="kd">class</span><span class="w"> </span><span class="nx">AzureInfrastructure</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="c1">// 1. Resource Group</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">  </span><span class="nx">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nx">ResourceGroup</span><span class="p">(</span><span class="s2">&quot;my-enterprise-rg&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">    </span><span class="p">.</span><span class="nx">location</span><span class="p">(</span><span class="s2">&quot;westeurope&quot;</span><span class="p">);</span>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">  </span><span class="c1">// 2. Storage</span>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">  </span><span class="nx">storage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nx">BlobStorage</span><span class="p">(</span><span class="s2">&quot;pulsassets&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">    </span><span class="p">.</span><span class="nx">resourceGroup</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">group</span><span class="p">)</span>
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">    </span><span class="p">.</span><span class="nx">containerName</span><span class="p">(</span><span class="s2">&quot;media&quot;</span><span class="p">);</span>
-<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>
-<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">  </span><span class="c1">// 3. Web Service</span>
-<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">  </span><span class="nx">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nx">AppService</span><span class="p">(</span><span class="s2">&quot;enterprise-api&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">resourceGroup</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">group</span><span class="p">)</span>
-<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">    </span><span class="p">.</span><span class="nx">sku</span><span class="p">(</span><span class="s2">&quot;B1&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">    </span><span class="p">.</span><span class="nx">runtime</span><span class="p">(</span><span class="s2">&quot;NODE|20-lts&quot;</span><span class="p">);</span>
-<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>
-<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">  </span><span class="c1">// 4. Compute VM</span>
-<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="w">  </span><span class="nx">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;db-replica&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="w">    </span><span class="p">.</span><span class="nx">resourceGroup</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">group</span><span class="p">)</span>
-<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">    </span><span class="p">.</span><span class="nx">size</span><span class="p">(</span><span class="s2">&quot;Standard_B2s&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="w">    </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="s2">&quot;~/.ssh/azure.pub&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="w">    </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;playbooks/db-replica.yaml&quot;</span><span class="p">);</span>
-<a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;dotenv/config&quot;</span><span class="p">;</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="p">,</span><span class="w"> </span><span class="nx">Secret</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Azure</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/azure&quot;</span><span class="p">;</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="kd">class</span><span class="w"> </span><span class="nx">AzureInfrastructure</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">  </span><span class="c1">// 1. Resource Group</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">  </span><span class="nx">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nx">ResourceGroup</span><span class="p">(</span><span class="s2">&quot;my-enterprise-rg&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">    </span><span class="p">.</span><span class="nx">location</span><span class="p">(</span><span class="s2">&quot;westeurope&quot;</span><span class="p">);</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">  </span><span class="c1">// 2. Standalone Network</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">  </span><span class="nx">network</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nx">VirtualNetwork</span><span class="p">(</span><span class="s2">&quot;prod-vnet&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">    </span><span class="p">.</span><span class="nx">resourceGroup</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">group</span><span class="p">)</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">    </span><span class="p">.</span><span class="nx">subnet</span><span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;10.0.0.0/24&quot;</span><span class="p">);</span>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a><span class="w">  </span><span class="c1">// 3. Storage Account</span>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a><span class="w">  </span><span class="nx">storage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nx">BlobStorage</span><span class="p">(</span><span class="s2">&quot;pulsassets&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">resourceGroup</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">group</span><span class="p">)</span>
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a><span class="w">    </span><span class="p">.</span><span class="nx">containerName</span><span class="p">(</span><span class="s2">&quot;media&quot;</span><span class="p">);</span>
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a>
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a><span class="w">  </span><span class="c1">// 4. SQL Server with Key Vault password</span>
+<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a><span class="w">  </span><span class="nx">dbPass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Secret</span><span class="p">.</span><span class="nx">azure</span><span class="p">(</span><span class="s2">&quot;sql-password&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;my-kv-vault&quot;</span><span class="p">);</span>
+<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a><span class="w">  </span><span class="nx">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nx">SQL</span><span class="p">(</span><span class="s2">&quot;enterprise-db-server&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a><span class="w">    </span><span class="p">.</span><span class="nx">resourceGroup</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">group</span><span class="p">)</span>
+<a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a><span class="w">    </span><span class="p">.</span><span class="nx">database</span><span class="p">(</span><span class="s2">&quot;prod-db&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a><span class="w">    </span><span class="p">.</span><span class="nx">credentials</span><span class="p">(</span><span class="s2">&quot;dbadmin&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">dbPass</span><span class="p">);</span>
+<a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a>
+<a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a><span class="w">  </span><span class="c1">// 5. Function App</span>
+<a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a><span class="w">  </span><span class="nx">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nb">Function</span><span class="p">(</span><span class="s2">&quot;enterprise-api&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-30" name="__codelineno-10-30" href="#__codelineno-10-30"></a><span class="w">    </span><span class="p">.</span><span class="nx">resourceGroup</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">group</span><span class="p">)</span>
+<a id="__codelineno-10-31" name="__codelineno-10-31" href="#__codelineno-10-31"></a><span class="w">    </span><span class="p">.</span><span class="nx">storage</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">storage</span><span class="p">)</span>
+<a id="__codelineno-10-32" name="__codelineno-10-32" href="#__codelineno-10-32"></a><span class="w">    </span><span class="p">.</span><span class="nx">runtime</span><span class="p">(</span><span class="s2">&quot;node&quot;</span><span class="p">);</span>
+<a id="__codelineno-10-33" name="__codelineno-10-33" href="#__codelineno-10-33"></a>
+<a id="__codelineno-10-34" name="__codelineno-10-34" href="#__codelineno-10-34"></a><span class="w">  </span><span class="c1">// 6. Compute VM linked to Custom Network</span>
+<a id="__codelineno-10-35" name="__codelineno-10-35" href="#__codelineno-10-35"></a><span class="w">  </span><span class="nx">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Azure</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;db-replica&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-36" name="__codelineno-10-36" href="#__codelineno-10-36"></a><span class="w">    </span><span class="p">.</span><span class="nx">resourceGroup</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">group</span><span class="p">)</span>
+<a id="__codelineno-10-37" name="__codelineno-10-37" href="#__codelineno-10-37"></a><span class="w">    </span><span class="p">.</span><span class="nx">network</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">network</span><span class="p">)</span>
+<a id="__codelineno-10-38" name="__codelineno-10-38" href="#__codelineno-10-38"></a><span class="w">    </span><span class="p">.</span><span class="nx">size</span><span class="p">(</span><span class="s2">&quot;Standard_B2s&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-39" name="__codelineno-10-39" href="#__codelineno-10-39"></a><span class="w">    </span><span class="p">.</span><span class="nx">sshKey</span><span class="p">(</span><span class="s2">&quot;~/.ssh/azure.pub&quot;</span><span class="p">);</span>
+<a id="__codelineno-10-40" name="__codelineno-10-40" href="#__codelineno-10-40"></a><span class="p">}</span>
 </code></pre></div>
 <hr />
 <h2 id="teardown-destroy">Teardown (destroy)</h2>
 <p>Running a stack teardown (<code>npx puls destroy</code>) for Azure:</p>
 <ol>
-<li>Deletes the Virtual Machines and cleans up their network interface cards (NICs), public IP resources, and Virtual Networks (VNets).</li>
-<li>Deletes the App Service Web Apps and App Service Plans.</li>
+<li>Deletes the Virtual Machines and cleans up their network interfaces, public IPs, and custom VNets.</li>
+<li>Deletes the logical SQL servers and databases.</li>
+<li>Deletes the Function Apps and App Service Plans.</li>
 <li>Deletes the Storage Accounts and containers.</li>
+<li>Deletes DNS Zones.</li>
 <li>Deletes the parent Resource Groups.</li>
 </ol>
 

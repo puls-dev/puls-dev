@@ -46,8 +46,8 @@ export class VMBuilder extends ProxmoxBaseBuilder {
         try {
           const config = await pm.get<any>(`/nodes/${match.node}/qemu/${match.vmid}/config`);
           match.description = config.description ?? "";
-          match.cfgCores = config.cores;
-          match.cfgMemory = config.memory;
+          match.cfgCores = config.cores !== undefined ? Number(config.cores) : undefined;
+          match.cfgMemory = config.memory !== undefined ? Number(config.memory) : undefined;
           match.cfgMachine = config.machine ?? "q35";
         } catch (err: any) {
           console.warn(`   ⚠️  Could not fetch VM config for ${match.vmid}: ${err.message}`);
