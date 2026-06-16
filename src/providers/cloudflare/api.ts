@@ -85,7 +85,7 @@ export class CloudflareApiClient {
     const context = resourceContextStorage.getStore();
     const abortSignal = context?.abortSignal;
 
-    if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+    if (Config.isOfflineMode() || (Config.isGlobalDryRun() && this.token === "mock-cf-token")) {
       return Promise.resolve(this.createCfOfflineMock("GET", path) as T);
     }
 

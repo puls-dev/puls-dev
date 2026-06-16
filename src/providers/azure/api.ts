@@ -49,8 +49,15 @@ export function resolveAzureConfig(): AzureConfig {
 }
 
 export async function getAzureToken(scope = "https://management.azure.com/.default"): Promise<string> {
-  if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+  if (Config.isOfflineMode()) {
     return "mock-azure-token";
+  }
+  if (Config.isGlobalDryRun()) {
+    const cfg = Config.get().providers.azure;
+    const hasCreds = cfg?.clientId || process.env.AZURE_CLIENT_ID;
+    if (!hasCreds) {
+      return "mock-azure-token";
+    }
   }
 
   const now = Date.now();
@@ -182,7 +189,10 @@ export class AzureApiClient {
     const context = resourceContextStorage.getStore();
     const abortSignal = context?.abortSignal;
 
-    if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+    const isWrite = method !== "GET";
+    const isMockClient = Config.isOfflineMode() || (Config.isGlobalDryRun() && !(Config.get().providers.azure?.clientId || process.env.AZURE_CLIENT_ID));
+
+    if (Config.isOfflineMode() || (Config.isGlobalDryRun() && (isWrite || isMockClient))) {
       return Promise.resolve(createAzureOfflineMock(method, path, body) as T);
     }
 

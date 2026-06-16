@@ -62,7 +62,9 @@ export class ProxmoxApiClient {
     const context = resourceContextStorage.getStore();
     const abortSignal = context?.abortSignal;
 
-    if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+    const isWrite = method !== "GET";
+    const isMockClient = this.baseUrl.includes("proxmox.invalid");
+    if (Config.isOfflineMode() || (Config.isGlobalDryRun() && (isWrite || isMockClient))) {
       return Promise.resolve(this.createProxmoxOfflineMock(method, path, body));
     }
 

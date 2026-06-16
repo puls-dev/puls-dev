@@ -74,7 +74,7 @@ export class DoApiClient {
     const context = resourceContextStorage.getStore();
     const abortSignal = context?.abortSignal;
 
-    if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+    if (Config.isOfflineMode() || (Config.isGlobalDryRun() && this.token === "mock-do-token")) {
       return Promise.resolve(this.createDoOfflineMock('GET', path) as T);
     }
 

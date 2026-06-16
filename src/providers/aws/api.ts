@@ -84,7 +84,16 @@ function wrapClient<T extends { send: Function }>(client: T): T {
     const context = resourceContextStorage.getStore();
     const abortSignal = context?.abortSignal;
 
-    if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+    const name = command.constructor.name;
+    const isWrite = !(
+      name.startsWith("List") ||
+      name.startsWith("Get") ||
+      name.startsWith("Describe") ||
+      name.startsWith("Head") ||
+      name.startsWith("Search")
+    );
+
+    if (Config.isOfflineMode() || (Config.isGlobalDryRun() && isWrite)) {
       return Promise.resolve(createAwsOfflineMock(command));
     }
 

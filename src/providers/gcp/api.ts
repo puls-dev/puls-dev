@@ -106,8 +106,18 @@ export function getRegion(): string {
 }
 
 export async function getGCPToken(scopes: string[]): Promise<string> {
-  if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+  if (Config.isOfflineMode()) {
     return "mock-gcp-token";
+  }
+  if (Config.isGlobalDryRun()) {
+    try {
+      const cfg = resolveGCPConfig();
+      if (cfg.projectId === "mock-gcp-project") {
+        return "mock-gcp-token";
+      }
+    } catch {
+      return "mock-gcp-token";
+    }
   }
   const { serviceAccountPath } = resolveGCPConfig();
   const auth = new GoogleAuth({ keyFile: serviceAccountPath, scopes });
@@ -174,7 +184,17 @@ export async function gcpFetch(base: string, path: string, opts: RequestInit = {
   const context = resourceContextStorage.getStore();
   const abortSignal = context?.abortSignal;
 
-  if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+  const method = opts.method ?? "GET";
+  const isWrite = method !== "GET";
+  let isMockClient = false;
+  try {
+    const cfg = resolveGCPConfig();
+    if (cfg.projectId === "mock-gcp-project") isMockClient = true;
+  } catch {
+    isMockClient = true;
+  }
+
+  if (Config.isOfflineMode() || (Config.isGlobalDryRun() && (isWrite || isMockClient))) {
     return Promise.resolve(createGcpOfflineMock(base, path, opts));
   }
 

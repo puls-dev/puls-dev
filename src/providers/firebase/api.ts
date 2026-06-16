@@ -28,8 +28,18 @@ export function getProjectId(): string {
 }
 
 export async function getFirebaseToken(scopes: string[]): Promise<string> {
-  if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+  if (Config.isOfflineMode()) {
     return "mock-firebase-token";
+  }
+  if (Config.isGlobalDryRun()) {
+    try {
+      const cfg = resolveFirebaseConfig();
+      if (cfg.projectId === "mock-firebase-project") {
+        return "mock-firebase-token";
+      }
+    } catch {
+      return "mock-firebase-token";
+    }
   }
   const { serviceAccountPath } = resolveFirebaseConfig();
   const auth = new GoogleAuth({ keyFile: serviceAccountPath, scopes });
@@ -67,7 +77,17 @@ export async function hostingFetch(path: string, opts: RequestInit = {}): Promis
   const context = resourceContextStorage.getStore();
   const abortSignal = context?.abortSignal;
 
-  if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+  const method = opts.method ?? "GET";
+  const isWrite = method !== "GET";
+  let isMockClient = false;
+  try {
+    const cfg = resolveFirebaseConfig();
+    if (cfg.projectId === "mock-firebase-project") isMockClient = true;
+  } catch {
+    isMockClient = true;
+  }
+
+  if (Config.isOfflineMode() || (Config.isGlobalDryRun() && (isWrite || isMockClient))) {
     return Promise.resolve(createFirebaseOfflineMock(path, opts));
   }
 
@@ -103,7 +123,17 @@ export async function cloudFetch(base: string, path: string, opts: RequestInit =
   const context = resourceContextStorage.getStore();
   const abortSignal = context?.abortSignal;
 
-  if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
+  const method = opts.method ?? "GET";
+  const isWrite = method !== "GET";
+  let isMockClient = false;
+  try {
+    const cfg = resolveFirebaseConfig();
+    if (cfg.projectId === "mock-firebase-project") isMockClient = true;
+  } catch {
+    isMockClient = true;
+  }
+
+  if (Config.isOfflineMode() || (Config.isGlobalDryRun() && (isWrite || isMockClient))) {
     return Promise.resolve(createFirebaseOfflineMock(path, opts));
   }
 
