@@ -32,4 +32,4 @@ export const OS = {
   DEBIAN_12: "debian-12",
 } as const;
 
-export type OSImage = (typeof OS)[keyof typeof OS];
+export type OSImage = (typeof OS)[keyof typeof OS] | (string & {}) | number;

@@ -141,14 +141,15 @@ export class TemplateBuilder extends ProxmoxBaseBuilder {
 
     // Lookup base image template
     const resources = await pm.get<any[]>("/cluster/resources?type=vm");
-    const isVmid = this._baseImage && /^\d+$/.test(this._baseImage);
-    const baseTemplate = this._baseImage
+    const baseImageStr = this._baseImage ? String(this._baseImage) : undefined;
+    const isVmid = baseImageStr && /^\d+$/.test(baseImageStr);
+    const baseTemplate = baseImageStr
       ? (resources ?? []).find(
           (r) =>
             r.template === 1 &&
             (isVmid
-              ? String(r.vmid) === this._baseImage
-              : r.name?.includes(this._baseImage)),
+              ? String(r.vmid) === baseImageStr
+              : r.name?.includes(baseImageStr)),
         )
       : null;
 
