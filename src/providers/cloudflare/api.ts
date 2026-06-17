@@ -52,6 +52,34 @@ export class CloudflareApiClient {
       }
       return { result: { id: "mock-route-id" } };
     }
+    if (path.includes("/pages/projects")) {
+      if (method === "GET") {
+        if (path.endsWith("/pages/projects")) {
+          return { result: [] };
+        }
+        if (path.includes("/domains")) {
+          return { result: [] };
+        }
+        return {
+          result: {
+            name: "mock-project",
+            production_branch: "main",
+            subdomain: "mock-project.pages.dev"
+          }
+        };
+      }
+      if (method === "POST" && path.includes("/domains")) {
+        return { result: { name: "mock-domain.com" } };
+      }
+      return {
+        result: {
+          name: "mock-project",
+          production_branch: "main",
+          subdomain: "mock-project.pages.dev"
+        }
+      };
+    }
+
     if (path.includes("/r2/buckets")) {
       if (method === "GET") {
         return { result: { buckets: [] } };

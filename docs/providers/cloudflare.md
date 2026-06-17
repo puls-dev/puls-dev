@@ -131,6 +131,26 @@ Puls parses target route patterns to automatically detect the parent DNS zone (e
 
 ---
 
+## Cloudflare Pages
+
+Deploy static sites and single-page applications (SPAs) with custom domains and branch configurations:
+
+```typescript
+CF.Pages("my-frontend-app")
+  .source("./dist") // Local directory containing built assets
+  .branch("main") // Production branch (default: "main")
+  .domain("my-cool-app.com") // Associated custom domains
+  .domain("www.my-cool-app.com");
+```
+
+### Direct Asset Uploads
+Puls utilizes the official Wrangler CLI under the hood to perform direct asset uploads. When the stack is deployed:
+1. Puls verifies the project exists (creating it via the Cloudflare REST API if it is missing).
+2. It hashes and uploads your static files to Cloudflare Pages.
+3. It maps and reconciles custom domains (adding new ones and removing obsolete ones).
+
+---
+
 ## Full Example
 
 Below is a complete Puls stack using Cloudflare:

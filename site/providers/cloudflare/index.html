@@ -951,6 +951,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cloudflare-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloudflare Pages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cloudflare Pages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#direct-asset-uploads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direct Asset Uploads
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#full-example" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1236,6 +1264,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cloudflare-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloudflare Pages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cloudflare Pages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#direct-asset-uploads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direct Asset Uploads
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#full-example" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1370,31 +1426,45 @@
 <h3 id="route-reconciliation">Route Reconciliation</h3>
 <p>Puls parses target route patterns to automatically detect the parent DNS zone (e.g., matching <code>api.example.com/*</code> or <code>example.com/api/*</code> against <code>example.com</code>). It then reconciles the worker routes on those zones on every deployment.</p>
 <hr />
+<h2 id="cloudflare-pages">Cloudflare Pages</h2>
+<p>Deploy static sites and single-page applications (SPAs) with custom domains and branch configurations:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nx">CF</span><span class="p">.</span><span class="nx">Pages</span><span class="p">(</span><span class="s2">&quot;my-frontend-app&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="p">.</span><span class="nx">source</span><span class="p">(</span><span class="s2">&quot;./dist&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// Local directory containing built assets</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="p">.</span><span class="nx">branch</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// Production branch (default: &quot;main&quot;)</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="p">.</span><span class="nx">domain</span><span class="p">(</span><span class="s2">&quot;my-cool-app.com&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// Associated custom domains</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span><span class="p">.</span><span class="nx">domain</span><span class="p">(</span><span class="s2">&quot;www.my-cool-app.com&quot;</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="direct-asset-uploads">Direct Asset Uploads</h3>
+<p>Puls utilizes the official Wrangler CLI under the hood to perform direct asset uploads. When the stack is deployed:
+1. Puls verifies the project exists (creating it via the Cloudflare REST API if it is missing).
+2. It hashes and uploads your static files to Cloudflare Pages.
+3. It maps and reconciles custom domains (adding new ones and removing obsolete ones).</p>
+<hr />
 <h2 id="full-example">Full Example</h2>
 <p>Below is a complete Puls stack using Cloudflare:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;dotenv/config&quot;</span><span class="p">;</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">CF</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/cloudflare&quot;</span><span class="p">;</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="kd">class</span><span class="w"> </span><span class="nx">CloudflareInfra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span><span class="c1">// 1. Storage &amp; Databases</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span><span class="nx">cache</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">CF</span><span class="p">.</span><span class="nx">KV</span><span class="p">(</span><span class="s2">&quot;prod-cache&quot;</span><span class="p">);</span>
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="nx">bucket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">CF</span><span class="p">.</span><span class="nx">R2</span><span class="p">(</span><span class="s2">&quot;prod-assets&quot;</span><span class="p">);</span>
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>
-<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">  </span><span class="c1">// 2. DNS Zone and Records</span>
-<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">  </span><span class="nx">zone</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">CF</span><span class="p">.</span><span class="nx">Zone</span><span class="p">(</span><span class="s2">&quot;my-cool-app.com&quot;</span><span class="p">)</span>
-<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">    </span><span class="p">.</span><span class="nx">pointer</span><span class="p">(</span><span class="s2">&quot;www&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;185.199.108.153&quot;</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span><span class="w"> </span><span class="c1">// GitHub Pages IP</span>
-<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">    </span><span class="p">.</span><span class="nx">txt</span><span class="p">(</span><span class="s2">&quot;_github-pages-challenge&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;challenge-value&quot;</span><span class="p">);</span>
-<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>
-<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">  </span><span class="c1">// 3. Worker Application</span>
-<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">  </span><span class="nx">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">CF</span><span class="p">.</span><span class="nx">Worker</span><span class="p">(</span><span class="s2">&quot;main-api&quot;</span><span class="p">)</span>
-<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">script</span><span class="p">(</span><span class="s2">&quot;./build/index.js&quot;</span><span class="p">)</span>
-<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="w">    </span><span class="p">.</span><span class="nx">kv</span><span class="p">(</span><span class="s2">&quot;CACHE&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">cache</span><span class="p">)</span>
-<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="w">    </span><span class="p">.</span><span class="nx">r2</span><span class="p">(</span><span class="s2">&quot;ASSETS&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">bucket</span><span class="p">)</span>
-<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="w">    </span><span class="p">.</span><span class="nx">env</span><span class="p">(</span><span class="s2">&quot;ENVIRONMENT&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">)</span>
-<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="w">    </span><span class="p">.</span><span class="nx">route</span><span class="p">(</span><span class="s2">&quot;api.my-cool-app.com/*&quot;</span><span class="p">);</span>
-<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;dotenv/config&quot;</span><span class="p">;</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">CF</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/cloudflare&quot;</span><span class="p">;</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="kd">class</span><span class="w"> </span><span class="nx">CloudflareInfra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">  </span><span class="c1">// 1. Storage &amp; Databases</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">  </span><span class="nx">cache</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">CF</span><span class="p">.</span><span class="nx">KV</span><span class="p">(</span><span class="s2">&quot;prod-cache&quot;</span><span class="p">);</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">  </span><span class="nx">bucket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">CF</span><span class="p">.</span><span class="nx">R2</span><span class="p">(</span><span class="s2">&quot;prod-assets&quot;</span><span class="p">);</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">  </span><span class="c1">// 2. DNS Zone and Records</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">  </span><span class="nx">zone</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">CF</span><span class="p">.</span><span class="nx">Zone</span><span class="p">(</span><span class="s2">&quot;my-cool-app.com&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">    </span><span class="p">.</span><span class="nx">pointer</span><span class="p">(</span><span class="s2">&quot;www&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;185.199.108.153&quot;</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span><span class="w"> </span><span class="c1">// GitHub Pages IP</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">    </span><span class="p">.</span><span class="nx">txt</span><span class="p">(</span><span class="s2">&quot;_github-pages-challenge&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;challenge-value&quot;</span><span class="p">);</span>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a><span class="w">  </span><span class="c1">// 3. Worker Application</span>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a><span class="w">  </span><span class="nx">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">CF</span><span class="p">.</span><span class="nx">Worker</span><span class="p">(</span><span class="s2">&quot;main-api&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="w">    </span><span class="p">.</span><span class="nx">script</span><span class="p">(</span><span class="s2">&quot;./build/index.js&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a><span class="w">    </span><span class="p">.</span><span class="nx">kv</span><span class="p">(</span><span class="s2">&quot;CACHE&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">cache</span><span class="p">)</span>
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a><span class="w">    </span><span class="p">.</span><span class="nx">r2</span><span class="p">(</span><span class="s2">&quot;ASSETS&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">bucket</span><span class="p">)</span>
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a><span class="w">    </span><span class="p">.</span><span class="nx">env</span><span class="p">(</span><span class="s2">&quot;ENVIRONMENT&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a><span class="w">    </span><span class="p">.</span><span class="nx">route</span><span class="p">(</span><span class="s2">&quot;api.my-cool-app.com/*&quot;</span><span class="p">);</span>
+<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a><span class="p">}</span>
 </code></pre></div>
 <hr />
 <h2 id="teardown-destroy">Teardown (destroy)</h2>
