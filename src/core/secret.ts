@@ -146,4 +146,46 @@ export class Secret extends Output<string> {
       return data.value;
     });
   }
+
+  /**
+   * Transforms this Secret by extracting a specific JSON key from its value.
+   */
+  jsonKey(key: string): Output<string> {
+    return this.apply(val => {
+      const parsed = extractJsonKey(val, key);
+      if (parsed === null) {
+        throw new Error(`Failed to extract JSON key "${key}" from secret "${this.secretName}"`);
+      }
+      return parsed;
+    });
+  }
 }
+
+export function extractJsonKey(value: string | null, key: string): string | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (parsed && typeof parsed === "object") {
+      return parsed[key] !== undefined ? String(parsed[key]) : null;
+    }
+  } catch {}
+
+  try {
+    const normalized = trimmed.replace(/'/g, '"');
+    const parsed = JSON.parse(normalized);
+    if (parsed && typeof parsed === "object") {
+      return parsed[key] !== undefined ? String(parsed[key]) : null;
+    }
+  } catch {}
+
+  const escapedKey = key.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+  const match = trimmed.match(new RegExp(`(?:['"]?${escapedKey}['"]?\\s*:\\s*['"])([^'"]+)`));
+  if (match && match[1]) {
+    return match[1];
+  }
+
+  return null;
+}
+

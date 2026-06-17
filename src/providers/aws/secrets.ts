@@ -7,21 +7,22 @@ import {
 } from "@aws-sdk/client-secrets-manager";
 import { BaseBuilder } from "../../core/resource.js";
 import { getSecretsClient } from "./api.js";
-import { resolvedSecrets } from "../../core/secret.js";
-
+import { resolvedSecrets, extractJsonKey } from "../../core/secret.js";
+ 
 export class SecretsBuilder extends BaseBuilder {
   private _value?: string;
   private _description?: string;
   private _forceDelete: boolean = false;
   private _pendingDeletion: boolean = false;
+  private _jsonKey?: string;
   resolvedValue: string | null = null;
   resolvedArn: string | null = null;
-
+ 
   constructor(secretId: string) {
     super(secretId);
     this.discoveryPromise = this.fetchSecret(secretId);
   }
-
+ 
   private async fetchSecret(secretId: string): Promise<any> {
     try {
       const result = await getSecretsClient().send(
@@ -44,9 +45,19 @@ export class SecretsBuilder extends BaseBuilder {
     }
   }
 
+  jsonKey(key: string) {
+    this._jsonKey = key;
+    return this;
+  }
+ 
   // Awaits eager discovery - used by resolveEnvVars so callers don't need discoveryPromise directly
-  async awaitValue(): Promise<string | null> {
+  async awaitValue(key?: string): Promise<string | null> {
     await this.discoveryPromise;
+    if (this.resolvedValue === null) return null;
+    const targetKey = key ?? this._jsonKey;
+    if (targetKey) {
+      return extractJsonKey(this.resolvedValue, targetKey);
+    }
     return this.resolvedValue;
   }
 

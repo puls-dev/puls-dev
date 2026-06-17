@@ -311,4 +311,38 @@ describe("GCPSecretBuilder Unit Tests", () => {
     assert.ok(dbPassEnv);
     assert.strictEqual(dbPassEnv.value, "mypassword"); // Successfully resolved!
   });
+
+  test("jsonKey extracts keys from JSON, single-quoted dicts, and malformed strings", async () => {
+    mockResponses["GET /secrets/json-sec"] = {
+      status: 200,
+      body: { name: "projects/my-gcp-project/secrets/json-sec" },
+    };
+
+    // 1. Standard double-quoted JSON
+    mockResponses["GET /secrets/json-sec/versions/latest:access"] = {
+      status: 200,
+      body: { payload: { data: Buffer.from('{"key1":"val1","key2":42}').toString("base64") } },
+    };
+    const b1 = new GCPSecretBuilder("json-sec").jsonKey("key1");
+    assert.strictEqual(await b1.awaitValue(), "val1");
+
+    const b2 = new GCPSecretBuilder("json-sec").jsonKey("key2");
+    assert.strictEqual(await b2.awaitValue(), "42");
+
+    // 2. Python/Ansible single-quoted representation
+    mockResponses["GET /secrets/json-sec/versions/latest:access"] = {
+      status: 200,
+      body: { payload: { data: Buffer.from("{'key1': 'val_single', 'key2': 'val2'}").toString("base64") } },
+    };
+    const b3 = new GCPSecretBuilder("json-sec").jsonKey("key1");
+    assert.strictEqual(await b3.awaitValue(), "val_single");
+
+    // 3. Regex match fallback for other formats
+    mockResponses["GET /secrets/json-sec/versions/latest:access"] = {
+      status: 200,
+      body: { payload: { data: Buffer.from("random text key1: 'regex_val' other text").toString("base64") } },
+    };
+    const b4 = new GCPSecretBuilder("json-sec").jsonKey("key1");
+    assert.strictEqual(await b4.awaitValue(), "regex_val");
+  });
 });

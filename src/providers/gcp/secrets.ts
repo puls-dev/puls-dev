@@ -1,11 +1,12 @@
 import { BaseBuilder } from "../../core/resource.js";
 import { gcpFetch, getProjectId } from "./api.js";
-import { resolvedSecrets } from "../../core/secret.js";
+import { resolvedSecrets, extractJsonKey } from "../../core/secret.js";
 
 const SECRET_BASE = "https://secretmanager.googleapis.com";
 
 export class GCPSecretBuilder extends BaseBuilder {
   private _value?: string;
+  private _jsonKey?: string;
   resolvedValue: string | null = null;
   resolvedArn: string | null = null;
 
@@ -54,8 +55,18 @@ export class GCPSecretBuilder extends BaseBuilder {
     }
   }
 
-  async awaitValue(): Promise<string | null> {
+  jsonKey(key: string) {
+    this._jsonKey = key;
+    return this;
+  }
+
+  async awaitValue(key?: string): Promise<string | null> {
     await this.discoveryPromise;
+    if (this.resolvedValue === null) return null;
+    const targetKey = key ?? this._jsonKey;
+    if (targetKey) {
+      return extractJsonKey(this.resolvedValue, targetKey);
+    }
     return this.resolvedValue;
   }
 
