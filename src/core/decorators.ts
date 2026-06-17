@@ -64,22 +64,44 @@ function applyConfig(opts: ProviderOpts) {
   if (process.env.PULS_PARALLEL === "true") Config.set({ parallel: true });
 }
 
-export function Protected(target: any, propertyKey: string) {
-  Reflect.defineMetadata("protected", true, target, propertyKey);
+export function Protected(target: any, contextOrKey: any) {
+  if (contextOrKey && typeof contextOrKey === "object" && contextOrKey.kind === "field") {
+    contextOrKey.addInitializer(function (this: any) {
+      Reflect.defineMetadata("protected", true, this, contextOrKey.name);
+    });
+    return;
+  }
+  Reflect.defineMetadata("protected", true, target, contextOrKey);
 }
 
-export function ForceConfigCheck(target: any, propertyKey: string) {
-  Reflect.defineMetadata("forceConfigCheck", true, target, propertyKey);
+export function ForceConfigCheck(target: any, contextOrKey: any) {
+  if (contextOrKey && typeof contextOrKey === "object" && contextOrKey.kind === "field") {
+    contextOrKey.addInitializer(function (this: any) {
+      Reflect.defineMetadata("forceConfigCheck", true, this, contextOrKey.name);
+    });
+    return;
+  }
+  Reflect.defineMetadata("forceConfigCheck", true, target, contextOrKey);
 }
 
 // Property decorator: @Destroy on a field inside a Stack
-export function Destroy(target: any, propertyKey: string): void;
+export function Destroy(target: any, propertyKey: any): void;
 // Class decorator without options: @Destroy
 export function Destroy(target: Function): void;
 // Class decorator with options: @Destroy({ proxmox: { ... } })
 export function Destroy(opts: ProviderOpts): (constructor: any) => void;
-export function Destroy(optsOrTarget: any, propertyKey?: string): any {
-  if (propertyKey !== undefined) {
+export function Destroy(optsOrTarget: any, propertyKey?: any): any {
+  // Check if it's a property/field decorator (legacy string key or ES field context)
+  if (
+    typeof propertyKey === "string" ||
+    (propertyKey && typeof propertyKey === "object" && propertyKey.kind === "field")
+  ) {
+    if (propertyKey && typeof propertyKey === "object" && propertyKey.kind === "field") {
+      propertyKey.addInitializer(function (this: any) {
+        Reflect.defineMetadata("destroy", true, this, propertyKey.name);
+      });
+      return;
+    }
     Reflect.defineMetadata("destroy", true, optsOrTarget, propertyKey);
     return;
   }
