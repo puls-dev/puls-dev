@@ -105,6 +105,15 @@ Popular self-hosting alternative to DigitalOcean - similar API shape, easy to ad
 - [ ] **Load Balancer** - HTTP/HTTPS with health checks
 - [ ] **Volume** - persistent block storage attached to servers
 
+### Vultr
+Excellent global footprint with high-performance compute, bare-metal options, and GPU cloud support.
+
+- [ ] **Instance** - Cloud compute VPS instances (regular and high-frequency)
+- [ ] **Bare Metal** - Dedicated physical servers provisioned via API
+- [ ] **VPC / Network** - Private network boundaries (VPC 2.0)
+- [ ] **Block Storage** - SSD-backed volumes attached to instances
+- [ ] **Firewall** - Group-based access control rules
+
 ### Microsoft Azure
 Enterprise cloud provider - critical for corporate environments. Needs resource group management, VM provisioning, and active directory support.
 
@@ -145,6 +154,9 @@ Enterprise CDN/edge - complex enough to warrant a dedicated maintainer; communit
 - [x] **Secrets at deploy time** - pull credentials from AWS SSM Parameter Store or HashiCorp Vault instead of requiring them as env vars upfront
 - [x] **Hybrid Resource Configuration (YAML)** - Support loading bulk static configuration sets (like DNS records, firewall rules, or security group rules) directly from a `.yaml` or `.json` file within builder methods while retaining the flexibility to chain programmatic methods for dynamic resource parameters.
 - [x] **Opt-in Infrastructure Blueprint Documentation (`Config.blueprint`)** - Generate version-controlled markdown blueprints (`docs/architecture.md`) of live system resources, auto-calculating monthly costs, formatting live endpoints, and rendering Mermaid.js dynamic dependency/topology graphs on local runs.
+- [ ] **Multi-account & Multi-tenant Contexts** - Dynamic or context-bound provider credentials in Stacks
+- [ ] **Eager Cost Estimation** - Estimate monthly infrastructure cost shifts directly in `puls diff`/`puls plan`
+- [ ] **Policy-as-Code Guardrails** - Enforce declarative pre-deploy compliance policies in pure TypeScript
 
 ---
 

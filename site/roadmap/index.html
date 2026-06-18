@@ -1026,6 +1026,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#vultr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vultr
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#microsoft-azure" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1276,6 +1287,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#vultr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vultr
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#microsoft-azure" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1483,6 +1505,15 @@
 <li>[ ] <strong>Load Balancer</strong> - HTTP/HTTPS with health checks</li>
 <li>[ ] <strong>Volume</strong> - persistent block storage attached to servers</li>
 </ul>
+<h3 id="vultr">Vultr</h3>
+<p>Excellent global footprint with high-performance compute, bare-metal options, and GPU cloud support.</p>
+<ul>
+<li>[ ] <strong>Instance</strong> - Cloud compute VPS instances (regular and high-frequency)</li>
+<li>[ ] <strong>Bare Metal</strong> - Dedicated physical servers provisioned via API</li>
+<li>[ ] <strong>VPC / Network</strong> - Private network boundaries (VPC 2.0)</li>
+<li>[ ] <strong>Block Storage</strong> - SSD-backed volumes attached to instances</li>
+<li>[ ] <strong>Firewall</strong> - Group-based access control rules</li>
+</ul>
 <h3 id="microsoft-azure">Microsoft Azure</h3>
 <p>Enterprise cloud provider - critical for corporate environments. Needs resource group management, VM provisioning, and active directory support.</p>
 <ul>
@@ -1519,6 +1550,9 @@
 <li>[x] <strong>Secrets at deploy time</strong> - pull credentials from AWS SSM Parameter Store or HashiCorp Vault instead of requiring them as env vars upfront</li>
 <li>[x] <strong>Hybrid Resource Configuration (YAML)</strong> - Support loading bulk static configuration sets (like DNS records, firewall rules, or security group rules) directly from a <code>.yaml</code> or <code>.json</code> file within builder methods while retaining the flexibility to chain programmatic methods for dynamic resource parameters.</li>
 <li>[x] <strong>Opt-in Infrastructure Blueprint Documentation (<code>Config.blueprint</code>)</strong> - Generate version-controlled markdown blueprints (<code>docs/architecture.md</code>) of live system resources, auto-calculating monthly costs, formatting live endpoints, and rendering Mermaid.js dynamic dependency/topology graphs on local runs.</li>
+<li>[ ] <strong>Multi-account &amp; Multi-tenant Contexts</strong> - Dynamic or context-bound provider credentials in Stacks</li>
+<li>[ ] <strong>Eager Cost Estimation</strong> - Estimate monthly infrastructure cost shifts directly in <code>puls diff</code>/<code>puls plan</code></li>
+<li>[ ] <strong>Policy-as-Code Guardrails</strong> - Enforce declarative pre-deploy compliance policies in pure TypeScript</li>
 </ul>
 <hr />
 <h2 id="roadmap-gap-analysis-tech-debt-planned-improvements">Roadmap Gap Analysis (Tech Debt / Planned Improvements)</h2>
