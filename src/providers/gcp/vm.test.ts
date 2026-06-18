@@ -78,8 +78,12 @@ describe("GCPVMBuilder Unit Tests", () => {
       };
     });
 
-    mock.method(fs, "readFileSync", () => {
-      return "ssh-rsa AAAA_FAKE_GCP_PUBLIC_KEY test@gcp.com";
+    const originalRead = fs.readFileSync;
+    mock.method(fs, "readFileSync", (path: any, options: any) => {
+      if (typeof path === "string" && path.includes(".pub")) {
+        return "ssh-rsa AAAA_FAKE_GCP_PUBLIC_KEY test@gcp.com";
+      }
+      return originalRead(path, options);
     });
   });
 
@@ -368,5 +372,79 @@ describe("GCPVMBuilder Unit Tests", () => {
 
     const deleteCall = fetchCalls.find((c) => c.method === "DELETE" && c.url.includes("/instances/delete-vm"));
     assert.ok(deleteCall);
+  });
+
+  test("resolves environment variables including secrets and writes to .env.puls", async () => {
+    // Clean up .env.puls if it exists
+    const fs = await import("node:fs");
+    if (fs.existsSync(".env.puls")) {
+      fs.unlinkSync(".env.puls");
+    }
+
+    mockResponses["GET /instances/my-new-vm"] = {
+      status: 404,
+      body: { error: "not found" },
+    };
+    mockResponses["POST /instances"] = {
+      status: 200,
+      body: {},
+    };
+
+    // Create a mock secret
+    const { Secret } = await import("../../core/secret.js");
+    const mySecret = Secret.env("MOCK_IPA_PASSWORD", "super-secret-password");
+
+    const builder = new GCPVMBuilder("my-new-vm")
+      .machineType("e2-micro")
+      .zone("us-central1-a")
+      .sshKey("~/.ssh/id_rsa")
+      .provision("playbooks/nginx.yaml")
+      .env({
+        MY_VAR: "simple-value",
+        IPA_PASSWORD: mySecret,
+      });
+
+    const provisionCalls: Array<{ ip: string; script: string; extraEnv?: Record<string, string> }> = [];
+
+    // Overrides
+    (builder as any).waitFor = async (label: string, condition: () => Promise<boolean>) => {
+      // Fake a running state on check
+      mockResponses["GET /instances/my-new-vm"] = {
+        status: 200,
+        body: {
+          id: "my-new-vm-id",
+          name: "my-new-vm",
+          status: "RUNNING",
+          networkInterfaces: [
+            {
+              accessConfigs: [{ natIP: "35.200.10.40" }],
+            },
+          ],
+        },
+      };
+      return await condition();
+    };
+    (builder as any).checkPort = async () => true;
+    (builder as any).runProvisioner = async (ip: string, script: string, extraEnv?: Record<string, string>) => {
+      provisionCalls.push({ ip, script, extraEnv });
+    };
+
+    await builder.deploy();
+
+    // Verify playbooks were executed with correct env
+    assert.strictEqual(provisionCalls.length, 1);
+    assert.deepStrictEqual(provisionCalls[0].extraEnv, {
+      MY_VAR: "simple-value",
+      IPA_PASSWORD: "super-secret-password",
+    });
+
+    // Verify .env.puls was written
+    assert.ok(fs.existsSync(".env.puls"));
+    const content = fs.readFileSync(".env.puls", "utf8");
+    assert.ok(content.includes("MY_VAR=simple-value"));
+    assert.ok(content.includes("IPA_PASSWORD=super-secret-password"));
+
+    // Clean up
+    fs.unlinkSync(".env.puls");
   });
 });

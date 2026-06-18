@@ -4,7 +4,7 @@ import { BaseBuilder } from "../../core/resource.js";
 import { Config } from "../../core/config.js";
 import { Output } from "../../core/output.js";
 import { gcpFetch, getProjectId, getRegion } from "./api.js";
-import { checkPort, runProvisioner } from "../../core/provisioner.js";
+import { checkPort, runProvisioner, writeEnvPulsFile } from "../../core/provisioner.js";
 import { getFileHash } from "../proxmox/hash.js";
 import { GCPTemplateBuilder } from "./template.js";
 import { resourceContextStorage } from "../../core/context.js";
@@ -102,13 +102,47 @@ export class GCPVMBuilder extends BaseBuilder {
     return checkPort(ip, port);
   }
 
-  protected async runProvisioner(ip: string, script: string): Promise<void> {
+  protected _env: Record<string, string | BaseBuilder | Output<string>> = {};
+
+  env(vars: Record<string, string | BaseBuilder | Output<string>>) {
+    this._env = { ...this._env, ...vars };
+    for (const [k, v] of Object.entries(vars)) {
+      if (v instanceof BaseBuilder) {
+        this.dependsOn(v);
+      }
+    }
+    return this;
+  }
+
+  protected async resolveEnv(): Promise<Record<string, string>> {
+    const resolved: Record<string, string> = {};
+    for (const [k, v] of Object.entries(this._env)) {
+      if (v instanceof BaseBuilder) {
+        const val = await (v as any).awaitValue?.();
+        if (val === null || val === undefined) {
+          throw new Error(`[${this.name}] Env var "${k}" references builder "${v.name}" which has no resolved value.`);
+        }
+        resolved[k] = val;
+      } else if (v instanceof Output) {
+        const val = await v.get();
+        if (val === null || val === undefined) {
+          throw new Error(`[${this.name}] Env var "${k}" references Output which has no resolved value.`);
+        }
+        resolved[k] = val;
+      } else {
+        resolved[k] = String(v);
+      }
+    }
+    return resolved;
+  }
+
+  protected async runProvisioner(ip: string, script: string, extraEnv?: Record<string, string>): Promise<void> {
     const keysArray = Array.isArray(this._sshKeys) ? this._sshKeys : [this._sshKeys];
     const keyPath = keysArray.find(k => !k.startsWith('ssh-') && !k.startsWith('ecdsa-') && !k.startsWith('sk-'));
     if (!keyPath) {
       throw new Error(`[GCP VM:${this.name}] No SSH private key path found. Pass a file path via .sshKey() to run provisioning.`);
     }
-    return runProvisioner(ip, this.resolveUser(), keyPath, script);
+    return runProvisioner(ip, this.resolveUser(), keyPath, script, extraEnv);
   }
 
   private async discoverVM(): Promise<any> {
@@ -142,6 +176,10 @@ export class GCPVMBuilder extends BaseBuilder {
 
   async deploy() {
     const dryRun = this.isDryRunActive();
+    const resolvedEnv = await this.resolveEnv();
+    if (!dryRun) {
+      writeEnvPulsFile(resolvedEnv);
+    }
     const existing = await this.discoveryPromise;
     const project = getProjectId();
     const zone = this._zone;
@@ -185,6 +223,9 @@ export class GCPVMBuilder extends BaseBuilder {
         ];
         if (this._network) {
           details.push(`Network:      ${this._network}`);
+        }
+        if (Object.keys(resolvedEnv).length > 0) {
+          details.push(`Env:          ${Object.keys(resolvedEnv).join(", ")}`);
         }
         if (this._provision.length > 0) {
           details.push(`Provision:    ${this._provision.join(", ")}`);
@@ -309,7 +350,7 @@ export class GCPVMBuilder extends BaseBuilder {
         );
 
         for (const playbook of this._provision) {
-          await this.runProvisioner(activeIp, playbook);
+          await this.runProvisioner(activeIp, playbook, resolvedEnv);
         }
       }
     } else {
@@ -375,7 +416,7 @@ export class GCPVMBuilder extends BaseBuilder {
         );
 
         for (const p of playbooksToRun) {
-          await this.runProvisioner(activeIp, p.path);
+          await this.runProvisioner(activeIp, p.path, resolvedEnv);
           appliedHashes[p.slug] = p.hash;
         }
 

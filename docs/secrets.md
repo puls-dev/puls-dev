@@ -54,6 +54,48 @@ class CloudStack extends Stack {
 
 ---
 
+## Injecting Secrets into VMs/Provisioners (.env)
+
+When deploying virtual machines (using Proxmox or GCP) and running provisioning tools (Ansible playbooks or Puppet manifests), you often need to inject sensitive credentials as environment variables.
+
+Puls provides a first-class `.env()` configuration method on VM and Template builders. This method accepts a record of environment variables, automatically resolves any dynamic secrets or values, and injects them into the provisioning process:
+
+```typescript
+import { Stack, Deploy, Secret } from "puls-dev";
+import { Proxmox } from "puls-dev/proxmox";
+
+const dbPassword = Secret.aws("prod/database/password");
+
+@Deploy()
+class AppStack extends Stack {
+  server = Proxmox.VM("web-server")
+    .cores(2)
+    .memory(4096)
+    .ip("10.8.10.90")
+    .sshKey("~/.ssh/id_rsa.pub")
+    .provision("playbooks/site.yaml")
+    // Secrets are automatically resolved and injected into the Ansible environment
+    .env({
+      DB_PASSWORD: dbPassword,
+      APP_ENV: "production",
+    });
+}
+```
+
+### Local Environment File (.env.puls)
+
+Additionally, upon successful deployment, Puls merges and writes all resolved environment variables into a local `.env.puls` file at your workspace root. 
+
+This enables you to run local scripts, tests, or application servers directly using the same secrets without manually fetching them from cloud APIs:
+
+```bash
+# Generated in .env.puls
+DB_PASSWORD=my-super-secret-db-password
+APP_ENV=production
+```
+
+---
+
 ## How Secrets Behave in Dry-Run
 
 Testing your infrastructure shouldn't require configuring real cloud credentials locally. Puls respects your `.dryRun` configurations completely:

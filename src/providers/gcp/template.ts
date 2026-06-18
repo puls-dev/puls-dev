@@ -4,7 +4,7 @@ import { BaseBuilder } from "../../core/resource.js";
 import { Config } from "../../core/config.js";
 import { Output } from "../../core/output.js";
 import { gcpFetch, getProjectId } from "./api.js";
-import { checkPort, runProvisioner } from "../../core/provisioner.js";
+import { checkPort, runProvisioner, writeEnvPulsFile } from "../../core/provisioner.js";
 import { getFileHash } from "../proxmox/hash.js";
 import { parseGcpMetadataForProvision, mergeGcpMetadataForProvision } from "./vm.js";
 
@@ -91,14 +91,52 @@ export class GCPTemplateBuilder extends BaseBuilder {
     return checkPort(ip, port);
   }
 
-  protected async runProvisioner(ip: string, script: string): Promise<void> {
+  protected _env: Record<string, string | BaseBuilder | Output<string>> = {};
+
+  env(vars: Record<string, string | BaseBuilder | Output<string>>) {
+    this._env = { ...this._env, ...vars };
+    for (const [k, v] of Object.entries(vars)) {
+      if (v instanceof BaseBuilder) {
+        this.dependsOn(v);
+      }
+    }
+    return this;
+  }
+
+  protected async resolveEnv(): Promise<Record<string, string>> {
+    const resolved: Record<string, string> = {};
+    for (const [k, v] of Object.entries(this._env)) {
+      if (v instanceof BaseBuilder) {
+        const val = await (v as any).awaitValue?.();
+        if (val === null || val === undefined) {
+          throw new Error(`[${this.name}] Env var "${k}" references builder "${v.name}" which has no resolved value.`);
+        }
+        resolved[k] = val;
+      } else if (v instanceof Output) {
+        const val = await v.get();
+        if (val === null || val === undefined) {
+          throw new Error(`[${this.name}] Env var "${k}" references Output which has no resolved value.`);
+        }
+        resolved[k] = val;
+      } else {
+        resolved[k] = String(v);
+      }
+    }
+    return resolved;
+  }
+
+  protected async runProvisioner(ip: string, script: string, extraEnv?: Record<string, string>): Promise<void> {
     const keysArray = Array.isArray(this._sshKeys) ? this._sshKeys : [this._sshKeys];
     const keyPath = keysArray.find(k => !k.startsWith('ssh-') && !k.startsWith('ecdsa-') && !k.startsWith('sk-'));
-    return runProvisioner(ip, this.resolveUser(), keyPath, script);
+    return runProvisioner(ip, this.resolveUser(), keyPath, script, extraEnv);
   }
 
   async deploy() {
     const dryRun = this.isDryRunActive();
+    const resolvedEnv = await this.resolveEnv();
+    if (!dryRun) {
+      writeEnvPulsFile(resolvedEnv);
+    }
     const existing = await this.discoveryPromise;
     const project = getProjectId();
 
@@ -150,6 +188,9 @@ export class GCPTemplateBuilder extends BaseBuilder {
     if (dryRun) {
       console.log(`   📝 [PLAN] Bake GCP Image Template "${this.name}"`);
       console.log(`      └─ Base Image: ${this._baseImage}  Machine Type: ${this._machineType}`);
+      if (Object.keys(resolvedEnv).length > 0) {
+        console.log(`      └─ Env: ${Object.keys(resolvedEnv).join(", ")}`);
+      }
       if (this._provision.length > 0) {
         console.log(`      └─ Provision: ${this._provision.join(", ")}`);
       }
@@ -253,7 +294,7 @@ export class GCPTemplateBuilder extends BaseBuilder {
       );
 
       for (const playbook of this._provision) {
-        await this.runProvisioner(resolvedIp!, playbook);
+        await this.runProvisioner(resolvedIp!, playbook, resolvedEnv);
       }
     }
 

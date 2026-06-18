@@ -7,6 +7,8 @@ import type { OSImage } from "../../types/proxmox.js";
 import { getFileHash, parseProvisionMetadata, mergeProvisionMetadata } from "./hash.js";
 import { TemplateBuilder } from "./template.js";
 import { resourceContextStorage } from "../../core/context.js";
+import { writeEnvPulsFile } from "../../core/provisioner.js";
+
 
 export class VMBuilder extends ProxmoxBaseBuilder {
   readonly out = {
@@ -141,6 +143,10 @@ export class VMBuilder extends ProxmoxBaseBuilder {
 
   private async _deploy() {
     const dryRun = this.isDryRunActive();
+    const resolvedEnv = await this.resolveEnv();
+    if (!dryRun) {
+      writeEnvPulsFile(resolvedEnv);
+    }
     const existing = await this.discoveryPromise;
     const pm = getPMClient();
 
@@ -198,7 +204,7 @@ export class VMBuilder extends ProxmoxBaseBuilder {
 
           // Execute each playbook
           for (const p of playbooksToRun) {
-            await this.runProvisioner(activeIp, p.path);
+            await this.runProvisioner(activeIp, p.path, resolvedEnv);
             appliedHashes[p.baseName] = p.hash;
           }
 
@@ -242,6 +248,9 @@ export class VMBuilder extends ProxmoxBaseBuilder {
       if (this._vlan) console.log(`      └─ VLAN: ${this._vlan}`);
       if (this._provision.length > 0) {
         console.log(`      └─ Provision: ${this._provision.join(", ")}`);
+      }
+      if (Object.keys(resolvedEnv).length > 0) {
+        console.log(`      └─ Env: ${Object.keys(resolvedEnv).join(", ")}`);
       }
       if (this._replace)
         console.log(`      └─ Replace: "${this._replace}" after creation`);
@@ -437,7 +446,7 @@ export class VMBuilder extends ProxmoxBaseBuilder {
 
       const appliedHashes: Record<string, string> = {};
       for (const script of this._provision) {
-        await this.runProvisioner(this.resolvedIp!, script);
+        await this.runProvisioner(this.resolvedIp!, script, resolvedEnv);
         const baseName = script.split("/").pop() ?? script;
         appliedHashes[baseName] = getFileHash(script);
       }

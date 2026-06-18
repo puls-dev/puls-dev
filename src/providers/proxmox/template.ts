@@ -4,6 +4,8 @@ import { Output } from "../../core/output.js";
 import { getPMClient, withVmidAllocation } from "./api.js";
 import type { OSImage } from "../../types/proxmox.js";
 import { getFileHash, parseProvisionMetadata, mergeProvisionMetadata } from "./hash.js";
+import { writeEnvPulsFile } from "../../core/provisioner.js";
+
 
 export class TemplateBuilder extends ProxmoxBaseBuilder {
   readonly out = {
@@ -76,6 +78,10 @@ export class TemplateBuilder extends ProxmoxBaseBuilder {
 
   private async _deploy() {
     const dryRun = this.isDryRunActive();
+    const resolvedEnv = await this.resolveEnv();
+    if (!dryRun) {
+      writeEnvPulsFile(resolvedEnv);
+    }
     const existing = await this.discoveryPromise;
     const pm = getPMClient();
 
@@ -121,6 +127,9 @@ export class TemplateBuilder extends ProxmoxBaseBuilder {
       console.log(`      └─ Cores: ${this._cores}  Memory: ${this._memory} MB`);
       if (this._provision.length > 0) {
         console.log(`      └─ Provision: ${this._provision.join(", ")}`);
+      }
+      if (Object.keys(resolvedEnv).length > 0) {
+        console.log(`      └─ Env: ${Object.keys(resolvedEnv).join(", ")}`);
       }
       this.out.vmid.resolve(-1);
       return { name: this.name, vmid: "PENDING" };
@@ -269,7 +278,7 @@ export class TemplateBuilder extends ProxmoxBaseBuilder {
 
       const appliedHashes: Record<string, string> = {};
       for (const script of this._provision) {
-        await this.runProvisioner(resolvedIp!, script);
+        await this.runProvisioner(resolvedIp!, script, resolvedEnv);
         const baseName = script.split("/").pop() ?? script;
         appliedHashes[baseName] = getFileHash(script);
       }

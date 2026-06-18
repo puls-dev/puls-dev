@@ -3,6 +3,7 @@ import { homedir } from "node:os";
 import { spawn } from "node:child_process";
 import { BaseBuilder } from "../../core/resource.js";
 import { Config } from "../../core/config.js";
+import { Output } from "../../core/output.js";
 import type { ProxmoxApiClient } from "./api.js";
 import { checkPort, runProvisioner } from "../../core/provisioner.js";
 
@@ -133,11 +134,45 @@ export abstract class ProxmoxBaseBuilder extends BaseBuilder {
     });
   }
 
+  protected _env: Record<string, string | BaseBuilder | Output<string>> = {};
+
+  env(vars: Record<string, string | BaseBuilder | Output<string>>) {
+    this._env = { ...this._env, ...vars };
+    for (const [k, v] of Object.entries(vars)) {
+      if (v instanceof BaseBuilder) {
+        this.dependsOn(v);
+      }
+    }
+    return this;
+  }
+
+  protected async resolveEnv(): Promise<Record<string, string>> {
+    const resolved: Record<string, string> = {};
+    for (const [k, v] of Object.entries(this._env)) {
+      if (v instanceof BaseBuilder) {
+        const val = await (v as any).awaitValue?.();
+        if (val === null || val === undefined) {
+          throw new Error(`[${this.name}] Env var "${k}" references builder "${v.name}" which has no resolved value.`);
+        }
+        resolved[k] = val;
+      } else if (v instanceof Output) {
+        const val = await v.get();
+        if (val === null || val === undefined) {
+          throw new Error(`[${this.name}] Env var "${k}" references Output which has no resolved value.`);
+        }
+        resolved[k] = val;
+      } else {
+        resolved[k] = String(v);
+      }
+    }
+    return resolved;
+  }
+
   protected async checkPort(ip: string, port: number): Promise<boolean> {
     return checkPort(ip, port);
   }
 
-  protected async runProvisioner(ip: string, script: string): Promise<void> {
-    return runProvisioner(ip, this.resolveUser(), this._sshKeys, script);
+  protected async runProvisioner(ip: string, script: string, extraEnv?: Record<string, string>): Promise<void> {
+    return runProvisioner(ip, this.resolveUser(), this._sshKeys, script, extraEnv);
   }
 }

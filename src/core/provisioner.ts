@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import net from "node:net";
 import { homedir } from "node:os";
 
-import { writeFileSync } from "node:fs";
+import { writeFileSync, existsSync, readFileSync } from "node:fs";
 import { resourceContextStorage } from "./context.js";
 
 export function checkPort(ip: string, port: number): Promise<boolean> {
@@ -40,7 +40,8 @@ export function runAnsible(
   ip: string,
   user: string,
   sshKeys: string | string[] | undefined,
-  playbook: string
+  playbook: string,
+  extraEnv?: Record<string, string>
 ): Promise<void> {
   console.log(`   🔧 Running Ansible: ${playbook} → ${ip}`);
   const keyPath = resolveSshKeyPath(sshKeys);
@@ -82,7 +83,13 @@ export function runAnsible(
     const proc = spawn(
       "ansible-playbook",
       args,
-      { stdio: "inherit" },
+      {
+        stdio: "inherit",
+        env: {
+          ...process.env,
+          ...extraEnv
+        }
+      },
     );
     proc.on("close", (code) => {
       if (code === 0) {
@@ -101,7 +108,8 @@ export function runPuppet(
   ip: string,
   user: string,
   sshKeys: string | string[] | undefined,
-  manifest: string
+  manifest: string,
+  extraEnv?: Record<string, string>
 ): Promise<void> {
   console.log(`   🔧 Applying Puppet manifest: ${manifest} → ${ip}`);
   const keyPath = resolveSshKeyPath(sshKeys);
@@ -125,6 +133,11 @@ export function runPuppet(
         reject(new Error(`scp exited with code ${code}`));
         return;
       }
+
+      const envPrefix = extraEnv
+        ? Object.entries(extraEnv).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(" ") + " "
+        : "";
+
       const puppet = spawn(
         "ssh",
         [
@@ -133,7 +146,7 @@ export function runPuppet(
           "-o",
           "StrictHostKeyChecking=no",
           `${user}@${ip}`,
-          "puppet apply /tmp/manifest.pp",
+          `${envPrefix}puppet apply /tmp/manifest.pp`,
         ],
         { stdio: "inherit" },
       );
@@ -157,7 +170,8 @@ export function runProvisioner(
   ip: string,
   user: string,
   sshKeys: string | string[] | undefined,
-  scriptPath: string
+  scriptPath: string,
+  extraEnv?: Record<string, string>
 ): Promise<void> {
   const ext = scriptPath.split(".").pop()?.toLowerCase();
 
@@ -167,6 +181,29 @@ export function runProvisioner(
         `Please migrate "${scriptPath}" to an Ansible playbook (.yaml/.yml).`,
     );
   }
-  if (ext === "pp") return runPuppet(ip, user, sshKeys, scriptPath);
-  return runAnsible(ip, user, sshKeys, scriptPath); // .yml / .yaml
+  if (ext === "pp") return runPuppet(ip, user, sshKeys, scriptPath, extraEnv);
+  return runAnsible(ip, user, sshKeys, scriptPath, extraEnv); // .yml / .yaml
 }
+
+export function writeEnvPulsFile(env: Record<string, string>): void {
+  if (Object.keys(env).length === 0) return;
+  let existing: Record<string, string> = {};
+  if (existsSync(".env.puls")) {
+    try {
+      const content = readFileSync(".env.puls", "utf8");
+      for (const line of content.split("\n")) {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith("#")) {
+          const idx = trimmed.indexOf("=");
+          if (idx > 0) {
+            existing[trimmed.substring(0, idx).trim()] = trimmed.substring(idx + 1).trim();
+          }
+        }
+      }
+    } catch {}
+  }
+  const merged = { ...existing, ...env };
+  const envFile = Object.entries(merged).map(([k, v]) => `${k}=${v}`).join("\n");
+  writeFileSync(".env.puls", envFile);
+}
+

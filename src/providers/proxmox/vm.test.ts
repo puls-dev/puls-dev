@@ -405,6 +405,63 @@ describe("Proxmox VMBuilder Unit Tests", () => {
     assert.strictEqual(provisionCalls.length, 1);
     assert.strictEqual(provisionCalls[0].script, "playbooks/nginx.yaml");
   });
+
+  test("resolves environment variables including secrets and writes to .env.puls", async () => {
+    // Clean up .env.puls if it exists
+    const fs = await import("node:fs");
+    if (fs.existsSync(".env.puls")) {
+      fs.unlinkSync(".env.puls");
+    }
+
+    mockGetResponses["/cluster/resources?type=vm"] = [];
+    mockGetResponses["/cluster/nextid"] = 105;
+    mockGetResponses["/nodes"] = [
+      { node: "pve1", status: "online", maxmem: 32 * 1024 * 1024 * 1024, mem: 12 * 1024 * 1024 * 1024 }
+    ];
+
+    // Create a mock secret
+    const { Secret } = await import("../../core/secret.js");
+    const mySecret = Secret.env("MOCK_IPA_PASSWORD", "super-secret-password");
+
+    const builder = new VMBuilder("my-new-vm")
+      .ip("10.8.10.90")
+      .provision("playbooks/nginx.yaml")
+      .env({
+        MY_VAR: "simple-value",
+        IPA_PASSWORD: mySecret,
+      });
+
+    const provisionCalls: Array<{ ip: string; script: string; extraEnv?: Record<string, string> }> = [];
+
+    // Overrides
+    (builder as any).waitFor = async (label: string, condition: () => Promise<boolean>) => {
+      return await condition();
+    };
+    (builder as any).checkPort = async () => true;
+    (builder as any).checkCloudInit = async () => true;
+    (builder as any).runProvisioner = async (ip: string, script: string, extraEnv?: Record<string, string>) => {
+      provisionCalls.push({ ip, script, extraEnv });
+    };
+
+    const deployResult = await builder.deploy();
+    assert.strictEqual(deployResult.vmid, 105);
+
+    // Verify playbooks were executed with correct env
+    assert.strictEqual(provisionCalls.length, 1);
+    assert.deepStrictEqual(provisionCalls[0].extraEnv, {
+      MY_VAR: "simple-value",
+      IPA_PASSWORD: "super-secret-password",
+    });
+
+    // Verify .env.puls was written
+    assert.ok(fs.existsSync(".env.puls"));
+    const content = fs.readFileSync(".env.puls", "utf8");
+    assert.ok(content.includes("MY_VAR=simple-value"));
+    assert.ok(content.includes("IPA_PASSWORD=super-secret-password"));
+
+    // Clean up
+    fs.unlinkSync(".env.puls");
+  });
 });
 
 describe("Proxmox Provision Hash & Metadata Utilities", () => {
