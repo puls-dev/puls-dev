@@ -262,11 +262,14 @@ export abstract class Stack {
     const hosts: any[] = [];
     // Snapshot current secrets; new secrets resolved during this run are added via context
     const secrets = new Set<string>(resolvedSecrets);
+    const configOpts = Reflect.getMetadata("config", this.constructor) || {};
     const context = {
       abortSignal: controller.signal,
       hosts,
       stackName: this.constructor.name,
       secrets,
+      aws: configOpts.aws,
+      gcp: configOpts.gcp,
     };
 
     return resourceContextStorage.run(context, async () => {
@@ -423,11 +426,14 @@ export abstract class Stack {
     const controller = new AbortController();
     const hosts: any[] = [];
     const secrets = new Set<string>(resolvedSecrets);
+    const configOpts = Reflect.getMetadata("config", this.constructor) || {};
     const context = {
       abortSignal: controller.signal,
       hosts,
       stackName: this.constructor.name,
       secrets,
+      aws: configOpts.aws,
+      gcp: configOpts.gcp,
     };
 
     return resourceContextStorage.run(context, async () => {

@@ -1,6 +1,6 @@
 {
   "name": "puls-dev",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Intent-driven infrastructure-as-code with eager discovery and no state files.",
   "type": "module",
   "main": "./dist/index.js",
@@ -89,6 +89,7 @@
     "@aws-sdk/client-sns": "^3.1053.0",
     "@aws-sdk/client-sqs": "^3.1053.0",
     "@aws-sdk/client-ssm": "^3.1053.0",
+    "@aws-sdk/credential-providers": "^3.1071.0",
     "dotenv": "^17.4.2",
     "google-auth-library": "^10.6.2",
     "reflect-metadata": "^0.2.2",

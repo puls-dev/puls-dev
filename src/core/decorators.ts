@@ -35,6 +35,18 @@ type ProviderOpts = {
     defaultLocation?: string;
     sshUser?: string;
   };
+  aws?: {
+    region?: string;
+    profile?: string;
+    accessKeyId?: string;
+    secretAccessKey?: string;
+  };
+  gcp?: {
+    projectId?: string;
+    serviceAccountPath?: string;
+    region?: string;
+    sshUser?: string;
+  };
 };
 
 function applyConfig(opts: ProviderOpts) {
@@ -51,6 +63,10 @@ function applyConfig(opts: ProviderOpts) {
     Config.set({ providers: { cloudflare: opts.cloudflare } });
   if (opts.azure)
     Config.set({ providers: { azure: opts.azure } });
+  if (opts.aws)
+    Config.set({ providers: { aws: { ...Config.get().providers.aws, ...opts.aws } } as any });
+  if (opts.gcp)
+    Config.set({ providers: { gcp: { ...Config.get().providers.gcp, ...opts.gcp } } as any });
   if (opts.firebase) {
     const sa = JSON.parse(readFileSync(opts.firebase, "utf8"));
     Config.set({
@@ -106,6 +122,7 @@ export function Destroy(optsOrTarget: any, propertyKey?: any): any {
     return;
   }
   if (typeof optsOrTarget === "function") {
+    Reflect.defineMetadata("config", {}, optsOrTarget);
     const instance = new optsOrTarget();
     Stack._register(optsOrTarget, instance);
     Promise.resolve().then(async () => {
@@ -114,6 +131,7 @@ export function Destroy(optsOrTarget: any, propertyKey?: any): any {
     return;
   }
   return function (constructor: any) {
+    Reflect.defineMetadata("config", optsOrTarget, constructor);
     const regions = optsOrTarget.regions ?? [];
     if (regions.length > 0) {
       Promise.resolve().then(async () => {
@@ -139,6 +157,7 @@ export function Destroy(optsOrTarget: any, propertyKey?: any): any {
 // THE "MAGIC": Auto-executing Stack Decorator
 export function Deploy(opts: ProviderOpts = {}) {
   return function (constructor: any) {
+    Reflect.defineMetadata("config", opts, constructor);
     const regions = opts.regions ?? [];
     const mode = process.env.PULS_MODE;
     if (regions.length > 0) {
@@ -187,6 +206,7 @@ export function Deploy(opts: ProviderOpts = {}) {
 
 export function Check(opts: ProviderOpts = {}) {
   return function (constructor: any) {
+    Reflect.defineMetadata("config", opts, constructor);
     applyConfig(opts);
     const instance = new constructor();
     Promise.resolve().then(async () => {

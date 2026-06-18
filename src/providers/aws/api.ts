@@ -17,18 +17,39 @@ import { SNSClient } from "@aws-sdk/client-sns";
 import { Config } from "../../core/config.js";
 import { withRetry } from "../../core/retry.js";
 import { resourceContextStorage } from "../../core/context.js";
+import { fromIni } from "@aws-sdk/credential-providers";
 
 function getRegion(): string {
-  const region = Config.get().providers.aws?.region;
+  const context = resourceContextStorage.getStore();
+  const region = context?.aws?.region ?? Config.get().providers.aws?.region;
   if (!region) {
     if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
       return "us-east-1";
     }
     throw new Error(
-      'AWS region not configured. Call AWS.init({ region: "..." })',
+      'AWS region not configured. Call AWS.init({ region: "..." }) or supply config in @Deploy',
     );
   }
   return region;
+}
+
+function getAwsClientConfig(region?: string): any {
+  const context = resourceContextStorage.getStore();
+  const aws = context?.aws;
+  const targetRegion = region ?? getRegion();
+  const config: any = { region: targetRegion };
+
+  if (aws) {
+    if (aws.accessKeyId && aws.secretAccessKey) {
+      config.credentials = {
+        accessKeyId: aws.accessKeyId,
+        secretAccessKey: aws.secretAccessKey,
+      };
+    } else if (aws.profile) {
+      config.credentials = fromIni({ profile: aws.profile });
+    }
+  }
+  return config;
 }
 
 function createAwsOfflineMock(command: any): any {
@@ -119,32 +140,32 @@ function wrapClient<T extends { send: Function }>(client: T): T {
 }
 
 export const getS3Client = (region?: string) =>
-  wrapClient(new S3Client({ region: region ?? getRegion() }));
+  wrapClient(new S3Client(getAwsClientConfig(region)));
 
 // CloudFront, Route53, ACM, Route53 Domains, and IAM are all global - must use us-east-1
-export const getCFClient = () => wrapClient(new CloudFrontClient({ region: "us-east-1" }));
-export const getR53Client = () => wrapClient(new Route53Client({ region: "us-east-1" }));
+export const getCFClient = () => wrapClient(new CloudFrontClient(getAwsClientConfig("us-east-1")));
+export const getR53Client = () => wrapClient(new Route53Client(getAwsClientConfig("us-east-1")));
 export const getR53DomainsClient = () =>
-  wrapClient(new Route53DomainsClient({ region: "us-east-1" }));
-export const getACMClient = () => wrapClient(new ACMClient({ region: "us-east-1" }));
-export const getIAMClient = () => wrapClient(new IAMClient({ region: "us-east-1" }));
+  wrapClient(new Route53DomainsClient(getAwsClientConfig("us-east-1")));
+export const getACMClient = () => wrapClient(new ACMClient(getAwsClientConfig("us-east-1")));
+export const getIAMClient = () => wrapClient(new IAMClient(getAwsClientConfig("us-east-1")));
 export const getLambdaClient = (region?: string) =>
-  wrapClient(new LambdaClient({ region: region ?? getRegion() }));
+  wrapClient(new LambdaClient(getAwsClientConfig(region)));
 export const getAPIGWClient = (region?: string) =>
-  wrapClient(new ApiGatewayV2Client({ region: region ?? getRegion() }));
+  wrapClient(new ApiGatewayV2Client(getAwsClientConfig(region)));
 export const getECSClient = (region?: string) =>
-  wrapClient(new ECSClient({ region: region ?? getRegion() }));
+  wrapClient(new ECSClient(getAwsClientConfig(region)));
 export const getEC2Client = (region?: string) =>
-  wrapClient(new EC2Client({ region: region ?? getRegion() }));
+  wrapClient(new EC2Client(getAwsClientConfig(region)));
 export const getCWLogsClient = (region?: string) =>
-  wrapClient(new CloudWatchLogsClient({ region: region ?? getRegion() }));
+  wrapClient(new CloudWatchLogsClient(getAwsClientConfig(region)));
 export const getRDSClient = (region?: string) =>
-  wrapClient(new RDSClient({ region: region ?? getRegion() }));
+  wrapClient(new RDSClient(getAwsClientConfig(region)));
 export const getSQSClient = (region?: string) =>
-  wrapClient(new SQSClient({ region: region ?? getRegion() }));
+  wrapClient(new SQSClient(getAwsClientConfig(region)));
 export const getSecretsClient = (region?: string) =>
-  wrapClient(new SecretsManagerClient({ region: region ?? getRegion() }));
+  wrapClient(new SecretsManagerClient(getAwsClientConfig(region)));
 export const getCWClient = (region?: string) =>
-  wrapClient(new CloudWatchClient({ region: region ?? getRegion() }));
+  wrapClient(new CloudWatchClient(getAwsClientConfig(region)));
 export const getSNSClient = (region?: string) =>
-  wrapClient(new SNSClient({ region: region ?? getRegion() }));
+  wrapClient(new SNSClient(getAwsClientConfig(region)));

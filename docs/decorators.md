@@ -31,6 +31,45 @@ class MyStack extends Stack { ... }
 | `firebase` | `string` | Path to service account JSON key file |
 | `cloudflare` | `CloudflareConfig` | Cloudflare token & account ID config |
 | `azure` | `AzureConfig` | Azure Service Principal connection config |
+| `aws` | `AwsConfig` | Context-scoped AWS profile & region config |
+| `gcp` | `GcpConfig` | Context-scoped GCP project, region, and service account config |
+
+## Multi-Account & Multi-Tenant Support
+
+Puls supports deploying different Stacks to different cloud accounts/profiles or projects concurrently by supplying `aws` or `gcp` options inside `@Deploy` or `@Destroy`. 
+
+A clean pattern is to define these configurations in a shared file (e.g. `types/accounts.ts`) and reference them in your decorators:
+
+```typescript
+// types/accounts.ts
+import { ProviderOpts } from "puls-dev";
+
+export const AWS_ACCOUNT: Record<string, ProviderOpts["aws"]> = {
+  PRODUCTION: {
+    profile: "aws-prod-profile",
+    region: "eu-west-1",
+  },
+  DEVELOPMENT: {
+    profile: "aws-dev-profile",
+    region: "us-east-1",
+  }
+};
+```
+
+Then, import and reference them inside your stack definitions:
+
+```typescript
+import { Deploy, Stack } from "puls-dev";
+import { AWS } from "puls-dev/aws";
+import { AWS_ACCOUNT } from "../../types/accounts.js";
+
+@Deploy({ aws: AWS_ACCOUNT.PRODUCTION })
+class ProdStack extends Stack {
+  secret = AWS.Secret("DB_PASSWORD");
+  // Resolves S3 bucket within the prod account context
+  bucket = AWS.S3("prod-backups");
+}
+```
 
 ## @DryRun
 

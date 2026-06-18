@@ -178,6 +178,7 @@ const dockerBaseTemplate = AWS.Template("ubuntu-docker-base")
 ```
 
 **Baking Lifecycle**:
+
 1. **Idempotent Baking**: Puls checks if a custom AMI with this name already exists in your AWS account. If it does and the provision playbooks match (via tags hashes under the `puls-provision` key), baking is skipped.
 2. **Deregister & Rebuild**: Because AMIs are read-only and immutable, if playbooks or configurations change, Puls will automatically deregister the old AMI (`DeregisterImage`) and delete its associated EBS snapshots (`DeleteSnapshot`) before rebuilding.
 3. **Automated VM Lifecycle**: Puls creates a temporary instance (`puls-bake-temp-{name}`), waits for SSH, runs the Ansible playbooks, stops the instance, issues a `CreateImage` command, waits for the custom AMI to become `available`, tags it with the Name and `puls-provision` playbook hashes, and terminates the temporary provisioning instance automatically.

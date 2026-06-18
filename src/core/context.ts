@@ -13,6 +13,18 @@ export interface ResourceContext {
   hosts?: HostEntry[];
   stackName?: string;
   secrets: Set<string>;
+  aws?: {
+    region?: string;
+    profile?: string;
+    accessKeyId?: string;
+    secretAccessKey?: string;
+  };
+  gcp?: {
+    projectId?: string;
+    serviceAccountPath?: string;
+    region?: string;
+    sshUser?: string;
+  };
 }
 
 export const resourceContextStorage = new AsyncLocalStorage<ResourceContext>();

@@ -12,6 +12,35 @@ export interface GCPConfig {
 
 export function resolveGCPConfig(): GCPConfig {
   const isOffline = Config.isOfflineMode() || Config.isGlobalDryRun();
+  const context = resourceContextStorage.getStore();
+  const contextGcp = context?.gcp;
+
+  // 0. Check context-scoped credentials
+  if (contextGcp?.serviceAccountPath) {
+    if (contextGcp.projectId) {
+      return {
+        projectId: contextGcp.projectId,
+        serviceAccountPath: contextGcp.serviceAccountPath,
+        region: contextGcp.region,
+      };
+    }
+    try {
+      const sa = JSON.parse(fs.readFileSync(contextGcp.serviceAccountPath, 'utf8'));
+      return {
+        projectId: sa.project_id as string,
+        serviceAccountPath: contextGcp.serviceAccountPath,
+        region: contextGcp.region,
+      };
+    } catch (e) {
+      // Continue to next fallback
+    }
+  } else if (contextGcp?.projectId) {
+    return {
+      projectId: contextGcp.projectId,
+      serviceAccountPath: "",
+      region: contextGcp.region,
+    };
+  }
 
   // 1. Check Config.providers.gcp
   const gcpCfg = Config.get().providers.gcp;
@@ -101,6 +130,10 @@ export function getProjectId(): string {
 }
 
 export function getRegion(): string {
+  const context = resourceContextStorage.getStore();
+  const contextRegion = context?.gcp?.region;
+  if (contextRegion) return contextRegion;
+
   const gcpCfg = Config.get().providers.gcp;
   return gcpCfg?.region ?? 'us-central1';
 }
