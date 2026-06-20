@@ -276,6 +276,41 @@ class ProductionCluster extends Stack {
 
 ---
 
+## BigQuery View
+
+Create and manage Google BigQuery views. Puls automatically manages view creation, query updates, and dependency resolution.
+
+### Implicit Dependency Resolution via Output Interpolation
+
+Puls supports native dependency resolution and reference generation when authoring BigQuery views. When you interpolate a `GCP.BigQueryView` instance into another view's query template literal, Puls automatically:
+1. Registers an implicit dependency (`dependsOn`) on the referenced view so they are created in the correct order.
+2. Resolves the sentinel placeholder to the view's fully-qualified backtick-quoted reference at deploy time (e.g. `` `project-id.dataset_id.view_name` ``).
+
+```typescript
+const baseView = GCP.BigQueryView("base_users")
+  .dataset("analytics")
+  .query("SELECT * FROM `my-gcp-project.raw.users` WHERE active = true");
+
+const ltvView = GCP.BigQueryView("user_ltv")
+  .dataset("analytics")
+  .query(`SELECT id, sum(ltv) as total_ltv FROM ${baseView} GROUP BY id`);
+```
+
+### BigQuery View API Reference
+
+| Method | Type | Description | Default |
+|--------|------|-------------|---------|
+| `.dataset(datasetId)` | `string` | **Required.** The ID of the BigQuery dataset containing the view. | - |
+| `.query(sql)` | `string` | **Required.** The SQL query defining the view. Supports template-literal interpolation of other `BigQueryView` instances. | - |
+| `.useLegacySql(enabled)` | `boolean` | Toggles whether the query uses legacy SQL syntax instead of standard SQL. | `false` |
+
+### Outputs
+
+* `qualifiedRef` (`Output<string>`): The fully-qualified, backtick-quoted identifier of the view (e.g., `` `project-id.dataset_id.view_name` ``).
+* `qualifiedRef` (synchronous getter `view.qualifiedRef`): A synchronous property returning the same backtick-quoted reference, useful for nesting inside strings or passing to other resources before deployment.
+
+---
+
 ## IAM (Service Accounts & Bindings)
 
 Provision and manage custom Google Cloud Service Accounts (`GCP.ServiceAccount`) and project-level IAM bindings (`GCP.IAMBinding`) to automate secure credentials setup.

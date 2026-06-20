@@ -32,23 +32,46 @@ const jwtSecret = Secret.gcp("jwt-private-key");
 
 You can pass a `Secret` directly into any resource builder input that expects a string, an Output, or a Secret. The framework handles dynamic dependency resolving automatically under the hood.
 
-### Example: Dynamic Database Provisioning
+### Example 1: Database Credentials (GCP Cloud SQL)
 
-In the following example, the DigitalOcean database password is securely retrieved from GCP Secret Manager at deploy time:
+In the following example, the PostgreSQL database root credentials are dynamically retrieved from GCP Secret Manager during deployment:
 
 ```typescript
 import { Stack, Deploy, Secret } from "puls-dev";
-import { DO } from "puls-dev/do";
+import { GCP } from "puls-dev/gcp";
 
-@Deploy({ dryRun: false })
-class CloudStack extends Stack {
-  // Pull database password dynamically from GCP Secret Manager
-  db = DO.Database("prod-db-cluster")
-    .engine("pg")
-    .version("15")
-    .size("db-s-1vcpu-1gb");
-    
-  // You can also pass dynamic secrets to environment variables, API endpoints, etc.
+// Retrieve database credentials securely at deploy time
+const dbUser = "db_admin";
+const dbPassword = Secret.gcp("prod-database-password");
+
+@Deploy()
+class DatabaseStack extends Stack {
+  db = GCP.CloudSQL("prod-postgres")
+    .engine({ engine: "postgres", version: "16" })
+    .size("db-f1-micro")
+    .credentials(dbUser, dbPassword); // Secret is resolved and passed automatically
+}
+```
+
+### Example 2: Container Environment Variables (GCP Cloud Run)
+
+In the following example, a Stripe API key is fetched and injected into the container environment variables for a Cloud Run service:
+
+```typescript
+import { Stack, Deploy, Secret } from "puls-dev";
+import { GCP } from "puls-dev/gcp";
+
+// Fetch Stripe API Key from GCP Secrets Manager
+const stripeApiKey = Secret.gcp("stripe-api-key");
+
+@Deploy()
+class AppStack extends Stack {
+  apiServer = GCP.CloudRun("api-service")
+    .image("gcr.io/my-project/api-server:latest")
+    .env({
+      STRIPE_API_KEY: stripeApiKey, // Automatically resolved & injected into environment
+      NODE_ENV: "production"
+    });
 }
 ```
 

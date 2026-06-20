@@ -8,7 +8,7 @@ import type {
   AwsInventory,
   GcpInventory,
   FirebaseInventory,
-} from "../types/inventory.ts";
+} from "../types/inventory.js";
 
 
 // ─── Box-drawing ──────────────────────────────────────────────────────────────

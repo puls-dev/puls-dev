@@ -157,7 +157,7 @@ Enterprise CDN/edge - complex enough to warrant a dedicated maintainer; communit
 - [x] **Multi-account & Multi-tenant Contexts** - Dynamic or context-bound provider credentials in Stacks
 - [ ] **Eager Cost Estimation** - Estimate monthly infrastructure cost shifts directly in `puls diff`/`puls plan`
 - [ ] **Policy-as-Code Guardrails** - Enforce declarative pre-deploy compliance policies in pure TypeScript
-- [ ] **Implicit Dependency Resolution via Output Interpolation** - Automatically extract and link resource dependencies when builder configuration parameters (such as SQL queries or configuration blocks) interpolate other resource outputs
+- [x] **Implicit Dependency Resolution via Output Interpolation** - `GCP.BigQueryView.query()` accepts template-literal-interpolated view builders; sentinels auto-wire `dependsOn` and resolve to qualified refs (`` `project.dataset.view` ``) at deploy time
 
 ---
 

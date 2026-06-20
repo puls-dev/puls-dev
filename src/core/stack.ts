@@ -51,14 +51,29 @@ type OutputEntry = {
   sub?: string[];
 };
 
-function formatEntry(val: any, parentKey?: string): OutputEntry {
+/** @internal */
+export function formatEntry(val: any, parentKey?: string): OutputEntry {
   const isSensitiveKey = (k: string) => /password|secret|token|key/i.test(k);
 
   if (parentKey && isSensitiveKey(parentKey)) {
     return { primary: "********" };
   }
 
-  if (!val || typeof val !== "object") return { primary: String(val) };
+  if (val === null || val === undefined) return { primary: "null" };
+
+  if (Array.isArray(val)) {
+    if (val.length === 0) return { primary: "[]" };
+    const items = val.map((item) => formatEntry(item, parentKey));
+    if (items.every((i) => !i.sub)) {
+      const inline = items.map((i) => i.primary).join("  ·  ");
+      if (inline.length <= 52) return { primary: inline };
+    }
+    const primary = items[0].primary;
+    const sub = items.slice(1).map((i) => i.primary).concat(items.flatMap((i) => i.sub ?? []));
+    return { primary, sub };
+  }
+
+  if (typeof val !== "object") return { primary: String(val) };
 
   const redactedVal = { ...val };
   for (const k of Object.keys(redactedVal)) {
@@ -68,12 +83,38 @@ function formatEntry(val: any, parentKey?: string): OutputEntry {
   }
 
   // Known shapes
-  if ("destroyed" in redactedVal)
+  if ("destroyed" in redactedVal) {
     return { primary: redactedVal.destroyed ? "🗑️  destroyed" : "─  not found" };
+  }
   if (redactedVal.zone) return { primary: redactedVal.zone };
-  if (redactedVal.name && redactedVal.id) return { primary: `${redactedVal.name}  [${redactedVal.id}]` };
+
+  const identifier = redactedVal.id ?? redactedVal.vmid;
+  if (redactedVal.name && identifier !== undefined) {
+    return { primary: `${redactedVal.name}  [${identifier}]` };
+  }
   if (redactedVal.name) return { primary: redactedVal.name };
   if (redactedVal.arn) return { primary: redactedVal.arn };
+
+  // Recursively format dictionary objects (where all values are objects)
+  const entryEntries = Object.entries(redactedVal);
+  const isAllObjects = entryEntries.every(([, v]) => v && typeof v === "object");
+  if (isAllObjects && entryEntries.length > 0) {
+    const items = entryEntries.map(([k, v]) => {
+      const formatted = formatEntry(v, k);
+      const prefix = /^\d+$/.test(k) ? "" : `${k}: `;
+      return {
+        primary: `${prefix}${formatted.primary}`,
+        sub: formatted.sub?.map((s) => `${prefix}${s}`),
+      };
+    });
+    if (items.every((i) => !i.sub)) {
+      const inline = items.map((i) => i.primary).join("  ·  ");
+      if (inline.length <= 52) return { primary: inline };
+    }
+    const primary = items[0].primary;
+    const sub = items.slice(1).map((i) => i.primary).concat(items.flatMap((i) => i.sub ?? []));
+    return { primary, sub };
+  }
 
   // Generic: pull all scalar values
   const pairs = Object.entries(redactedVal).filter(

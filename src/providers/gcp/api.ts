@@ -163,6 +163,17 @@ export async function getGCPToken(scopes: string[]): Promise<string> {
 }
 
 function createGcpOfflineMock(base: string, path: string, opts: RequestInit): any {
+  if (path.includes("/bigquery/v2/")) {
+    const method = opts.method ?? "GET";
+    if (method === "GET") {
+      throw new Error(`GCP API GET ${path} → 404: Not Found`);
+    }
+    return {
+      tableReference: { projectId: "mock-gcp-project", datasetId: "mock-dataset", tableId: "mock-view" },
+      view: { query: "SELECT 1", useLegacySql: false },
+      type: "VIEW",
+    };
+  }
   if (path.includes("/secrets/")) {
     return {
       payload: {

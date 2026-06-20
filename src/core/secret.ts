@@ -47,6 +47,7 @@ export class Secret extends Output<string> {
       const resolved = await val.get();
       if (val instanceof Secret && resolved && resolved.length >= 3) {
         resolvedSecrets.add(resolved);
+        resourceContextStorage.getStore()?.secrets.add(resolved);
       }
       return resolved;
     }
@@ -72,6 +73,7 @@ export class Secret extends Output<string> {
    */
   static aws(secretId: string, options?: { region?: string }): Secret {
     return new Secret(secretId, async () => {
+      if (Config.isOfflineMode()) return `[SECRET:${secretId}]`;
       const { SecretsManagerClient, GetSecretValueCommand } = await import("@aws-sdk/client-secrets-manager");
       const client = new SecretsManagerClient({ region: options?.region ?? process.env.AWS_REGION ?? "us-east-1" });
       const result = await client.send(new GetSecretValueCommand({ SecretId: secretId }));
@@ -88,6 +90,7 @@ export class Secret extends Output<string> {
    */
   static ssm(parameterName: string, options?: { region?: string }): Secret {
     return new Secret(parameterName, async () => {
+      if (Config.isOfflineMode()) return `[SECRET:${parameterName}]`;
       const { SSMClient, GetParameterCommand } = await import("@aws-sdk/client-ssm");
       const client = new SSMClient({ region: options?.region ?? process.env.AWS_REGION ?? "us-east-1" });
       const result = await client.send(new GetParameterCommand({ Name: parameterName, WithDecryption: true }));
@@ -104,6 +107,7 @@ export class Secret extends Output<string> {
    */
   static gcp(secretId: string, options?: { projectId?: string }): Secret {
     return new Secret(secretId, async () => {
+      if (Config.isOfflineMode()) return `[SECRET:${secretId}]`;
       const { gcpFetch, getProjectId } = await import("../providers/gcp/api.js");
       const project = options?.projectId ?? getProjectId();
       const payload = await gcpFetch(

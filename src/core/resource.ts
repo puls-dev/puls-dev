@@ -61,17 +61,6 @@ export abstract class BaseBuilder {
   }
 
   /**
-   * Pre-resolve a named output on this builder. Use alongside `adoptId` to
-   * supply known connection details (host, port, uri, etc.) so downstream
-   * resources can reference them before this builder deploys.
-   *
-   * @example
-   *   db = DO.Database("prod-db")
-   *     .adoptId("abc123")
-   *     .adoptOutput("host", "db.internal.example.com")
-   *     .adoptOutput("uri", "postgres://...");
-   */
-  /**
    * Returns field-level differences between declared intent and live cloud state.
    * Called by `Stack.diff()` for each resource that exists. Override in provider
    * builders to surface meaningful drift fields. The default returns an empty array
@@ -83,6 +72,17 @@ export abstract class BaseBuilder {
 
   forceConfigCheck?(): void;
 
+  /**
+   * Pre-resolve a named output on this builder. Use alongside `adoptId` to
+   * supply known connection details (host, port, uri, etc.) so downstream
+   * resources can reference them before this builder deploys.
+   *
+   * @example
+   *   db = DO.Database("prod-db")
+   *     .adoptId("abc123")
+   *     .adoptOutput("host", "db.internal.example.com")
+   *     .adoptOutput("uri", "postgres://...");
+   */
   adoptOutput(key: string, value: any) {
     const out = (this as any).out;
     if (typeof out?.[key]?.resolve === "function") {

@@ -6,6 +6,7 @@ import { GCPCloudDNSZoneBuilder } from './clouddns.js';
 import { GCPServiceAccountBuilder, GCPIAMBindingBuilder } from './iam.js';
 import { GCPVMBuilder } from './vm.js';
 import { GCPTemplateBuilder } from './template.js';
+import { GCPBigQueryViewBuilder } from './bigquery.js';
 
 export {
   GCPSecretBuilder,
@@ -16,7 +17,8 @@ export {
   GCPServiceAccountBuilder,
   GCPIAMBindingBuilder,
   GCPVMBuilder,
-  GCPTemplateBuilder
+  GCPTemplateBuilder,
+  GCPBigQueryViewBuilder,
 };
 
 export const GCP = {
@@ -32,6 +34,7 @@ export const GCP = {
   },
   VM: (instanceId: string) => new GCPVMBuilder(instanceId),
   Template: (instanceId: string) => new GCPTemplateBuilder(instanceId),
+  BigQueryView: (viewId: string) => new GCPBigQueryViewBuilder(viewId),
 };
 
 

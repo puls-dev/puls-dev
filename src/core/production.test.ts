@@ -210,4 +210,41 @@ describe("Production Features Unit Tests", () => {
       assert.ok(contents.includes("db1 ansible_host=5.6.7.8"), "Should contain db1 host entry");
     });
   });
+
+  test("formatEntry formats objects, arrays, and dictionaries cleanly", async () => {
+    const { formatEntry } = await import("./stack.js");
+
+    // 1. Simple array of values
+    const arrayResult = formatEntry(["val1", "val2"]);
+    assert.strictEqual(arrayResult.primary, "val1  ·  val2");
+
+    // 2. VM object shape with vmid
+    const vmResult = formatEntry({ name: "my-vm", vmid: 500 });
+    assert.strictEqual(vmResult.primary, "my-vm  [500]");
+
+    // 3. VM object shape with id
+    const gcpVmResult = formatEntry({ name: "my-gcp-vm", id: "instance-123" });
+    assert.strictEqual(gcpVmResult.primary, "my-gcp-vm  [instance-123]");
+
+    // 4. Nested VM object in a dictionary/map output (such as ipaServers)
+    const dictResult = formatEntry({
+      "0": { name: "ix-sto1-pulsdev-ipa01", vmid: "PENDING" }
+    });
+    assert.strictEqual(dictResult.primary, "ix-sto1-pulsdev-ipa01  [PENDING]");
+
+    // 5. Array of VM objects (fits inline)
+    const vmArrayResult = formatEntry([
+      { name: "vm-1", vmid: 101 },
+      { name: "vm-2", vmid: 102 }
+    ]);
+    assert.strictEqual(vmArrayResult.primary, "vm-1  [101]  ·  vm-2  [102]");
+
+    // 6. Array of VM objects (too long for inline, formats with sub-lines)
+    const longVmArrayResult = formatEntry([
+      { name: "very-long-virtual-machine-name-01", vmid: 101 },
+      { name: "very-long-virtual-machine-name-02", vmid: 102 }
+    ]);
+    assert.strictEqual(longVmArrayResult.primary, "very-long-virtual-machine-name-01  [101]");
+    assert.deepStrictEqual(longVmArrayResult.sub, ["very-long-virtual-machine-name-02  [102]"]);
+  });
 });

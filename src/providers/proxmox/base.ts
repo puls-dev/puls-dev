@@ -134,31 +134,20 @@ export abstract class ProxmoxBaseBuilder extends BaseBuilder {
     });
   }
 
-  protected _env: Record<string, string | BaseBuilder | Output<string>> = {};
+  protected _env: Record<string, string | Output<string>> = {};
 
-  env(vars: Record<string, string | BaseBuilder | Output<string>>) {
+  env(vars: Record<string, string | Output<string>>) {
     this._env = { ...this._env, ...vars };
-    for (const [k, v] of Object.entries(vars)) {
-      if (v instanceof BaseBuilder) {
-        this.dependsOn(v);
-      }
-    }
     return this;
   }
 
   protected async resolveEnv(): Promise<Record<string, string>> {
     const resolved: Record<string, string> = {};
     for (const [k, v] of Object.entries(this._env)) {
-      if (v instanceof BaseBuilder) {
-        const val = await (v as any).awaitValue?.();
-        if (val === null || val === undefined) {
-          throw new Error(`[${this.name}] Env var "${k}" references builder "${v.name}" which has no resolved value.`);
-        }
-        resolved[k] = val;
-      } else if (v instanceof Output) {
+      if (v instanceof Output) {
         const val = await v.get();
         if (val === null || val === undefined) {
-          throw new Error(`[${this.name}] Env var "${k}" references Output which has no resolved value.`);
+          throw new Error(`[${this.name}] Env var "${k}" resolved to null/undefined.`);
         }
         resolved[k] = val;
       } else {
