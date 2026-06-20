@@ -1,10 +1,10 @@
 import { test, describe, beforeEach } from "node:test";
 import assert from "node:assert";
-import { Stack } from "./stack.js";
-import { Deploy, Destroy } from "./decorators.js";
-import { BaseBuilder } from "./resource.js";
-import { Config } from "./config.js";
-import { Output } from "./output.js";
+import { Stack } from "../../core/stack.js";
+import { Deploy, Destroy } from "../../core/decorators.js";
+import { BaseBuilder } from "../../core/resource.js";
+import { Config } from "../../core/config.js";
+import { Output } from "../../core/output.js";
 
 // Helper delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

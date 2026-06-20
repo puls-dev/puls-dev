@@ -4,6 +4,7 @@ import { Config } from "./config.js";
 import { resourceContextStorage } from "./context.js";
 import { resolvedSecrets } from "./secret.js";
 import type { StackDiff, ResourceDiff, ResourceStatus } from "../types/diff.js";
+import { Policy } from "./policy.js";
 
 async function withRedactedConsole<T>(
   secrets: Set<string>,
@@ -272,6 +273,8 @@ export abstract class Stack {
       }
     }
 
+    Policy.validate(entries.map((e) => e.resource));
+
     const resources: ResourceDiff[] = [];
 
     for (const { prop, resource } of entries) {
@@ -356,6 +359,8 @@ export abstract class Stack {
             }
           }
         }
+
+        Policy.validate(resources.map((r) => r.resource));
 
         // 2. Schedule execution
         if (isParallel) {

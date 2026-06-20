@@ -1,21 +1,87 @@
 # AWS Provider
 
-## Setup
+Puls dynamically resolves your AWS configuration and credentials through several layers, supporting local development, CI/CD pipelines, and complex multi-account environments.
 
-Uses standard AWS SDK environment variables - no explicit `AWS.init()` needed:
+### 1. Ambient Environment Variables
+By default, Puls falls back to standard AWS SDK environment variables:
 
 ```bash
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
 AWS_REGION=us-east-1
+AWS_PROFILE=my-profile  # Optional: uses shared credentials file
 ```
 
-Pass the region via decorator:
+### 2. Explicit Global Configuration
+You can set project-wide AWS options programmatically via `Config.set`:
 
 ```typescript
-@Deploy({ region: REGION.EU_CENTRAL_1 })
-class MyStack extends Stack { ... }
+import { Config } from "puls-dev";
+
+Config.set({
+  providers: {
+    aws: {
+      region: "us-east-1",
+      profile: "dev-profile", // Resolved from ~/.aws/credentials
+    }
+  }
+});
 ```
+
+### 3. Context-Scoped Accounts (Multi-Account Setup)
+To deploy different stacks to different AWS accounts, regions, or environments concurrently, you can supply context-scoped AWS configurations inside your `@Deploy` or `@Destroy` decorators.
+
+A recommended pattern is to define these environments in a shared configuration file (e.g., `config/accounts.ts`):
+
+```typescript
+// config/accounts.ts
+import { ProviderOpts } from "puls-dev";
+
+export const AWS_ACCOUNTS = {
+  PRODUCTION: {
+    profile: "aws-prod-profile",
+    region: "eu-west-1",
+  },
+  STAGING: {
+    profile: "aws-staging-profile",
+    region: "us-east-1",
+  },
+  DEVELOPMENT: {
+    profile: "aws-dev-profile",
+    region: "us-east-1",
+  }
+} satisfies Record<string, ProviderOpts["aws"]>;
+```
+
+Then reference them when declaring your stacks:
+
+```typescript
+import { Deploy, Stack } from "puls-dev";
+import { AWS } from "puls-dev/aws";
+import { AWS_ACCOUNTS } from "./config/accounts.js";
+
+@Deploy({ aws: AWS_ACCOUNTS.PRODUCTION })
+class ProductionStack extends Stack {
+  // Resolves S3 bucket in the context of the production account
+  bucket = AWS.S3("company-prod-backups");
+}
+
+@Deploy({ aws: AWS_ACCOUNTS.DEVELOPMENT })
+class DevStack extends Stack {
+  // Resolves S3 bucket in the context of the development account
+  bucket = AWS.S3("company-dev-backups");
+}
+```
+
+#### Supported Decorator Options
+The `aws` configuration object accepts the following fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `region` | `string` | Scopes AWS client calls to the specified AWS Region. |
+| `profile` | `string` | Resolves credentials dynamically from the shared credentials files (e.g., `~/.aws/credentials` or `~/.aws/config`). |
+| `accessKeyId` | `string` | Direct AWS access key ID. |
+| `secretAccessKey` | `string` | Direct AWS secret access key. |
 
 **Constants**
 

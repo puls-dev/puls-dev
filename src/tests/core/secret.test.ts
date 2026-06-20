@@ -3,9 +3,9 @@ import assert from "node:assert";
 import fs from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { Secret } from "./secret.js";
-import { Config } from "./config.js";
-import { Output } from "./output.js";
+import { Secret } from "../../core/secret.js";
+import { Config } from "../../core/config.js";
+import { Output } from "../../core/output.js";
 
 // Import clients to mock their prototype methods
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";

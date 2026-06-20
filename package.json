@@ -1,6 +1,6 @@
 {
   "name": "puls-dev",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "Intent-driven infrastructure-as-code with eager discovery and no state files.",
   "type": "module",
   "main": "./dist/index.js",
@@ -52,7 +52,8 @@
     "build": "tsc",
     "postbuild": "node -e \"const fs=require('fs'),f='dist/bin/puls.js',c=fs.readFileSync(f,'utf8');if(!c.startsWith('#!'))fs.writeFileSync(f,'#!/usr/bin/env node\\n'+c);\" && chmod +x dist/bin/puls.js",
     "prepublishOnly": "npm run build",
-    "test": "find src -name '*.test.ts' | xargs tsx --test --test-concurrency=1"
+    "test": "find src -name '*.test.ts' ! -name '*.integration.test.ts' | xargs tsx --test --test-concurrency=1",
+    "test:integration": "find src -name '*.integration.test.ts' | xargs tsx --test --test-concurrency=1"
   },
   "keywords": [
     "iac",

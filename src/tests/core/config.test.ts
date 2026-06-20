@@ -1,6 +1,6 @@
 import { test, describe } from "node:test";
 import assert from "node:assert";
-import { Config } from "./config.js";
+import { Config } from "../../core/config.js";
 
 describe("ConfigManager", () => {
   test("sets and gets config correctly", () => {

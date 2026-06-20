@@ -1,6 +1,6 @@
 import { test, describe } from "node:test";
 import assert from "node:assert";
-import { Output } from "./output.js";
+import { Output } from "../../core/output.js";
 
 describe("Output", () => {
   test("resolves a value correctly", async () => {

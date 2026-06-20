@@ -1,6 +1,6 @@
 import { test, describe } from "node:test";
 import assert from "node:assert";
-import { withRetry } from "./retry.js";
+import { withRetry } from "../../core/retry.js";
 
 describe("Retry & Backoff Engine Unit Tests", () => {
   test("resolves immediately if target function succeeds on the first try", async () => {

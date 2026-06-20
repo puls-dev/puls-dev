@@ -1,12 +1,12 @@
 import { test, describe, beforeEach } from "node:test";
 import assert from "node:assert";
-import { Stack } from "./stack.js";
-import { Config } from "./config.js";
-import { Output } from "./output.js";
-import { BaseBuilder } from "./resource.js";
-import { Secret } from "./secret.js";
-import { resourceContextStorage } from "./context.js";
-import { runAnsible } from "./provisioner.js";
+import { Stack } from "../../core/stack.js";
+import { Config } from "../../core/config.js";
+import { Output } from "../../core/output.js";
+import { BaseBuilder } from "../../core/resource.js";
+import { Secret } from "../../core/secret.js";
+import { resourceContextStorage } from "../../core/context.js";
+import { runAnsible } from "../../core/provisioner.js";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -163,7 +163,7 @@ describe("Production Features Unit Tests", () => {
     class OfflineStack extends Stack {
       aws_vm = new class extends BaseBuilder {
         async deploy() {
-          const { getEC2Client } = await import("../providers/aws/api.js");
+          const { getEC2Client } = await import("../../providers/aws/api.js");
           const client = getEC2Client();
           const res = await client.send({ constructor: { name: "RunInstancesCommand" } } as any);
           return res;
@@ -172,7 +172,7 @@ describe("Production Features Unit Tests", () => {
 
       gcp_vm = new class extends BaseBuilder {
         async deploy() {
-          const { gcpFetch } = await import("../providers/gcp/api.js");
+          const { gcpFetch } = await import("../../providers/gcp/api.js");
           const res = await gcpFetch("compute", "/instances");
           return res;
         }
@@ -212,7 +212,7 @@ describe("Production Features Unit Tests", () => {
   });
 
   test("formatEntry formats objects, arrays, and dictionaries cleanly", async () => {
-    const { formatEntry } = await import("./stack.js");
+    const { formatEntry } = await import("../../core/stack.js");
 
     // 1. Simple array of values
     const arrayResult = formatEntry(["val1", "val2"]);

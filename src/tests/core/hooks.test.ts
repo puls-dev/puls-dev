@@ -1,9 +1,9 @@
 import { test, describe, beforeEach, afterEach, mock } from "node:test";
 import assert from "node:assert";
-import { Stack } from "./stack.js";
-import { BaseBuilder } from "./resource.js";
-import { Config } from "./config.js";
-import { SLACK, DISCORD } from "./hooks.js";
+import { Stack } from "../../core/stack.js";
+import { BaseBuilder } from "../../core/resource.js";
+import { Config } from "../../core/config.js";
+import { SLACK, DISCORD } from "../../core/hooks.js";
 
 // A minimal dummy resource builder for testing hooks
 class TestResource extends BaseBuilder {

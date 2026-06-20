@@ -283,6 +283,7 @@ Create and manage Google BigQuery views. Puls automatically manages view creatio
 ### Implicit Dependency Resolution via Output Interpolation
 
 Puls supports native dependency resolution and reference generation when authoring BigQuery views. When you interpolate a `GCP.BigQueryView` instance into another view's query template literal, Puls automatically:
+
 1. Registers an implicit dependency (`dependsOn`) on the referenced view so they are created in the correct order.
 2. Resolves the sentinel placeholder to the view's fully-qualified backtick-quoted reference at deploy time (e.g. `` `project-id.dataset_id.view_name` ``).
 

@@ -1,7 +1,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert";
 import "reflect-metadata";
-import { Protected, ForceConfigCheck, Destroy } from "./decorators.js";
+import { Protected, ForceConfigCheck, Destroy } from "../../core/decorators.js";
 
 describe("Decorators Compatibility Tests", () => {
   test("legacy decorators define metadata correctly", () => {

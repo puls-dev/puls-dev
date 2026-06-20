@@ -1,8 +1,8 @@
 import { test, describe } from "node:test";
 import assert from "node:assert";
-import { BaseBuilder, createBuilderArray } from "./resource.js";
-import { Stack } from "./stack.js";
-import { Config } from "./config.js";
+import { BaseBuilder, createBuilderArray } from "../../core/resource.js";
+import { Stack } from "../../core/stack.js";
+import { Config } from "../../core/config.js";
 
 class MockResourceBuilder extends BaseBuilder {
   public val: number = 0;

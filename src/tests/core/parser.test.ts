@@ -2,7 +2,7 @@ import { test, describe } from "node:test";
 import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
-import { parseYaml, loadRecordsFromFile } from "./parser.js";
+import { parseYaml, loadRecordsFromFile } from "../../core/parser.js";
 
 describe("YAML & JSON Config Parser", () => {
   test("parses standard simple key-value YAML blocks correctly", () => {
