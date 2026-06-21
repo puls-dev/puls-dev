@@ -1,316 +1,95 @@
 # Pulsdev.io
 
-**Intent-driven infrastructure-as-code. Describe what you want- Puls figures out create, update, or skip.**
+**State-free, eager-discovery Infrastructure-as-Code for TypeScript.**
 
-[Live Documentation](https://pulsdev.io/) | [GitHub Actions](docs/github-actions.md) | Matrix|Gitter: **pulsdev.io** ([Join](https://matrix.to/#/#pulsdevio:gitter.im))
+[![Live Documentation](https://img.shields.io/badge/docs-pulsdev.io-blueviolet)](https://pulsdev.io/)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-> [!IMPORTANT]
-> **Active Pre-1.0 Development**
-> `pulsdev.io` is under active development. APIs and features are evolving- we welcome feedback, bug reports, and contributions!
+---
+
+## What is Puls?
+
+Pulsdev.io is a modern, developer-centric Infrastructure-as-Code (IaC) framework. Instead of using complex configuration languages or managing centralized, brittle state files (`terraform.tfstate`), Puls allows you to define and manage cloud infrastructure as pure, strongly-typed TypeScript stacks.
+
+### Key Philosophy
+* **Zero State Files**: Puls queries your live cloud environment directly. There is no state file to get corrupted, desynchronized, or locked.
+* **Eager Discovery**: Resource discovery queries execute in the background the moment you declare a builder. By the time deployment begins, the current infrastructure state is already resolved.
+* **Idempotent by Default**: Running the same stack multiple times is always safe. Puls automatically detects existing resources, skipping them or applying in-place updates.
+
+---
+
+## What Puls Solves
+
+### 1. Eliminates State Management Overhead
+Traditional IaC tools require a shared state file stored in S3/GCS. If a deployment fails or state becomes desynchronized, developers must manually edit state files or run complex imports. Puls solves this by treating the cloud provider itself as the single source of truth.
+
+### 2. Speeds Up Developer Feedback Loops
+Puls executes resource discovery asynchronously in the background. Because compilation and discovery happen concurrently, dry-runs (`puls plan`) and state drift comparisons (`puls diff`) complete in seconds rather than minutes.
+
+### 3. Native TypeScript Integration
+No custom DSLs (like HCL) or YAML templates. Write stacks using standard TypeScript classes, decorators, and libraries. Share configuration, secrets, and utilities using standard npm modules and environment configs.
+
+---
+
+## Code Example
 
 ```typescript
-@Deploy({ proxmox: CONFIG.STAGING })
-class GameInfra extends Stack {
-  server = Proxmox.VM("ix-app01")
-    .image(OS.UBUNTU_24_04)
-    .cores(4).memory(8192)
-    .ip("10.8.10.51").vlan(2010)
-    .sshKey(KEYS)
-    .provision("config/default.yaml");
+import { Stack, Deploy } from "puls-dev";
+import { AWS, REGION, RUNTIME } from "puls-dev/aws";
+
+@Deploy({ region: REGION.US_EAST_1 })
+class AppStack extends Stack {
+  // 1. Declare database
+  db = AWS.RDS("app-db").engine("postgres").size("db.t3.micro");
+
+  // 2. Declare Lambda function referencing the database endpoint
+  api = AWS.Lambda("app-api")
+    .code("./dist/api")
+    .runtime(RUNTIME.NODEJS_20)
+    .env({
+      DB_HOST: this.db.endpoint,
+    });
 }
 ```
 
-No state files. No plan step. Runs against real APIs- idempotent by default.
-
 ---
 
-## How it works
+## Quick Start
 
-Puls uses **eager discovery**: the moment you declare a resource, it checks the real API in the background. By the time `deploy()` runs, it already knows the current state.
-
-```
-Declare resource  →  Discovery fires immediately (async)
-                  →  You chain config (.cores(), .ip(), ...)
-                  →  deploy() awaits discovery, diffs, acts
-```
-
-Running the same stack twice is always safe- existing resources are detected and skipped or updated in place.
-
----
-
-## Install
+### Installation
 
 ```bash
 npm install puls-dev
 ```
 
-**One-time shell setup**- so you never have to type `npx puls` again:
+### Install CLI
+Run the one-time launcher setup to invoke `puls` directly in your terminal:
 
 ```bash
 npx puls install-shell
 ```
 
-This adds a `puls` launcher to `~/.puls/bin` and wires it into your shell config (`~/.zshrc`, `~/.bashrc`, or Fish). Open a new terminal and `puls` works everywhere.
-
----
-
-## CLI
+### Command Cheat Sheet
 
 ```bash
-puls plan    infra/stack.ts          # dry-run- prints what would change, no API writes
-puls deploy  infra/stack.ts          # apply the stack
-puls destroy infra/stack.ts          # tear down the stack
-puls diff    infra/stack.ts          # compare declared intent vs live cloud state
-puls diff    infra/stack.ts --fail-on-drift   # exit 1 if anything has drifted
-
-puls install-shell                   # one-time shell setup
-puls uninstall-shell                 # remove shell integration
-```
-
-Always run `plan` before `deploy`- it activates dry-run mode automatically.
-
----
-
-## Providers
-
-| Provider | Resources |
-|----------|-----------|
-| **AWS** | EC2, RDS, Lambda, ECS/Fargate, API Gateway, S3, CloudFront, Route53, ACM, SQS, SNS, IAM, CloudWatch, SecretsManager |
-| **Azure** | Resource Groups, Blob Storage, App Service, Virtual Machines |
-| **Cloudflare** | Zone, DNS Records, KV Namespaces, R2 Buckets, Workers |
-| **DigitalOcean** | Droplet, Domain (full DNS), Firewall, Certificate, LoadBalancer, Database, App Platform, VPC, Spaces |
-| **GCP** | Compute VM, Cloud Run, Cloud SQL, Secret Manager, Pub/Sub, Cloud DNS, IAM |
-| **Firebase** | Hosting, Functions, Firestore, Storage, Auth, RemoteConfig, App Check |
-| **Proxmox** | VM (clone, cloud-init, provision, cluster-aware scheduling), Templates (golden images) |
-
----
-
-## Quick examples
-
-### DigitalOcean
-
-```typescript
-import "dotenv/config";
-import { Stack, Deploy } from "puls-dev";
-import { DO, SIZE, REGION } from "puls-dev/do";
-
-@Deploy({ token: process.env.DO_TOKEN! })
-class Production extends Stack {
-  db  = DO.Database("prod-db").engine("pg").size("db-s-2vcpu-2gb").nodes(2);
-  web = DO.Droplet("prod-web").size(SIZE.MEDIUM).region(REGION.FRA).allowPublicWeb();
-  dns = DO.Domain("example.com").pointer("@", this.web).withSSL();
-}
-```
-
-### AWS
-
-```typescript
-import "dotenv/config";
-import { Stack, Deploy } from "puls-dev";
-import { AWS, REGION, RUNTIME, DB } from "puls-dev/aws";
-
-@Deploy({ region: REGION.EU_CENTRAL_1 })
-class AppStack extends Stack {
-  db  = AWS.RDS("app-db").engine(DB.POSTGRES_16).size("db.t3.micro");
-  api = AWS.Lambda("app-api").code("./functions/api").runtime(RUNTIME.NODEJS_20);
-  cdn = AWS.S3("app-assets").staticSite().allowFrom(this.api);
-}
-```
-
-### GCP
-
-```typescript
-import "dotenv/config";
-import { Stack, Deploy } from "puls-dev";
-import { GCP } from "puls-dev/gcp";
-
-@Deploy({})
-class CloudStack extends Stack {
-  secret = GCP.Secret("db-password").value(process.env.DB_PASS!);
-  api    = GCP.CloudRun("app-api").image("gcr.io/my-project/api:latest").port(8080).public();
-  db     = GCP.CloudSQL("app-db").engine("postgres").version("16").tier("db-f1-micro");
-}
-```
-
-### Proxmox
-
-```typescript
-import "dotenv/config";
-import { Stack, Deploy, Protected } from "puls-dev";
-import { Proxmox, CONFIG, OS, KEYS } from "puls-dev/proxmox";
-
-@Deploy({ proxmox: CONFIG.STAGING })
-class StagingInfra extends Stack {
-  @Protected
-  db = Proxmox.VM("ix-db01").image(OS.UBUNTU_24_04).cores(2).memory(4096)
-        .ip("10.8.10.50").vlan(2010).sshKey(KEYS);
-
-  app = Proxmox.VM("ix-app01").image(OS.UBUNTU_24_04).cores(4).memory(8192)
-         .ip("10.8.10.51").vlan(2010).sshKey(KEYS)
-         .provision("config/default.yaml");
-}
-```
-
-### Azure
-
-```typescript
-import "dotenv/config";
-import { Stack, Deploy } from "puls-dev";
-import { Azure } from "puls-dev/azure";
-
-@Deploy({})
-class AzureStack extends Stack {
-  group   = Azure.ResourceGroup("my-app-rg").location("eastus");
-  storage = Azure.BlobStorage("mystorageacct").resourceGroup(this.group).containerName("uploads");
-  web     = Azure.AppService("my-web-app").resourceGroup(this.group).sku("B1").runtime("NODE|20-lts");
-}
-```
-
-### Cloudflare
-
-```typescript
-import "dotenv/config";
-import { Stack, Deploy } from "puls-dev";
-import { CF } from "puls-dev/cloudflare";
-
-@Deploy({})
-class CloudflareStack extends Stack {
-  zone   = CF.Zone("example.com")
-            .pointer("www", "1.2.3.4", true)
-            .txt("verification", "token123");
-  bucket = CF.R2("app-media");
-  worker = CF.Worker("api-worker")
-            .script("./dist/worker.js")
-            .r2("MEDIA", this.bucket)
-            .route("api.example.com/*");
-}
+puls plan    infra/stack.ts   # Dry-run stack: view changes without making writes
+puls deploy  infra/stack.ts   # Apply the declared stack to your cloud provider
+puls diff    infra/stack.ts   # Check for drift against live cloud state
+puls destroy infra/stack.ts   # Teardown the stack
 ```
 
 ---
 
-## Key features
+## Key Capabilities
 
-### Drift detection
-
-`Stack.diff()` compares every declared resource against its live cloud state- no API writes, structured output:
-
-```bash
-puls diff infra/production.ts
-```
-
-```
-🔍 Diff: Production
-
-   db   prod-db   ⚠️  drift
-        └─ size      db-s-1vcpu-1gb  →  db-s-2vcpu-2gb
-        └─ nodes     1  →  2
-   web  prod-web  ✅ in-sync
-   dns  example.com  ✅ in-sync
-
-   ⚠️  1 drifted out of 3 resources.
-```
-
-### Resource adoption
-
-Bring existing cloud infrastructure under Puls management without recreating it:
-
-```typescript
-db = DO.Database("prod-db")
-  .adoptId("existing-cluster-uuid")
-  .adoptOutput("host", "db.internal.example.com")
-  .adoptOutput("uri", "postgres://...");
-```
-
-### GitHub Actions integration
-
-Post plan output as a PR comment automatically. Add to your repo:
-
-```yaml
-# .github/workflows/puls-plan.yml
-- uses: puls-dev/puls-dev@v1
-  with:
-    command: plan
-    stack-file: infra/production.ts
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    DO_TOKEN: ${{ secrets.DO_TOKEN }}
-```
-
-Every PR that touches infra files gets a comment showing exactly what would change. See [docs/github-actions.md](docs/github-actions.md) for deploy and drift-check workflows.
-
-### Stack outputs & cross-stack wiring
-
-```typescript
-@Deploy({ proxmox: CONFIG.STAGING, token: process.env.DO_TOKEN })
-class Infra extends Stack {
-  vm  = Proxmox.VM("ix-app01").cores(4).memory(8192).ip("10.8.10.51").vlan(2010);
-  dns = DO.Domain("example.com").pointer("app", this.vm.out.ip); // Output<string>
-}
-```
-
-Outputs resolve lazily- downstream resources unblock the moment their dependency finishes deploying.
-
-### Dry run / plan
-
-```typescript
-@Deploy({ dryRun: true, proxmox: CONFIG.STAGING })
-class MyStack extends Stack { ... }
-```
-
-Or via the CLI: `puls plan infra/stack.ts`- no config change required.
-
-### Protected resources
-
-```typescript
-@Protected
-db = Proxmox.VM("ix-db01")...;  // Puls will refuse to modify or destroy this
-```
+* **Governance (Policy-as-Code)**: Enforce declarative compliance policies pre-flight.
+* **Drift Detection**: Run `puls diff --fail-on-drift` to identify external modifications instantly.
+* **Resource Adoption**: Bring existing cloud resources under Puls management via `.adoptId()`.
+* **Universal Provisioning**: Eagerly bake VM templates and run Ansible playbooks with change-aware metadata.
+* **Parallel Execution**: Automatically resolves resource DAGs and deploys independent nodes concurrently.
 
 ---
 
-## Decorators
+## Documentation
 
-| Decorator | Effect |
-|-----------|--------|
-| `@Deploy({ ... })` | Deploy all resources in the stack |
-| `@Deploy({ dryRun: true })` | Print plan without making changes |
-| `@Destroy` | Tear down all resources in the stack |
-| `@DryRun` | Shorthand for `@Deploy({ dryRun: true })` |
-| `@Protected` | Block changes/destruction of that resource |
-| `@Check` | Inventory query- lists all live resources across providers |
-
----
-
-## .env
-
-```bash
-# DigitalOcean
-DO_TOKEN=
-
-# AWS
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_REGION=us-east-1
-
-# Proxmox
-PROXMOX_URL=https://pve.example.com:8006
-PROXMOX_USER=root@pam
-PROXMOX_TOKEN_NAME=puls
-PROXMOX_TOKEN_SECRET=
-PROXMOX_NODES=pve1,pve2
-
-# GCP / Firebase
-GCP_SA=./service-account.json
-
-# Cloudflare
-CLOUDFLARE_TOKEN=
-CLOUDFLARE_ACCOUNT_ID=
-
-# Azure
-AZURE_CLIENT_ID=
-AZURE_CLIENT_SECRET=
-AZURE_TENANT_ID=
-AZURE_SUBSCRIPTION_ID=
-```
-
-Requires Node 20+.
+For full guides, provider credentials setup, and API references, visit the **[Live Documentation](https://pulsdev.io/)**.
