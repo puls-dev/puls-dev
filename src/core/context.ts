@@ -18,6 +18,7 @@ export interface ResourceContext {
     profile?: string;
     accessKeyId?: string;
     secretAccessKey?: string;
+    endpoint?: string;
   };
   gcp?: {
     projectId?: string;

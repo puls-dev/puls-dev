@@ -4,11 +4,14 @@ import { Config } from "../../core/config.js";
 import { Output } from "../../core/output.js";
 import { getPMClient, withVmidAllocation, ProxmoxApiClient } from "./api.js";
 import type { OSImage } from "../../types/proxmox.js";
-import { getFileHash, parseProvisionMetadata, mergeProvisionMetadata } from "./hash.js";
+import {
+  getFileHash,
+  parseProvisionMetadata,
+  mergeProvisionMetadata,
+} from "./hash.js";
 import { TemplateBuilder } from "./template.js";
 import { resourceContextStorage } from "../../core/context.js";
 import { writeEnvPulsFile } from "../../core/provisioner.js";
-
 
 export class VMBuilder extends ProxmoxBaseBuilder {
   readonly out = {
@@ -43,16 +46,23 @@ export class VMBuilder extends ProxmoxBaseBuilder {
     try {
       const pm = getPMClient();
       const resources = await pm.get<any[]>("/cluster/resources?type=vm");
-      const match = (resources ?? []).find((r) => r.name === name && !r.template) ?? null;
+      const match =
+        (resources ?? []).find((r) => r.name === name && !r.template) ?? null;
       if (match) {
         try {
-          const config = await pm.get<any>(`/nodes/${match.node}/qemu/${match.vmid}/config`);
+          const config = await pm.get<any>(
+            `/nodes/${match.node}/qemu/${match.vmid}/config`,
+          );
           match.description = config.description ?? "";
-          match.cfgCores = config.cores !== undefined ? Number(config.cores) : undefined;
-          match.cfgMemory = config.memory !== undefined ? Number(config.memory) : undefined;
+          match.cfgCores =
+            config.cores !== undefined ? Number(config.cores) : undefined;
+          match.cfgMemory =
+            config.memory !== undefined ? Number(config.memory) : undefined;
           match.cfgMachine = config.machine ?? "q35";
         } catch (err: any) {
-          console.warn(`   ⚠️  Could not fetch VM config for ${match.vmid}: ${err.message}`);
+          console.warn(
+            `   ⚠️  Could not fetch VM config for ${match.vmid}: ${err.message}`,
+          );
           match.description = "";
         }
       }
@@ -120,13 +130,31 @@ export class VMBuilder extends ProxmoxBaseBuilder {
   getDiff(existing: any) {
     const diffs = [];
     if (existing.cfgCores !== undefined && existing.cfgCores !== this._cores) {
-      diffs.push({ field: "cores", declared: this._cores, live: existing.cfgCores });
+      diffs.push({
+        field: "cores",
+        declared: this._cores,
+        live: existing.cfgCores,
+      });
     }
-    if (existing.cfgMemory !== undefined && existing.cfgMemory !== this._memory) {
-      diffs.push({ field: "memory", declared: `${this._memory} MB`, live: `${existing.cfgMemory} MB` });
+    if (
+      existing.cfgMemory !== undefined &&
+      existing.cfgMemory !== this._memory
+    ) {
+      diffs.push({
+        field: "memory",
+        declared: `${this._memory} MB`,
+        live: `${existing.cfgMemory} MB`,
+      });
     }
-    if (existing.cfgMachine !== undefined && this._machine !== existing.cfgMachine) {
-      diffs.push({ field: "machine", declared: this._machine, live: existing.cfgMachine });
+    if (
+      existing.cfgMachine !== undefined &&
+      this._machine !== existing.cfgMachine
+    ) {
+      diffs.push({
+        field: "machine",
+        declared: this._machine,
+        live: existing.cfgMachine,
+      });
     }
     return diffs;
   }
@@ -156,7 +184,11 @@ export class VMBuilder extends ProxmoxBaseBuilder {
       this.out.vmid.resolve(existing.vmid);
 
       // Resolve the IP of the existing VM
-      this.resolvedIp = await this.resolveExistingIp(existing.node, existing.vmid, pm);
+      this.resolvedIp = await this.resolveExistingIp(
+        existing.node,
+        existing.vmid,
+        pm,
+      );
       if (this.resolvedIp) {
         this.out.ip.resolve(this.resolvedIp);
         this.registerHost();
@@ -181,25 +213,31 @@ export class VMBuilder extends ProxmoxBaseBuilder {
       if (playbooksToRun.length > 0) {
         console.log(`\n🖥️  Finalizing Proxmox VM "${this.name}"...`);
         console.log(
-          `   ✅ VM "${this.name}" already exists (vmid=${existing.vmid}, node=${existing.node}, status=${existing.status})`
+          `   ✅ VM "${this.name}" already exists (vmid=${existing.vmid}, node=${existing.node}, status=${existing.status})`,
         );
 
         if (dryRun) {
-          console.log(`   📝 [PLAN] Run ${playbooksToRun.length} playbook changes on existing VM:`);
+          console.log(
+            `   📝 [PLAN] Run ${playbooksToRun.length} playbook changes on existing VM:`,
+          );
           for (const p of playbooksToRun) {
             console.log(`      └─ Playbook: ${p.path} (hash: ${p.hash})`);
           }
         } else {
           if (activeIp === "0.0.0.0") {
-            throw new Error(`Failed to resolve IP for existing VM "${this.name}" to run playbooks`);
+            throw new Error(
+              `Failed to resolve IP for existing VM "${this.name}" to run playbooks`,
+            );
           }
-          console.log(`   🔄 Running ${playbooksToRun.length} playbook changes → ${activeIp}`);
+          console.log(
+            `   🔄 Running ${playbooksToRun.length} playbook changes → ${activeIp}`,
+          );
 
           // Wait for SSH
           await this.waitFor(
             `SSH on ${activeIp} to be ready`,
             () => this.checkPort(activeIp, 22),
-            { intervalMs: 10_000, timeoutMs: 300_000 }
+            { intervalMs: 10_000, timeoutMs: 300_000 },
           );
 
           // Execute each playbook
@@ -209,11 +247,19 @@ export class VMBuilder extends ProxmoxBaseBuilder {
           }
 
           // Update notes on Proxmox VM
-          const updatedNotes = mergeProvisionMetadata(existing.description ?? "", appliedHashes);
-          await pm.post(`/nodes/${existing.node}/qemu/${existing.vmid}/config`, {
-            description: updatedNotes,
-          });
-          console.log(`   ✅ Playbooks applied successfully and metadata updated.`);
+          const updatedNotes = mergeProvisionMetadata(
+            existing.description ?? "",
+            appliedHashes,
+          );
+          await pm.post(
+            `/nodes/${existing.node}/qemu/${existing.vmid}/config`,
+            {
+              description: updatedNotes,
+            },
+          );
+          console.log(
+            `   ✅ Playbooks applied successfully and metadata updated.`,
+          );
         }
 
         return {
@@ -227,7 +273,7 @@ export class VMBuilder extends ProxmoxBaseBuilder {
       // No playbook changes
       console.log(`\n🖥️  Finalizing Proxmox VM "${this.name}"...`);
       console.log(
-        `   ✅ VM "${this.name}" already exists (vmid=${existing.vmid}, node=${existing.node}, status=${existing.status})`
+        `   ✅ VM "${this.name}" already exists (vmid=${existing.vmid}, node=${existing.node}, status=${existing.status})`,
       );
       console.log(`   ✅ Configuration and playbooks are up to date.`);
       return {
@@ -243,8 +289,11 @@ export class VMBuilder extends ProxmoxBaseBuilder {
     if (dryRun) {
       console.log(`   📝 [PLAN] Create VM "${this.name}"`);
       if (this._image) console.log(`      └─ Image: ${this._image}`);
-      if (this._templateSource) console.log(`      └─ Template: ${this._templateSource.name}`);
-      console.log(`      └─ Cores: ${this._cores}  Memory: ${this._memory} MB  Machine: ${this._machine}`);
+      if (this._templateSource)
+        console.log(`      └─ Template: ${this._templateSource.name}`);
+      console.log(
+        `      └─ Cores: ${this._cores}  Memory: ${this._memory} MB  Machine: ${this._machine}`,
+      );
       if (this._vlan) console.log(`      └─ VLAN: ${this._vlan}`);
       if (this._provision.length > 0) {
         console.log(`      └─ Provision: ${this._provision.join(", ")}`);
@@ -290,7 +339,7 @@ export class VMBuilder extends ProxmoxBaseBuilder {
     }
 
     // Resolve target node: explicit → cluster-aware (online & max free RAM) → configured nodes list → template's node → API discovery
-    let node = this._node ?? await this.selectBestNode(pm);
+    let node = this._node ?? (await this.selectBestNode(pm));
 
     if (!node) {
       const configuredNodes = Config.get().providers.proxmox?.nodes;
@@ -306,37 +355,43 @@ export class VMBuilder extends ProxmoxBaseBuilder {
 
     // Allocate VMID and immediately issue the create/clone request while holding the lock
     // to prevent parallel VMs from claiming the same VMID.
-    const { newVmid, cloneTaskId, cloneNode } = await withVmidAllocation(async () => {
-      const vmid = await pm.get<number>("/cluster/nextid");
-      if (template) {
-        console.log(
-          `   📋 Cloning template "${template.name}" (vmid=${template.vmid}) → "${this.name}" (vmid=${vmid})`,
-        );
-        const taskId = await pm.post<string>(
-          `/nodes/${template.node || node}/qemu/${template.vmid}/clone`,
-          {
-            newid: vmid,
+    const { newVmid, cloneTaskId, cloneNode } = await withVmidAllocation(
+      async () => {
+        const vmid = await pm.get<number>("/cluster/nextid");
+        if (template) {
+          console.log(
+            `   📋 Cloning template "${template.name}" (vmid=${template.vmid}) → "${this.name}" (vmid=${vmid})`,
+          );
+          const taskId = await pm.post<string>(
+            `/nodes/${template.node || node}/qemu/${template.vmid}/clone`,
+            {
+              newid: vmid,
+              name: this.name,
+              full: 1,
+              storage,
+              format: "raw",
+              target: node,
+            },
+          );
+          return {
+            newVmid: vmid,
+            cloneTaskId: taskId,
+            cloneNode: template.node || node,
+          };
+        } else {
+          console.log(`   🆕 Creating blank VM "${this.name}" (vmid=${vmid})`);
+          await pm.post(`/nodes/${node}/qemu`, {
+            vmid,
             name: this.name,
-            full: 1,
-            storage,
-            format: "raw",
-            target: node,
-          },
-        );
-        return { newVmid: vmid, cloneTaskId: taskId, cloneNode: template.node || node };
-      } else {
-        console.log(`   🆕 Creating blank VM "${this.name}" (vmid=${vmid})`);
-        await pm.post(`/nodes/${node}/qemu`, {
-          vmid,
-          name: this.name,
-          cores: this._cores,
-          memory: this._memory,
-          net0: `virtio,bridge=vmbr1${this._vlan ? `,tag=${this._vlan}` : ""}`,
-          ostype: "l26",
-        });
-        return { newVmid: vmid, cloneTaskId: null, cloneNode: null };
-      }
-    });
+            cores: this._cores,
+            memory: this._memory,
+            net0: `virtio,bridge=vmbr1${this._vlan ? `,tag=${this._vlan}` : ""}`,
+            ostype: "l26",
+          });
+          return { newVmid: vmid, cloneTaskId: null, cloneNode: null };
+        }
+      },
+    );
 
     if (cloneTaskId && cloneNode) {
       await this.waitForTask(cloneNode, cloneTaskId, pm);
@@ -373,7 +428,8 @@ export class VMBuilder extends ProxmoxBaseBuilder {
       ipconfig0: this._ip
         ? (() => {
             const [addr, prefix = "24"] = this._ip!.split("/");
-            const gw = this._gateway ?? (addr.split(".").slice(0, 3).join(".") + ".1");
+            const gw =
+              this._gateway ?? addr.split(".").slice(0, 3).join(".") + ".1";
             return `gw=${gw},ip=${addr}/${prefix}`;
           })()
         : "ip=dhcp",
@@ -453,9 +509,12 @@ export class VMBuilder extends ProxmoxBaseBuilder {
 
       // Write metadata to new VM description
       const updatedNotes = mergeProvisionMetadata("", appliedHashes);
-      await pm.post(`/nodes/${this.resolvedNode}/qemu/${this.resolvedVmid}/config`, {
-        description: updatedNotes,
-      });
+      await pm.post(
+        `/nodes/${this.resolvedNode}/qemu/${this.resolvedVmid}/config`,
+        {
+          description: updatedNotes,
+        },
+      );
     }
 
     if (this._replace) {
@@ -465,18 +524,22 @@ export class VMBuilder extends ProxmoxBaseBuilder {
     return { name: this.name, vmid: this.resolvedVmid, ip: this.resolvedIp };
   }
 
-  private async resolveExistingIp(node: string, vmid: number, pm: ProxmoxApiClient): Promise<string | null> {
+  private async resolveExistingIp(
+    node: string,
+    vmid: number,
+    pm: ProxmoxApiClient,
+  ): Promise<string | null> {
     if (this._ip) {
       return this._ip.split("/")[0];
     }
     // Try QEMU guest agent first
     try {
       const ifaces = await pm.get<any[]>(
-        `/nodes/${node}/qemu/${vmid}/agent/network-get-interfaces`
+        `/nodes/${node}/qemu/${vmid}/agent/network-get-interfaces`,
       );
       const eth = (ifaces ?? []).find((i: any) => i.name !== "lo");
       const addr = eth?.["ip-addresses"]?.find(
-        (a: any) => a["ip-address-type"] === "ipv4"
+        (a: any) => a["ip-address-type"] === "ipv4",
       );
       if (addr?.["ip-address"]) {
         return addr["ip-address"];

@@ -49,6 +49,12 @@ function getAwsClientConfig(region?: string): any {
       config.credentials = fromIni({ profile: aws.profile });
     }
   }
+
+  const endpoint = aws?.endpoint ?? Config.get().providers.aws?.endpoint ?? process.env.AWS_ENDPOINT_URL;
+  if (endpoint) {
+    config.endpoint = endpoint;
+  }
+
   return config;
 }
 

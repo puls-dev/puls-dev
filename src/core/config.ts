@@ -13,7 +13,8 @@ export interface GlobalConfig {
       sshUser?: string;
     };
     aws?: {
-      region: string;
+      region?: string;
+      endpoint?: string;
     };
     proxmox?: {
       url: string; // e.g. https://10.8.4.39:8006

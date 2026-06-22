@@ -23,8 +23,10 @@ Resources in the same stack deploy sequentially in declaration order, so earlier
 @Deploy({ proxmox: CONFIG.STAGING, token: process.env.DO_TOKEN })
 class Infra extends Stack {
   server = Proxmox.VM("ix-app01")
-    .cores(4).memory(8192)
-    .ip("10.8.10.51").vlan(2010);
+    .cores(4)
+    .memory(8192)
+    .ip("1.1.1.1")
+    .vlan(2010);
 
   // server.out.ip is an Output<string> - resolves once the VM is up
   dns = DO.Domain("example.com").pointer("app", this.server.out.ip);
@@ -41,8 +43,8 @@ Use `Stack.from(TargetStack)` to get a reference to another stack's instance and
 // infra-stack.ts
 @Deploy({ proxmox: CONFIG.STAGING })
 export class InfraStack extends Stack {
-  db  = Proxmox.VM("ix-db01").cores(2).memory(4096).ip("10.8.10.50").vlan(2010);
-  app = Proxmox.VM("ix-app01").cores(4).memory(8192).ip("10.8.10.51").vlan(2010);
+  db  = Proxmox.VM("ix-db01").cores(2).memory(4096).ip("1.1.1.1").vlan(2010);
+  app = Proxmox.VM("ix-app01").cores(4).memory(8192).ip("2.2.2.2").vlan(2010);
 }
 ```
 

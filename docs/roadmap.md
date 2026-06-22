@@ -19,9 +19,9 @@ Internal tracking doc - improvements, new providers, and the path to a publishab
 
 - [x] Basic test suite (core: `config.test.ts`, `output.test.ts`)
 - [x] Provider unit tests with mocked API clients - each builder's `deploy()` and `destroy()` paths covered (create, skip, update, dry-run) (DO, AWS S3/Route53/Lambda, and Firebase Hosting/Functions fully complete)
-- [ ] Dry-run integration tests - run full stacks with `dryRun: true` against real provider credentials to verify discovery without writing
-- [ ] CI pipeline - run unit tests on every push; dry-run suite on PRs that touch provider code
-- [ ] End-to-end tests against sandboxes (LocalStack for AWS, DO staging token, Firebase emulator)
+- [x] Dry-run integration tests - run full stacks with `dryRun: true` against real provider credentials to verify discovery without writing
+- [x] CI pipeline - run unit tests on every push; dry-run suite on PRs that touch provider code
+- [x] End-to-end tests against sandboxes (LocalStack for AWS, DO staging token, Firebase emulator)
 
 ---
 

@@ -82,6 +82,30 @@ The `aws` configuration object accepts the following fields:
 | `profile` | `string` | Resolves credentials dynamically from the shared credentials files (e.g., `~/.aws/credentials` or `~/.aws/config`). |
 | `accessKeyId` | `string` | Direct AWS access key ID. |
 | `secretAccessKey` | `string` | Direct AWS secret access key. |
+| `endpoint` | `string` | Optional custom endpoint URL (e.g., `http://localhost:4566` for LocalStack). |
+
+### 4. Local Emulator Integration (LocalStack)
+To route AWS SDK calls to local emulator instances like **LocalStack**, you can configure the custom endpoint URL globally, in context decorators, or via the `AWS_ENDPOINT_URL` environment variable:
+
+```typescript
+import { Deploy, Stack } from "puls-dev";
+import { AWS } from "puls-dev/aws";
+
+@Deploy({
+  aws: {
+    region: "us-east-1",
+    endpoint: "http://localhost:4566",
+  }
+})
+class LocalStackStack extends Stack {
+  bucket = AWS.S3("local-bucket");
+}
+```
+
+Or run via CLI environment override:
+```bash
+AWS_ENDPOINT_URL=http://localhost:4566 puls deploy stack.ts
+```
 
 **Constants**
 

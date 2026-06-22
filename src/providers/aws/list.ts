@@ -12,7 +12,7 @@ import type {
 } from '../../types/inventory.js';
 
 export async function listAwsResources(): Promise<AwsInventory> {
-  const region = Config.get().providers.aws!.region;
+  const region = Config.get().providers.aws?.region ?? "us-east-1";
 
   const [cfResult, s3Result, lambdaResult, rdsResult, r53Result, ec2Result] = await Promise.all([
     getCFClient().send(new ListDistributionsCommand({})),

@@ -50,6 +50,29 @@ A new provider must implement:
 
 The existing providers (AWS, Azure, Cloudflare, DigitalOcean, GCP, Firebase, Proxmox) are the reference implementation. When in doubt, look at how they do it.
 
+## Testing
+
+Puls separates tests into three suites to guarantee code safety without complicating local development:
+
+### 1. Unit Tests
+Mocked, offline unit tests covering core engine logic and provider decorators. They require no cloud credentials and execute in milliseconds.
+```bash
+npm run test
+```
+
+### 2. Integration Tests
+Dry-run (`dryRun: true`) tests executing against real cloud provider APIs. They perform read-only discovery to verify SDK configurations and dynamically skip if credentials are missing from the environment.
+```bash
+npm run test:integration
+```
+
+### 3. End-to-End (E2E) Tests
+Real mutation lifecycle tests (create, verify, destroy) run against local sandboxes. The current suite runs against **LocalStack** to test AWS resources. Start the sandbox in Docker, then run:
+```bash
+docker run --rm -d -p 4566:4566 localstack/localstack
+npm run test:e2e
+```
+
 ---
 
 ## The bar for a PR
