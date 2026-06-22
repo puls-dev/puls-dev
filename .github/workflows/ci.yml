@@ -6,8 +6,6 @@ on:
     paths-ignore:
       - "package.json"
       - "docs/**"
-      - "**.md"
-      - "README.md"
       - ".github/workflows/**"
   pull_request:
 
