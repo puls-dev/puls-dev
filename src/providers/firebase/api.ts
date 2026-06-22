@@ -6,17 +6,21 @@ import { resourceContextStorage } from '../../core/context.js';
 
 function resolveFirebaseConfig() {
   const isOffline = Config.isOfflineMode() || Config.isGlobalDryRun();
+  const hasEmulator = !!(process.env.FIREBASE_AUTH_EMULATOR_HOST || process.env.FIRESTORE_EMULATOR_HOST);
   const cfg = Config.get().providers.firebase;
   if (cfg?.serviceAccountPath) return cfg;
+  if (cfg?.projectId) {
+    return { projectId: cfg.projectId, serviceAccountPath: "/mock/sa.json" };
+  }
 
   // Fallback: auto-configure from FIREBASE_SA env var so the decorator option is optional
   const saPath = process.env.FIREBASE_SA;
-  if (saPath) {
+  if (saPath && fs.existsSync(saPath)) {
     const sa = JSON.parse(fs.readFileSync(saPath, 'utf8'));
     return { projectId: sa.project_id as string, serviceAccountPath: saPath };
   }
 
-  if (isOffline) {
+  if (isOffline || hasEmulator) {
     return { projectId: "mock-firebase-project", serviceAccountPath: "/mock/sa.json" };
   }
 
@@ -28,7 +32,8 @@ export function getProjectId(): string {
 }
 
 export async function getFirebaseToken(scopes: string[]): Promise<string> {
-  if (Config.isOfflineMode()) {
+  const hasEmulator = !!(process.env.FIREBASE_AUTH_EMULATOR_HOST || process.env.FIRESTORE_EMULATOR_HOST);
+  if (Config.isOfflineMode() || hasEmulator) {
     return "mock-firebase-token";
   }
   if (Config.isGlobalDryRun()) {
@@ -133,15 +138,101 @@ export async function cloudFetch(base: string, path: string, opts: RequestInit =
     isMockClient = true;
   }
 
-  if (Config.isOfflineMode() || (Config.isGlobalDryRun() && (isWrite || isMockClient))) {
-    return Promise.resolve(createFirebaseOfflineMock(path, opts));
+  const firestoreEmulator = process.env.FIRESTORE_EMULATOR_HOST;
+  const authEmulator = process.env.FIREBASE_AUTH_EMULATOR_HOST;
+
+  // Intercept and handle Firestore indexes (not supported/required by emulator)
+  if (firestoreEmulator && base === 'https://firestore.googleapis.com/v1') {
+    if (path.includes('/collectionGroups/') && path.includes('/indexes')) {
+      if (method === 'GET') {
+        return { indexes: [] };
+      }
+      if (method === 'POST') {
+        return { name: 'mock-index' };
+      }
+    }
+  }
+
+  // Intercept and handle Firestore security rules for the emulator
+  if (firestoreEmulator && base === 'https://firebaserules.googleapis.com/v1') {
+    const projectId = getProjectId();
+    if (method === 'POST' && path.endsWith('/rulesets')) {
+      let parsedBody;
+      try {
+        parsedBody = typeof opts.body === 'string' ? JSON.parse(opts.body) : opts.body;
+      } catch {}
+      const rulesContent = parsedBody?.source?.files?.[0]?.content;
+      if (rulesContent) {
+        const emulatorRulesUrl = `http://${firestoreEmulator}/emulator/v1/projects/${projectId}:securityRules`;
+        const putRes = await fetch(emulatorRulesUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rules: {
+              files: [
+                {
+                  name: 'firestore.rules',
+                  content: rulesContent,
+                },
+              ],
+            },
+          }),
+        });
+        if (!putRes.ok) {
+          const bodyText = await putRes.text();
+          throw new Error(`Firestore Emulator Rules PUT failed: ${putRes.status} ${bodyText}`);
+        }
+      }
+      return { name: `projects/${projectId}/rulesets/mock-ruleset` };
+    }
+    if (method === 'PUT' && path.includes('/releases/')) {
+      return {};
+    }
+    if (method === 'GET' && path.includes('/releases/')) {
+      return { rulesetName: `projects/${projectId}/rulesets/mock-ruleset` };
+    }
+  }
+
+  // Intercept and handle Auth configuration for the emulator
+  if (authEmulator && base === 'https://identitytoolkit.googleapis.com/admin/v2') {
+    if (method === 'GET' && path.endsWith('/config')) {
+      return { signIn: { email: { enabled: false } } };
+    }
+    if (method === 'PATCH' && path.includes('/config')) {
+      return {};
+    }
+    if (method === 'GET' && path.includes('/defaultSupportedIdpConfigs/')) {
+      return null;
+    }
+    if (method === 'POST' && path.includes('/defaultSupportedIdpConfigs')) {
+      return {};
+    }
+    if (method === 'PATCH' && path.includes('/defaultSupportedIdpConfigs/')) {
+      return {};
+    }
+  }
+
+  const isTargetingEmulator = (base === 'https://firestore.googleapis.com/v1' && firestoreEmulator) ||
+                              (base === 'https://firebaserules.googleapis.com/v1' && firestoreEmulator) ||
+                              (base === 'https://identitytoolkit.googleapis.com/admin/v2' && authEmulator);
+
+  if (!isTargetingEmulator) {
+    if (Config.isOfflineMode() || (Config.isGlobalDryRun() && (isWrite || isMockClient))) {
+      return Promise.resolve(createFirebaseOfflineMock(path, opts));
+    }
   }
 
   const fetchOpts = abortSignal ? { ...opts, signal: abortSignal } : opts;
 
   return withRetry(async () => {
     const token = await getFirebaseToken([CLOUD_SCOPE]);
-    const res = await fetch(`${base}${path}`, {
+    
+    let targetUrl = `${base}${path}`;
+    if (base === 'https://firestore.googleapis.com/v1' && firestoreEmulator) {
+      targetUrl = targetUrl.replace('https://firestore.googleapis.com/v1', `http://${firestoreEmulator}/v1`);
+    }
+
+    const res = await fetch(targetUrl, {
       ...fetchOpts,
       headers: {
         'Authorization': `Bearer ${token}`,

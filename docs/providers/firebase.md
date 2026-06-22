@@ -24,6 +24,25 @@ The `firebase` option in `@Deploy` is optional - if `FIREBASE_SA` is set in your
 
 ---
 
+## Local Emulator Integration
+
+Puls supports local development using the **Firebase Local Emulator Suite** (specifically Firebase Auth and Cloud Firestore). 
+
+When you configure the standard Firebase emulator environment variables, Puls automatically intercepts API requests, bypasses production service account checks, and routes operations to your local emulators:
+
+```bash
+# Set emulator hosts in your shell before running Puls
+export FIRESTORE_EMULATOR_HOST=localhost:8080
+export FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
+```
+
+When these environment variables are active:
+1. **Token Bypass**: Puls does not require a valid `FIREBASE_SA` service account file and uses mock access credentials.
+2. **Firestore Rules**: Security rules are deployed directly to the local Firestore emulator rules engine.
+3. **Firestore Indexes & Auth Config**: Since the local emulators do not support management REST APIs for indexes and authentication provider setups, Puls automatically intercepts these calls and simulates successful results locally so that stacks deploy and tear down cleanly without errors.
+
+---
+
 ## Hosting
 
 Deploy a static site from a local build directory.
