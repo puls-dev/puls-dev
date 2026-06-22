@@ -30,7 +30,7 @@ export interface GlobalConfig {
     };
     firebase?: {
       projectId: string;
-      serviceAccountPath: string;
+      serviceAccountPath?: string;
     };
     gcp?: {
       projectId?: string;
