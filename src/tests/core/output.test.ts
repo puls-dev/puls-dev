@@ -12,8 +12,8 @@ describe("Output", () => {
 
   test("applies transformations via .apply()", async () => {
     const out = new Output<number>();
-    const doubled = out.apply(n => n * 2);
-    
+    const doubled = out.apply((n) => n * 2);
+
     out.resolve(10);
     const result = await doubled.get();
     assert.strictEqual(result, 20);

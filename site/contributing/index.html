@@ -286,6 +286,35 @@
   
   
   
+    
+  
+  
+    <li class="md-nav__item">
+      <a href="../blog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
   
     <li class="md-nav__item">
       <a href="../getting-started/" class="md-nav__link">
@@ -625,10 +654,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_16" >
         
           
-          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
             
   
   
@@ -646,8 +675,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_15">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -971,6 +1000,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-unit-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Unit Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-integration-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Integration Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-end-to-end-e2e-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. End-to-End (E2E) Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-bar-for-a-pr" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1087,6 +1166,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-unit-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Unit Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-integration-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Integration Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-end-to-end-e2e-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. End-to-End (E2E) Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-bar-for-a-pr" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1157,6 +1286,21 @@
 <li><strong>Sane defaults</strong> - a resource declared with only a name should be deployable</li>
 </ol>
 <p>The existing providers (AWS, Azure, Cloudflare, DigitalOcean, GCP, Firebase, Proxmox) are the reference implementation. When in doubt, look at how they do it.</p>
+<h2 id="testing">Testing</h2>
+<p>Puls separates tests into three suites to guarantee code safety without complicating local development:</p>
+<h3 id="1-unit-tests">1. Unit Tests</h3>
+<p>Mocked, offline unit tests covering core engine logic and provider decorators. They require no cloud credentials and execute in milliseconds.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>npm<span class="w"> </span>run<span class="w"> </span><span class="nb">test</span>
+</code></pre></div></p>
+<h3 id="2-integration-tests">2. Integration Tests</h3>
+<p>Dry-run (<code>dryRun: true</code>) tests executing against real cloud provider APIs. They perform read-only discovery to verify SDK configurations and dynamically skip if credentials are missing from the environment.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>npm<span class="w"> </span>run<span class="w"> </span>test:integration
+</code></pre></div></p>
+<h3 id="3-end-to-end-e2e-tests">3. End-to-End (E2E) Tests</h3>
+<p>Real mutation lifecycle tests (create, verify, destroy) run against local sandboxes. The current suite runs against <strong>LocalStack</strong> to test AWS resources. Start the sandbox in Docker, then run:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">4566</span>:4566<span class="w"> </span>localstack/localstack
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>npm<span class="w"> </span>run<span class="w"> </span>test:e2e
+</code></pre></div></p>
 <hr />
 <h2 id="the-bar-for-a-pr">The bar for a PR</h2>
 <p>Before opening a pull request, ask:</p>

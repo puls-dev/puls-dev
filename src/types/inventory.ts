@@ -226,7 +226,7 @@ export interface FirebaseInventory {
 // ─── Combined ─────────────────────────────────────────────────────────────────
 
 export interface InventoryError {
-  provider: "proxmox" | "do" | "aws" | "gcp" | "firebase";
+  provider: string;
   message: string;
 }
 
@@ -237,4 +237,5 @@ export interface InventoryResult {
   gcp?: GcpInventory;
   firebase?: FirebaseInventory;
   errors: InventoryError[];
+  [key: string]: any;
 }

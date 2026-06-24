@@ -1,3 +1,4 @@
+import "./plugin.js";
 import { Config } from "../../core/config.js";
 import { S3BucketBuilder } from "./s3.js";
 import { Route53Builder } from "./route53.js";

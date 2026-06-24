@@ -1,3 +1,4 @@
+import "./plugin.js";
 import { Config } from "../../core/config.js";
 import { ZoneBuilder } from "./zone.js";
 import { WorkerBuilder } from "./worker.js";

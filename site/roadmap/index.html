@@ -284,6 +284,35 @@
   
   
   
+    
+  
+  
+    <li class="md-nav__item">
+      <a href="../blog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
   
     <li class="md-nav__item">
       <a href="../getting-started/" class="md-nav__link">
@@ -623,10 +652,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_16" >
         
           
-          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="">
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
             
   
   
@@ -644,8 +673,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_15">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1476,9 +1505,9 @@
 <ul>
 <li>[x] Basic test suite (core: <code>config.test.ts</code>, <code>output.test.ts</code>)</li>
 <li>[x] Provider unit tests with mocked API clients - each builder's <code>deploy()</code> and <code>destroy()</code> paths covered (create, skip, update, dry-run) (DO, AWS S3/Route53/Lambda, and Firebase Hosting/Functions fully complete)</li>
-<li>[ ] Dry-run integration tests - run full stacks with <code>dryRun: true</code> against real provider credentials to verify discovery without writing</li>
-<li>[ ] CI pipeline - run unit tests on every push; dry-run suite on PRs that touch provider code</li>
-<li>[ ] End-to-end tests against sandboxes (LocalStack for AWS, DO staging token, Firebase emulator)</li>
+<li>[x] Dry-run integration tests - run full stacks with <code>dryRun: true</code> against real provider credentials to verify discovery without writing</li>
+<li>[x] CI pipeline - run unit tests on every push; dry-run suite on PRs that touch provider code</li>
+<li>[x] End-to-end tests against sandboxes (LocalStack for AWS, DO staging token, Firebase emulator)</li>
 </ul>
 <hr />
 <h2 id="provider-improvements">Provider Improvements</h2>
@@ -1619,7 +1648,7 @@
 <li>[x] <strong>Gap 4: Shell Script Provisioning Deprecation</strong> - Explicitly document the deprecation of <code>.sh</code> script provisioning (in favor of Ansible/Puppet playbooks) to avoid user migration confusion.</li>
 <li>[x] <strong>Gap 5: Advanced Drift Detection &amp; diff</strong> - Clarify stateless tag/note-based metadata tracking in architecture docs, and design a formal <code>Stack.diff()</code> structural diff engine comparing declared settings against live cloud properties.</li>
 <li>[x] <strong>Gap 6: Checker Integration Completeness</strong> - Newer providers (GCP, Firebase) lack <code>list.ts</code> implementations, causing <code>@Check</code> to silently skip them. Resolve by providing complete <code>list.ts</code> inventory engines for GCP and Firebase.</li>
-<li>[ ] <strong>Gap 7: Provider Plugin &amp; Decoupling API</strong> - Establish a standard <code>registerProvider()</code> hook and split core framework utilities into an independent <code>@puls-dev/core</code> package to enable community-built custom providers.</li>
+<li>[x] <strong>Gap 7: Provider Plugin &amp; Decoupling API</strong> - Establish a standard <code>registerProvider()</code> hook and split core framework utilities into an independent <code>@puls-dev/core</code> package to enable community-built custom providers.</li>
 </ul>
 <hr />
 <h2 id="breaking-changes-migration-notes">Breaking Changes &amp; Migration Notes</h2>

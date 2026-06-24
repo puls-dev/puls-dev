@@ -5,6 +5,8 @@ export * from "./core/resource.js";
 export { Secret, clearResolvedSecrets } from "./core/secret.js";
 export { Output } from "./core/output.js";
 export { Config } from "./core/config.js";
+export { providerRegistry, registerProvider } from "./core/provider.js";
+export type { ProviderPlugin } from "./core/provider.js";
 
 export * as INVENTORY_TYPES from "./types/inventory.js";
 export type { FieldDiff, ResourceDiff, StackDiff, ResourceStatus } from "./types/diff.js";

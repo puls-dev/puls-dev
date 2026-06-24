@@ -1,7 +1,7 @@
 import "reflect-metadata";
-import { readFileSync } from "node:fs";
 import { Config } from "./config.js";
 import { Stack } from "./stack.js";
+import { providerRegistry } from "./provider.js";
 
 type ProviderOpts = {
   token?: string;
@@ -10,44 +10,13 @@ type ProviderOpts = {
   dryRun?: boolean;
   parallel?: boolean;
   offline?: boolean;
-  firebase?: string; // path to service account JSON file
-  proxmox?: {
-    url: string;
-    user: string;
-    tokenName: string;
-    tokenSecret: string;
-    nodes?: string[];
-    storage?: string;
-    dnsDomain?: string;
-    dnsServers?: string[];
-    verifySsl?: boolean;
-    sshUser?: string;
-  };
-  cloudflare?: {
-    token: string;
-    accountId?: string;
-  };
-  azure?: {
-    clientId: string;
-    clientSecret: string;
-    tenantId: string;
-    subscriptionId: string;
-    defaultLocation?: string;
-    sshUser?: string;
-  };
-  aws?: {
-    region?: string;
-    profile?: string;
-    accessKeyId?: string;
-    secretAccessKey?: string;
-    endpoint?: string;
-  };
-  gcp?: {
-    projectId?: string;
-    serviceAccountPath?: string;
-    region?: string;
-    sshUser?: string;
-  };
+  firebase?: string | any; // path to service account JSON file or configuration block
+  proxmox?: any;
+  cloudflare?: any;
+  azure?: any;
+  aws?: any;
+  gcp?: any;
+  [key: string]: any;
 };
 
 function applyConfig(opts: ProviderOpts) {
@@ -58,24 +27,16 @@ function applyConfig(opts: ProviderOpts) {
     Config.set({ providers: { do: { token: opts.token } } });
   if (opts.region)
     Config.set({ providers: { aws: { region: opts.region } } });
-  if (opts.proxmox)
-    Config.set({ providers: { proxmox: opts.proxmox } });
-  if (opts.cloudflare)
-    Config.set({ providers: { cloudflare: opts.cloudflare } });
-  if (opts.azure)
-    Config.set({ providers: { azure: opts.azure } });
-  if (opts.aws)
-    Config.set({ providers: { aws: { ...Config.get().providers.aws, ...opts.aws } } as any });
-  if (opts.gcp)
-    Config.set({ providers: { gcp: { ...Config.get().providers.gcp, ...opts.gcp } } as any });
-  if (opts.firebase) {
-    const sa = JSON.parse(readFileSync(opts.firebase, "utf8"));
-    Config.set({
-      providers: {
-        firebase: { projectId: sa.project_id, serviceAccountPath: opts.firebase },
-      },
-    });
+
+  // For each registered plugin, run its configure hook
+  const registered = providerRegistry.getAll();
+  for (const plugin of registered) {
+    const pOpts = opts[plugin.name];
+    if (pOpts !== undefined && plugin.configure) {
+      plugin.configure(pOpts);
+    }
   }
+
   // CLI env-var overrides - applied last so `puls plan/destroy/--parallel` wins over decorator options
   if (process.env.PULS_DRY_RUN === "true") Config.set({ dryRun: true });
   if (process.env.PULS_PARALLEL === "true") Config.set({ parallel: true });

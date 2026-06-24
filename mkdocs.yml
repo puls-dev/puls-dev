@@ -21,6 +21,12 @@ theme:
     - search.suggest
     - search.highlight
 
+plugins:
+  - search
+  - blog:
+      blog_dir: blog
+      post_dir: blog/posts
+
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
@@ -36,6 +42,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Why Puls?: why.md
+  - Blog: blog/index.md
   - Getting Started: getting-started.md
   - Concepts: concepts.md
   - Decorators: decorators.md

@@ -171,7 +171,7 @@ A version-controlled analysis of internal tech debt and feature gaps. Gaps are a
 - [x] **Gap 4: Shell Script Provisioning Deprecation** - Explicitly document the deprecation of `.sh` script provisioning (in favor of Ansible/Puppet playbooks) to avoid user migration confusion.
 - [x] **Gap 5: Advanced Drift Detection & diff** - Clarify stateless tag/note-based metadata tracking in architecture docs, and design a formal `Stack.diff()` structural diff engine comparing declared settings against live cloud properties.
 - [x] **Gap 6: Checker Integration Completeness** - Newer providers (GCP, Firebase) lack `list.ts` implementations, causing `@Check` to silently skip them. Resolve by providing complete `list.ts` inventory engines for GCP and Firebase.
-- [ ] **Gap 7: Provider Plugin & Decoupling API** - Establish a standard `registerProvider()` hook and split core framework utilities into an independent `@puls-dev/core` package to enable community-built custom providers.
+- [x] **Gap 7: Provider Plugin & Decoupling API** - Establish a standard `registerProvider()` hook and split core framework utilities into an independent `@puls-dev/core` package to enable community-built custom providers.
 
 ---
 

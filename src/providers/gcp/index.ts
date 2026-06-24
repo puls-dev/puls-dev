@@ -1,3 +1,4 @@
+import "./plugin.js";
 import { GCPCloudRunBuilder } from './cloudrun.js';
 import { GCPCloudSQLBuilder } from './cloudsql.js';
 import { GCPSecretBuilder, resolveGCPEnvVars } from './secrets.js';

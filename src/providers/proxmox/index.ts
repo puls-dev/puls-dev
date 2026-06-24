@@ -1,3 +1,4 @@
+import "./plugin.js";
 import { Config } from "../../core/config.js";
 import { VMBuilder } from "./vm.js";
 import { TemplateBuilder } from "./template.js";

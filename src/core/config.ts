@@ -50,6 +50,7 @@ export interface GlobalConfig {
       defaultLocation?: string;
       sshUser?: string;
     };
+    [key: string]: any;
   };
 }
 

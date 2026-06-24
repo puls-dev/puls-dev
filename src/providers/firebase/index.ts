@@ -1,3 +1,4 @@
+import "./plugin.js";
 import { FirebaseHostingBuilder } from './hosting.js';
 import { FirebaseFunctionsBuilder, FUNCTIONS_RUNTIME } from './functions.js';
 import { FirebaseFirestoreBuilder } from './firestore.js';

@@ -1,3 +1,4 @@
+import "./plugin.js";
 import { Config } from "../../core/config.js";
 import { DropletBuilder } from "./droplet.js";
 import { DomainBuilder } from "./domain.js";

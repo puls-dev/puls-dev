@@ -1,3 +1,4 @@
+import "./plugin.js";
 import { Config } from "../../core/config.js";
 import { ResourceGroupBuilder } from "./resource_group.js";
 import { BlobStorageBuilder } from "./blob_storage.js";
