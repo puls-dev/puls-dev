@@ -47,6 +47,17 @@ export class EC2VMBuilder extends BaseBuilder {
     return this;
   }
 
+  override getMonthlyCost(state?: any): number {
+    const type = state ? (state.InstanceType ?? state.instanceType) : this._instanceType;
+    const pricing: Record<string, number> = {
+      't3.micro':   8,
+      't3.small':  16,
+      't3.medium': 32,
+      't3.large':  64,
+    };
+    return pricing[type] ?? 0;
+  }
+
   ami(amiId: string) {
     this._ami = amiId;
     return this;

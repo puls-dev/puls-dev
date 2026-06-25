@@ -38,6 +38,19 @@ export class GCPVMBuilder extends BaseBuilder {
     return this;
   }
 
+  override getMonthlyCost(state?: any): number {
+    let type = state ? (state.machineType ?? state.machine_type) : this._machineType;
+    if (type && type.includes("/")) {
+      type = type.split("/").pop();
+    }
+    const pricing: Record<string, number> = {
+      'e2-micro':       6,
+      'e2-medium':     24,
+      'e2-standard-4': 96,
+    };
+    return pricing[type] ?? 0;
+  }
+
   image(img: string) {
     this._image = img;
     return this;

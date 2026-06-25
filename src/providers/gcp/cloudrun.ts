@@ -43,6 +43,18 @@ export class GCPCloudRunBuilder extends BaseBuilder {
     return this;
   }
 
+  override getMonthlyCost(state?: any): number {
+    let cpuStr = "1";
+    if (state) {
+      const container = state.template?.spec?.containers?.[0];
+      cpuStr = container?.resources?.limits?.cpu ?? "1";
+    } else {
+      cpuStr = String(this._cpu);
+    }
+    const cpu = parseFloat(cpuStr) || 1;
+    return cpu * 5;
+  }
+
   memory(m: string | number) {
     this._memory = m;
     return this;

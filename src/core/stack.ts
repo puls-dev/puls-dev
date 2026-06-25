@@ -182,14 +182,31 @@ function printDiff(diff: StackDiff): void {
   for (const r of diff.resources) {
     const prop = r.prop.padEnd(propWidth);
     const name = r.resource.padEnd(nameWidth);
+    
+    let costLabel = "";
+    const curCost = r.currentCost ?? 0;
+    const newCost = r.newCost ?? 0;
+
     if (r.status === "in-sync") {
-      console.log(`   ${prop}  ${name}  ✅ in-sync`);
+      if (newCost > 0) costLabel = `  ($${newCost.toFixed(2)}/mo)`;
+      console.log(`   ${prop}  ${name}  ✅ in-sync${costLabel}`);
     } else if (r.status === "adopted") {
-      console.log(`   ${prop}  ${name}  🔗 adopted`);
+      if (newCost > 0) costLabel = `  ($${newCost.toFixed(2)}/mo)`;
+      console.log(`   ${prop}  ${name}  🔗 adopted${costLabel}`);
     } else if (r.status === "missing") {
-      console.log(`   ${prop}  ${name}  ❌ missing  (will create)`);
+      if (newCost > 0) costLabel = `  (+$${newCost.toFixed(2)}/mo)`;
+      console.log(`   ${prop}  ${name}  ❌ missing  (will create)${costLabel}`);
     } else {
-      console.log(`   ${prop}  ${name}  ⚠️  drift`);
+      if (newCost > 0 || curCost > 0) {
+        if (newCost !== curCost) {
+          const shift = newCost - curCost;
+          const sign = shift > 0 ? "+" : "-";
+          costLabel = `  (shift: ${sign}$${Math.abs(shift).toFixed(2)}/mo, from $${curCost.toFixed(2)}/mo to $${newCost.toFixed(2)}/mo)`;
+        } else {
+          costLabel = `  ($${newCost.toFixed(2)}/mo)`;
+        }
+      }
+      console.log(`   ${prop}  ${name}  ⚠️  drift${costLabel}`);
       const fieldWidth = Math.max(...r.changes.map((c) => String(c.field).length), 8);
       for (const c of r.changes) {
         const field = String(c.field).padEnd(fieldWidth);
@@ -207,6 +224,16 @@ function printDiff(diff: StackDiff): void {
     if (driftCount > 0) parts.push(`${driftCount} drifted`);
     if (missingCount > 0) parts.push(`${missingCount} missing`);
     console.log(`\n   ⚠️  ${parts.join(", ")} out of ${diff.resources.length} resources.`);
+  }
+
+  if (diff.totalNewCost !== undefined && diff.totalCurrentCost !== undefined && (diff.totalNewCost > 0 || diff.totalCurrentCost > 0)) {
+    const shift = diff.totalNewCost - diff.totalCurrentCost;
+    if (shift !== 0) {
+      const sign = shift > 0 ? "+" : "-";
+      console.log(`\n   💰 Estimated monthly cost shift: ${sign}$${Math.abs(shift).toFixed(2)}/mo (from $${diff.totalCurrentCost.toFixed(2)}/mo to $${diff.totalNewCost.toFixed(2)}/mo)`);
+    } else {
+      console.log(`\n   💰 Estimated monthly cost: $${diff.totalNewCost.toFixed(2)}/mo (no change)`);
+    }
   }
 }
 
@@ -276,6 +303,8 @@ export abstract class Stack {
     Policy.validate(entries.map((e) => e.resource));
 
     const resources: ResourceDiff[] = [];
+    let totalCurrentCost = 0;
+    let totalNewCost = 0;
 
     for (const { prop, resource } of entries) {
       const existing = await resource._resolveDiscovery();
@@ -292,11 +321,29 @@ export abstract class Stack {
         status = changes.length > 0 ? "drift" : "in-sync";
       }
 
-      resources.push({ prop, resource: resource.name, status, changes });
+      const currentCost = existing ? (resource.getMonthlyCost(existing) ?? 0) : 0;
+      const newCost = status === "adopted" ? currentCost : (resource.getMonthlyCost() ?? 0);
+      totalCurrentCost += currentCost;
+      totalNewCost += newCost;
+
+      resources.push({
+        prop,
+        resource: resource.name,
+        status,
+        changes,
+        currentCost,
+        newCost,
+      });
     }
 
     const hasDrift = resources.some((r) => r.status === "drift" || r.status === "missing");
-    const result: StackDiff = { stackName: this.constructor.name, resources, hasDrift };
+    const result: StackDiff = {
+      stackName: this.constructor.name,
+      resources,
+      hasDrift,
+      totalCurrentCost,
+      totalNewCost,
+    };
     printDiff(result);
     return result;
   }
@@ -452,6 +499,32 @@ export abstract class Stack {
               controller.abort();
               throw err;
             }
+          }
+        }
+
+        // Calculate and print monthly cost shifts
+        let totalCurrentCost = 0;
+        let totalNewCost = 0;
+        let hasCostBearing = false;
+        for (const { prop, resource } of resources) {
+          const existing = await resource._resolveDiscovery().catch(() => null);
+          const currentCost = existing ? (resource.getMonthlyCost(existing) ?? 0) : 0;
+          const isDestroyed = Reflect.getMetadata("destroy", this, prop);
+          const newCost = isDestroyed ? 0 : (resource.getMonthlyCost() ?? 0);
+          if (currentCost > 0 || newCost > 0) {
+            hasCostBearing = true;
+          }
+          totalCurrentCost += currentCost;
+          totalNewCost += newCost;
+        }
+
+        if (hasCostBearing) {
+          const shift = totalNewCost - totalCurrentCost;
+          if (shift !== 0) {
+            const sign = shift > 0 ? "+" : "-";
+            console.log(`\n   💰 Estimated monthly cost shift: ${sign}$${Math.abs(shift).toFixed(2)}/mo (from $${totalCurrentCost.toFixed(2)}/mo to $${totalNewCost.toFixed(2)}/mo)`);
+          } else {
+            console.log(`\n   💰 Estimated monthly cost: $${totalNewCost.toFixed(2)}/mo (no change)`);
           }
         }
 

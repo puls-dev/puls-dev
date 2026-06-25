@@ -70,6 +70,15 @@ export abstract class BaseBuilder {
     return [];
   }
 
+  /**
+   * Returns the estimated monthly cost for this resource in USD.
+   * If state is provided, calculates cost for the live state.
+   * Otherwise, calculates cost for the declared configuration.
+   */
+  getMonthlyCost(_state?: any): number {
+    return 0;
+  }
+
   forceConfigCheck?(): void;
 
   /**

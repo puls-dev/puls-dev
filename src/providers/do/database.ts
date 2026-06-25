@@ -51,6 +51,20 @@ export class DatabaseBuilder extends BaseBuilder {
     return this;
   }
 
+  override getMonthlyCost(state?: any): number {
+    const slug = state ? (state.size_slug ?? state.size) : this._size;
+    const nodes = state ? (state.num_nodes ?? state.nodeCount ?? 1) : this._nodes;
+    const pricing: Record<string, number> = {
+      'db-s-1vcpu-1gb':  15,
+      'db-s-1vcpu-2gb':  30,
+      'db-s-2vcpu-2gb':  50,
+      'db-s-2vcpu-4gb':  60,
+      'db-s-4vcpu-8gb': 120,
+    };
+    const pricePerNode = pricing[slug] ?? 15;
+    return pricePerNode * nodes;
+  }
+
   vpc(uuid: string) {
     this._vpcUuid = uuid;
     return this;

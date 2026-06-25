@@ -73,6 +73,14 @@
          <lastmod>2026-06-24</lastmod>
     </url>
     <url>
+         <loc>https://pulsdev.io/blog/2026/06/24/infrastructure-as-code-without-state-files-and-without-the-headaches/</loc>
+         <lastmod>2026-06-24</lastmod>
+    </url>
+    <url>
+         <loc>https://pulsdev.io/blog/2026/06/24/dynamic-secret-injection-zero-hardcoding-credentials-in-puls/</loc>
+         <lastmod>2026-06-24</lastmod>
+    </url>
+    <url>
          <loc>https://pulsdev.io/providers/aws/</loc>
          <lastmod>2026-06-24</lastmod>
     </url>
@@ -110,6 +118,14 @@
     </url>
     <url>
          <loc>https://pulsdev.io/blog/category/architecture/</loc>
+         <lastmod>2026-06-24</lastmod>
+    </url>
+    <url>
+         <loc>https://pulsdev.io/blog/category/philosophy/</loc>
+         <lastmod>2026-06-24</lastmod>
+    </url>
+    <url>
+         <loc>https://pulsdev.io/blog/category/security/</loc>
          <lastmod>2026-06-24</lastmod>
     </url>
 </urlset>

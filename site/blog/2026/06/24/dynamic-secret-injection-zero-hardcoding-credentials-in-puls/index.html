@@ -10,11 +10,11 @@
       
       
       
-        <link rel="canonical" href="https://pulsdev.io/blog/2026/06/24/decoupling-cloud-providers-introducing-the-puls-plugin-api/">
+        <link rel="canonical" href="https://pulsdev.io/blog/2026/06/24/dynamic-secret-injection-zero-hardcoding-credentials-in-puls/">
       
       
-        <link rel="prev" href="../infrastructure-as-code-without-state-files-and-without-the-headaches/">
       
+        <link rel="next" href="../infrastructure-as-code-without-state-files-and-without-the-headaches/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Decoupling Cloud Providers: Introducing the Puls Plugin API - Pulsdev.io</title>
+        <title>Dynamic Secret Injection: Zero-Hardcoding Credentials in Puls - Pulsdev.io</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#decoupling-cloud-providers-introducing-the-puls-plugin-api" class="md-skip">
+        <a href="#dynamic-secret-injection-zero-hardcoding-credentials-in-puls" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Decoupling Cloud Providers: Introducing the Puls Plugin API
+              Dynamic Secret Injection: Zero-Hardcoding Credentials in Puls
             
           </span>
         </div>
@@ -974,38 +974,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-decoupled-provider-plugin-api" class="md-nav__link">
+  <a href="#the-core-concept-lazy-resolution" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Decoupled Provider Plugin API
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The Decoupled Provider Plugin API">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#key-benefits" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Key Benefits:
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#firebase-local-emulator-suite-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Firebase Local Emulator Suite Integration
+        The Core Concept: Lazy Resolution
       
     </span>
   </a>
@@ -1013,10 +985,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#whats-next" class="md-nav__link">
+  <a href="#production-pattern-dynamic-secrets-to-ansible" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What's Next?
+        Production Pattern: Dynamic Secrets to Ansible
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#safe-dry-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Safe Dry Runs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-deploy-local-testing-envpuls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-Deploy Local Testing: .env.puls
       
     </span>
   </a>
@@ -1090,8 +1084,8 @@
                           <span class="md-ellipsis">
                             in
                             
-                              <a href="../../../../category/releases/">Releases</a>, 
-                              <a href="../../../../category/architecture/">Architecture</a></span>
+                              <a href="../../../../category/architecture/">Architecture</a>, 
+                              <a href="../../../../category/security/">Security</a></span>
                         </div>
                       </li>
                     
@@ -1102,7 +1096,7 @@
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 20a8 8 0 0 0 8-8 8 8 0 0 0-8-8 8 8 0 0 0-8 8 8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10 10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67-.75 1.23L11 13V7z"/></svg>
                           <span class="md-ellipsis">
                             
-                              2 min read
+                              3 min read
                             
                           </span>
                         </div>
@@ -1129,47 +1123,86 @@
   
 
 
-<h1 id="decoupling-cloud-providers-introducing-the-puls-plugin-api">Decoupling Cloud Providers: Introducing the Puls Plugin API</h1>
-<p>Today, we are excited to release Puls <code>v0.4.9</code>! This release marks a significant architectural milestone for Puls as we decouple the core infrastructure engine from individual cloud provider implementations. We have also added complete support for local E2E testing against <strong>Firebase Local Emulators</strong>.</p>
+<h1 id="dynamic-secret-injection-zero-hardcoding-credentials-in-puls">Dynamic Secret Injection: Zero-Hardcoding Credentials in Puls</h1>
+<p>Hardcoding credentials in your version control system is one of the most common ways security leaks happen. Whether it's an API token, a database root password, or a service account key, committing credentials to Git is a recipe for disaster.</p>
+<p>Yet, managing these secrets on team projects is often painful. Developers end up sharing <code>.env</code> files via Slack, updating private vaults manually, or writing complex bootstrap scripts.</p>
+<p>Puls solves this with <strong>Secrets at Deploy Time</strong>: a lazy-resolved, type-safe secret engine that fetches passwords directly from secure cloud vaults when deploying, with native injection into your VM environments and provisioning scripts.</p>
 <!-- more -->
 
-<p>Puls was built on a simple premise: describe the infrastructure you want, and let Puls figure out how to safely create, update, or skip resources without state files or manual configuration drifts. </p>
-<p>As we expand support for more cloud systems, keeping provider-specific configurations, list APIs, and console visualizers inside the core framework code was becoming a bottleneck. Today's release introduces the <strong>Provider Plugin API</strong>, moving Puls closer to a pluggable community-driven ecosystem.</p>
 <hr />
-<h2 id="the-decoupled-provider-plugin-api">The Decoupled Provider Plugin API</h2>
-<p>Previously, core framework files like the CLI <code>Checker</code> and configuration decorator <code>applyConfig</code> contained hardcoded mappings for <code>aws</code>, <code>do</code> (DigitalOcean), <code>gcp</code>, <code>firebase</code>, and <code>proxmox</code>. </p>
-<p>With <code>v0.4.9</code>, we've introduced the <code>ProviderPlugin</code> interface and a global <code>providerRegistry</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">export</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="nx">ProviderPlugin</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nx">isConfigured</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nx">list</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">any</span><span class="o">&gt;</span><span class="p">;</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="nx">render</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">inventory</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="p">;</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="nx">configure</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">opts</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="p">;</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">}</span>
+<h2 id="the-core-concept-lazy-resolution">The Core Concept: Lazy Resolution</h2>
+<p>In Puls, secrets are represented by the <code>Secret</code> class. Instead of resolving the values when the file is read or when the stack is instantiated, <code>Secret</code> acts as a secure, lazy wrapper.</p>
+<p>Puls support multiple vaults out of the box with zero boilerplate:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Secret</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1">// Fetch from AWS Secrets Manager</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kd">const</span><span class="w"> </span><span class="nx">dbPassword</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Secret</span><span class="p">.</span><span class="nx">aws</span><span class="p">(</span><span class="s2">&quot;prod/database/password&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;us-east-1&quot;</span><span class="w"> </span><span class="p">});</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1">// Fetch from GCP Secret Manager</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="kd">const</span><span class="w"> </span><span class="nx">jwtSecret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Secret</span><span class="p">.</span><span class="nx">gcp</span><span class="p">(</span><span class="s2">&quot;jwt-private-key&quot;</span><span class="p">);</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1">// Fallback to local environment variable</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="kd">const</span><span class="w"> </span><span class="nx">stripeKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Secret</span><span class="p">.</span><span class="nx">env</span><span class="p">(</span><span class="s2">&quot;STRIPE_API_KEY&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;fallback-key&quot;</span><span class="p">);</span>
 </code></pre></div>
-<h3 id="key-benefits">Key Benefits:</h3>
-<ol>
-<li><strong>Zero-Configuration Auto-Registration</strong>: Provider plugins register themselves dynamically on import. When you import resources (e.g. <code>import { AWS } from "puls-dev/aws"</code>), the provider registers its configure, list, and visual rendering hooks automatically.</li>
-<li><strong>Simplified Core Engine</strong>: The CLI visual checker now dynamically queries the registry to parse configuration files and display inventory tables, allowing it to remain completely agnostic of specific cloud providers.</li>
-<li><strong>Paving the Way for Community Providers</strong>: Developers can now call <code>registerProvider(myPlugin)</code> to write first-class custom providers (like Cloudflare, Hetzner, or Vultr) without modifying any core framework files.</li>
-</ol>
+<p>Because of Puls's <strong>zero-dependency architecture</strong>, the heavy AWS or GCP SDKs are only imported dynamically if you explicitly call <code>Secret.aws()</code> or <code>Secret.gcp()</code>. If you don't use them, you don't need them in your <code>package.json</code>.</p>
 <hr />
-<h2 id="firebase-local-emulator-suite-integration">Firebase Local Emulator Suite Integration</h2>
-<p>As part of our commitment to local-first development, we have also shipped E2E testing capabilities for the Firebase provider utilizing the local <strong>Firebase Emulator Suite</strong> (specifically targeting <strong>Firebase Auth</strong> and <strong>Cloud Firestore</strong>).</p>
-<p>When the standard emulator host environment variables are set:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">FIRESTORE_EMULATOR_HOST</span><span class="o">=</span>localhost:8080
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">FIREBASE_AUTH_EMULATOR_HOST</span><span class="o">=</span>localhost:9099
+<h2 id="production-pattern-dynamic-secrets-to-ansible">Production Pattern: Dynamic Secrets to Ansible</h2>
+<p>Let's look at a real-world production pattern. Suppose you are deploying a virtual machine and configuring an FreeIPA client, which requires a sensitive admin password. </p>
+<p>Instead of embedding the password anywhere in your provisioning repositories, you can declare it in a centralized secrets file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// aws-infra/secrets.ts</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Secret</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">IPA_PASSWORD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Secret</span><span class="p">.</span><span class="nx">aws</span><span class="p">(</span><span class="s2">&quot;IPA_CLIENT_PASSWORD&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eu-west-1&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">});</span>
 </code></pre></div>
-<p>Puls automatically redirects its GCP and Identity Toolkit API calls:</p>
-<ul>
-<li><strong>Service Account Bypass</strong>: Bypasses production service account configuration checks and executes authenticated resources locally using mock credentials.</li>
-<li><strong>Emulator Rules Translation</strong>: Intercepts GCP ruleset updates and automatically posts them to the Firestore emulator rules evaluation engine.</li>
-<li><strong>Graceful No-ops</strong>: Mock-succeeds Firestore composite index management and Auth provider config (which are not supported or needed by local emulators), allowing you to run deployment pipelines locally without errors.</li>
-</ul>
+<p>Inside your stack configuration, you import the secret and bind it to the builder environment using the <code>.env()</code> method:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// proxmox-infra/stacks/vms.ts</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Proxmox</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/proxmox&quot;</span><span class="p">;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">IPA_PASSWORD</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;../../aws-infra/secrets&quot;</span><span class="p">;</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="kd">@Deploy</span><span class="p">()</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="kd">class</span><span class="w"> </span><span class="nx">VMStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="nx">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Proxmox</span><span class="p">.</span><span class="nx">VM</span><span class="p">(</span><span class="s2">&quot;ipa-client-node&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="p">.</span><span class="nx">cores</span><span class="p">(</span><span class="mf">2</span><span class="p">)</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="p">.</span><span class="nx">memory</span><span class="p">(</span><span class="mf">4096</span><span class="p">)</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="c1">// Inject the resolved secret into the provisioning process&#39;s environment</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="p">.</span><span class="nx">env</span><span class="p">({</span><span class="w"> </span><span class="nx">IPA_CLIENT_PASSWORD</span><span class="o">:</span><span class="w"> </span><span class="kt">IPA_PASSWORD</span><span class="w"> </span><span class="p">});</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="p">.</span><span class="nx">provision</span><span class="p">(</span><span class="s2">&quot;playbooks/configure-ipa.yaml&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="p">}</span>
+</code></pre></div>
+<p>Finally, in your Ansible playbook or tasks (<code>playbooks/configure-ipa.yaml</code>), you can cleanly fetch the password from the environment lookup:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Configure FreeIPA Client</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">hosts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">vars</span><span class="p">:</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">ipaclient_password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">lookup(&#39;ansible.builtin.env&#39;,</span><span class="nv"> </span><span class="s">&#39;IPA_CLIENT_PASSWORD&#39;)</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">default(&#39;&#39;,</span><span class="nv"> </span><span class="s">true)</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">tasks</span><span class="p">:</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Register client to IPA realm</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">      </span><span class="nt">freeipa.ansible_freeipa.ipaclient</span><span class="p">:</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">        </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">        </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">ipaclient_password</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">        </span><span class="c1"># ...</span>
+</code></pre></div>
+<p>This is simple, elegant, and completely secure. The password resides inside AWS Secrets Manager. When you deploy, Puls fetches the secret, sets it as an environment variable for the duration of the Ansible process execution, and then cleans it up. It never gets written to disk or printed in the deployment logs.</p>
 <hr />
-<h2 id="whats-next">What's Next?</h2>
-<p>With the provider decoupling API completed, our next major milestone is <strong>splitting <code>puls-dev</code> into monorepo sub-packages</strong> (e.g., <code>@puls-dev/core</code>, <code>@puls-dev/aws</code>, <code>@puls-dev/firebase</code>) to dramatically reduce dependency bloat, ensuring developers only download the SDKs and providers they actively use.</p>
-<p>Stay tuned for more updates, and happy coding!</p>
+<h2 id="safe-dry-runs">Safe Dry Runs</h2>
+<p>Testing your infrastructure should never require having access to real production secrets on your local machine. Puls respects this by intercepting secret resolution during dry runs:</p>
+<p>If <code>dryRun: true</code> is configured on the stack, all dynamic secret fetchers skip network requests and resolve immediately to a secure placeholder string:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="sb">`[SECRET:name]`</span>
+</code></pre></div>
+<p>This allows developers to run <code>puls plan</code> or dry-run deployments locally with zero cloud API keys configured.</p>
+<hr />
+<h2 id="post-deploy-local-testing-envpuls">Post-Deploy Local Testing: <code>.env.puls</code></h2>
+<p>What happens if your local application server or test scripts need access to these secrets after a successful deployment? </p>
+<p>To prevent developers from needing to manual copy-paste credentials, Puls automatically aggregates all environment variables defined in your stacks and merges them into a local <code>.env.puls</code> file at your workspace root upon successful deployment.</p>
+<p>You can then run local processes or tests with access to the actual secrets:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Run local tests using the resolved deploy-time secrets</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>dotenv<span class="w"> </span>-e<span class="w"> </span>.env.puls<span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+<p>By making secrets lazy, secure, and deeply integrated into VM provisioning, Puls ensures that the secure path is also the easiest path.</p>
+<hr />
+<p><em>To learn more, check out the full <a href="../../../../../secrets/">Secrets at Deploy Time</a> documentation.</em></p>
 
 
 

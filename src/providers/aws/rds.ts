@@ -57,6 +57,17 @@ export class RDSBuilder extends BaseBuilder {
     this._instanceClass = instanceClass;
     return this;
   }
+
+  override getMonthlyCost(state?: any): number {
+    const cls = state ? (state.DBInstanceClass ?? state.instanceClass) : this._instanceClass;
+    const pricing: Record<string, number> = {
+      'db.t3.micro':  15,
+      'db.t3.small':  30,
+      'db.t3.medium': 60,
+      'db.t3.large':  120,
+    };
+    return pricing[cls] ?? 0;
+  }
   storage(gb: number) {
     this._storage = gb;
     return this;

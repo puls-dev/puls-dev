@@ -55,6 +55,27 @@ export class DropletBuilder extends BaseBuilder {
     return this.resolvedIp;
   }
 
+  override getMonthlyCost(state?: any): number {
+    const slug = state ? (state.size_slug ?? state.size) : this.config.size;
+    const pricing: Record<string, number> = {
+      's-1vcpu-1gb':    6,
+      's-1vcpu-2gb':   12,
+      's-2vcpu-2gb':   18,
+      's-2vcpu-4gb':   24,
+      's-4vcpu-8gb':   48,
+      's-6vcpu-16gb':  96,
+      's-8vcpu-32gb': 192,
+      'c-2':           42,
+      'c-4':           84,
+      'c-8':          168,
+      'g-2vcpu-8gb':   60,
+      'g-4vcpu-16gb': 120,
+      'm-2vcpu-16gb':  90,
+      'm-4vcpu-32gb': 180,
+    };
+    return pricing[slug] ?? 0;
+  }
+
   allowPublicWeb(sources: string[] = [NETWORK.ANY, NETWORK.ANY_V6]) {
     const fw = new FirewallBuilder(`${this.name}-web-fw`)
       .ingress('tcp', 80, sources)

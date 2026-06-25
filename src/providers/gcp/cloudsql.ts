@@ -51,6 +51,15 @@ export class GCPCloudSQLBuilder extends BaseBuilder {
     return this;
   }
 
+  override getMonthlyCost(state?: any): number {
+    const tier = state ? (state.settings?.tier ?? state.tier) : this._tier;
+    const pricing: Record<string, number> = {
+      'db-f1-micro':       10,
+      'db-custom-2-7680':  80,
+    };
+    return pricing[tier] ?? 0;
+  }
+
   storage(gb: number) {
     this._storage = gb;
     return this;
