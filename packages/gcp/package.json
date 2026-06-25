@@ -1,0 +1,20 @@
+{
+  "name": "@puls-dev/gcp",
+  "version": "0.5.0",
+  "description": "GCP Provider for Puls IaC",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "find src -name '*.test.ts' | xargs tsx --test --test-concurrency=1"
+  },
+  "dependencies": {
+    "@puls-dev/core": "*",
+    "google-auth-library": "^10.6.2"
+  },
+  "files": [
+    "dist"
+  ]
+}

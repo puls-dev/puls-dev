@@ -1,100 +1,18 @@
 {
-  "name": "puls-dev",
-  "version": "0.4.9",
-  "description": "Intent-driven infrastructure-as-code with eager discovery and no state files.",
-  "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./aws": {
-      "types": "./dist/providers/aws/index.d.ts",
-      "default": "./dist/providers/aws/index.js"
-    },
-    "./do": {
-      "types": "./dist/providers/do/index.d.ts",
-      "default": "./dist/providers/do/index.js"
-    },
-    "./proxmox": {
-      "types": "./dist/providers/proxmox/index.d.ts",
-      "default": "./dist/providers/proxmox/index.js"
-    },
-    "./firebase": {
-      "types": "./dist/providers/firebase/index.d.ts",
-      "default": "./dist/providers/firebase/index.js"
-    },
-    "./gcp": {
-      "types": "./dist/providers/gcp/index.d.ts",
-      "default": "./dist/providers/gcp/index.js"
-    },
-    "./cloudflare": {
-      "types": "./dist/providers/cloudflare/index.d.ts",
-      "default": "./dist/providers/cloudflare/index.js"
-    },
-    "./azure": {
-      "types": "./dist/providers/azure/index.d.ts",
-      "default": "./dist/providers/azure/index.js"
-    }
-  },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
+  "name": "puls-monorepo",
+  "private": true,
+  "description": "Monorepo for Puls intent-driven IaC",
+  "workspaces": [
+    "packages/*"
   ],
-  "bin": {
-    "puls": "dist/bin/puls.js"
-  },
   "scripts": {
-    "build": "tsc",
-    "postbuild": "node -e \"const fs=require('fs'),f='dist/bin/puls.js',c=fs.readFileSync(f,'utf8');if(!c.startsWith('#!'))fs.writeFileSync(f,'#!/usr/bin/env node\\n'+c);\" && chmod +x dist/bin/puls.js",
-    "prepublishOnly": "npm run build",
-    "test": "find src -name '*.test.ts' ! -name '*.integration.test.ts' ! -name '*.e2e.test.ts' | xargs tsx --test --test-concurrency=1",
-    "test:integration": "find src -name '*.integration.test.ts' | xargs tsx --test --test-concurrency=1",
-    "test:e2e": "find src -name '*.e2e.test.ts' | xargs tsx --test --test-concurrency=1"
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
   },
-  "keywords": [
-    "iac",
-    "infrastructure",
-    "aws",
-    "digitalocean",
-    "proxmox",
-    "typescript",
-    "intent-driven"
-  ],
-  "author": "Bia",
-  "license": "ISC",
   "devDependencies": {
     "@types/node": "^25.6.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
-  },
-  "dependencies": {
-    "@aws-sdk/client-acm": "^3.1053.0",
-    "@aws-sdk/client-apigatewayv2": "^3.1053.0",
-    "@aws-sdk/client-cloudfront": "^3.1053.0",
-    "@aws-sdk/client-cloudwatch": "^3.1053.0",
-    "@aws-sdk/client-cloudwatch-logs": "^3.1053.0",
-    "@aws-sdk/client-ec2": "^3.1053.0",
-    "@aws-sdk/client-ecs": "^3.1053.0",
-    "@aws-sdk/client-iam": "^3.1053.0",
-    "@aws-sdk/client-lambda": "^3.1053.0",
-    "@aws-sdk/client-rds": "^3.1053.0",
-    "@aws-sdk/client-route-53": "^3.1053.0",
-    "@aws-sdk/client-route-53-domains": "^3.1053.0",
-    "@aws-sdk/client-s3": "^3.1053.0",
-    "@aws-sdk/client-secrets-manager": "^3.1053.0",
-    "@aws-sdk/client-sns": "^3.1053.0",
-    "@aws-sdk/client-sqs": "^3.1053.0",
-    "@aws-sdk/client-ssm": "^3.1053.0",
-    "@aws-sdk/credential-providers": "^3.1071.0",
-    "dotenv": "^17.4.2",
-    "google-auth-library": "^10.6.2",
-    "reflect-metadata": "^0.2.2",
-    "undici": "^8.3.0"
   }
 }

@@ -1,0 +1,24 @@
+{
+  "name": "@puls-dev/core",
+  "version": "0.5.0",
+  "description": "Core engine for Puls intent-driven IaC",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "puls": "dist/bin/puls.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "postbuild": "node -e \"const fs=require('fs'),f='dist/bin/puls.js';if(fs.existsSync(f)){const c=fs.readFileSync(f,'utf8');if(!c.startsWith('#!'))fs.writeFileSync(f,'#!/usr/bin/env node\\n'+c);fs.chmodSync(f, 0o755);}\"",
+    "test": "find src -name '*.test.ts' | xargs tsx --test --test-concurrency=1"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "reflect-metadata": "^0.2.2"
+  },
+  "files": [
+    "dist"
+  ]
+}
