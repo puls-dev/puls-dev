@@ -50,7 +50,7 @@ Options:
   --help           Print this help and exit
 
 Examples:
-  npx puls install-shell         # one-time setup- then just use "puls" directly
+  npx @puls-dev/core install-shell         # one-time setup- then just use "puls" directly
   puls plan    infra/staging.ts
   puls deploy  infra/staging.ts --parallel
   puls destroy infra/staging.ts

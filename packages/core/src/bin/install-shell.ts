@@ -4,7 +4,7 @@ import path from "node:path";
 
 const MARKER = "# added by puls-dev";
 const LAUNCHER_CONTENT = `#!/bin/sh
-exec npx --yes puls-dev "$@"
+exec npx --yes @puls-dev/core "$@"
 `;
 
 function detectShellConfig(): { shell: string; configFile: string } | null {
@@ -43,15 +43,10 @@ export function installShell(): void {
   const launcherPath = path.join(launcherDir, "puls");
 
   // 1. Create launcher
-  const launcherExists = fs.existsSync(launcherPath);
-  if (!launcherExists) {
-    fs.mkdirSync(launcherDir, { recursive: true });
-    fs.writeFileSync(launcherPath, LAUNCHER_CONTENT, { encoding: "utf8" });
-    fs.chmodSync(launcherPath, 0o755);
-    console.log(`✅ Created launcher at ${launcherPath}`);
-  } else {
-    console.log(`   Launcher already exists at ${launcherPath}`);
-  }
+  fs.mkdirSync(launcherDir, { recursive: true });
+  fs.writeFileSync(launcherPath, LAUNCHER_CONTENT, { encoding: "utf8" });
+  fs.chmodSync(launcherPath, 0o755);
+  console.log(`✅ Created/updated launcher at ${launcherPath}`);
 
   // 2. Detect shell config
   const detected = detectShellConfig();

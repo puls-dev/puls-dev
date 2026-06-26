@@ -1,6 +1,6 @@
 {
   "name": "@puls-dev/aws",
-  "version": "0.5.0",
+  "version": "0.5.2",
   "description": "AWS Provider for Puls IaC",
   "type": "module",
   "main": "./dist/index.js",

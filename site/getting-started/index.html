@@ -1276,7 +1276,7 @@
 </code></pre></div>
 <h2 id="the-puls-cli">The <code>puls</code> CLI</h2>
 <p><code>@puls-dev/core</code> ships a <code>puls</code> binary. Run the one-time shell setup so you never need <code>npx</code> again:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>npx<span class="w"> </span>puls<span class="w"> </span>install-shell
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>npx<span class="w"> </span>@puls-dev/core<span class="w"> </span>install-shell
 </code></pre></div>
 <p>This creates a tiny launcher at <code>~/.puls/bin/puls</code> and adds it to your PATH in <code>~/.zshrc</code> / <code>~/.bashrc</code> / <code>~/.config/fish/config.fish</code>. After sourcing your shell config (or opening a new terminal), <code>puls</code> is available everywhere:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>puls<span class="w"> </span>plan<span class="w">    </span>my-first-stack.ts<span class="w">   </span><span class="c1"># dry-run - prints what would change, no API writes</span>

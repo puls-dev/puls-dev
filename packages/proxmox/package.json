@@ -1,6 +1,6 @@
 {
   "name": "@puls-dev/proxmox",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Proxmox Provider for Puls IaC",
   "type": "module",
   "main": "./dist/index.js",

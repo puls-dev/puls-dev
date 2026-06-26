@@ -43,7 +43,7 @@ class MyFirstStack extends Stack {
 `@puls-dev/core` ships a `puls` binary. Run the one-time shell setup so you never need `npx` again:
 
 ```bash
-npx puls install-shell
+npx @puls-dev/core install-shell
 ```
 
 This creates a tiny launcher at `~/.puls/bin/puls` and adds it to your PATH in `~/.zshrc` / `~/.bashrc` / `~/.config/fish/config.fish`. After sourcing your shell config (or opening a new terminal), `puls` is available everywhere:

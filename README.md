@@ -66,7 +66,7 @@ npm install @puls-dev/core @puls-dev/aws
 Run the one-time launcher setup to invoke `puls` directly in your terminal:
 
 ```bash
-npx puls install-shell
+npx @puls-dev/core install-shell         # one-time setup- then just use "puls" directly
 ```
 
 ### Command Cheat Sheet
