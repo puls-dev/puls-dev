@@ -42,7 +42,7 @@ A clean pattern is to define these configurations in a shared file (e.g. `types/
 
 ```typescript
 // types/accounts.ts
-import { ProviderOpts } from "puls-dev";
+import { ProviderOpts } from "@puls-dev/core";
 
 export const AWS_ACCOUNT: Record<string, ProviderOpts["aws"]> = {
   PRODUCTION: {
@@ -59,8 +59,8 @@ export const AWS_ACCOUNT: Record<string, ProviderOpts["aws"]> = {
 Then, import and reference them inside your stack definitions:
 
 ```typescript
-import { Deploy, Stack } from "puls-dev";
-import { AWS } from "puls-dev/aws";
+import { Deploy, Stack } from "@puls-dev/core";
+import { AWS } from "@puls-dev/aws";
 import { AWS_ACCOUNT } from "../../types/accounts.js";
 
 @Deploy({ aws: AWS_ACCOUNT.PRODUCTION })

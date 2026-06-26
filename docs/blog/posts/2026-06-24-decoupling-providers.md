@@ -36,7 +36,7 @@ export interface ProviderPlugin {
 ```
 
 ### Key Benefits:
-1. **Zero-Configuration Auto-Registration**: Provider plugins register themselves dynamically on import. When you import resources (e.g. `import { AWS } from "puls-dev/aws"`), the provider registers its configure, list, and visual rendering hooks automatically.
+1. **Zero-Configuration Auto-Registration**: Provider plugins register themselves dynamically on import. When you import resources (e.g. `import { AWS } from "@puls-dev/aws"`), the provider registers its configure, list, and visual rendering hooks automatically.
 2. **Simplified Core Engine**: The CLI visual checker now dynamically queries the registry to parse configuration files and display inventory tables, allowing it to remain completely agnostic of specific cloud providers.
 3. **Paving the Way for Community Providers**: Developers can now call `registerProvider(myPlugin)` to write first-class custom providers (like Cloudflare, Hetzner, or Vultr) without modifying any core framework files.
 

@@ -26,7 +26,7 @@ In Puls, secrets are represented by the `Secret` class. Instead of resolving the
 Puls support multiple vaults out of the box with zero boilerplate:
 
 ```typescript
-import { Secret } from "puls-dev";
+import { Secret } from "@puls-dev/core";
 
 // Fetch from AWS Secrets Manager
 const dbPassword = Secret.aws("prod/database/password", { region: "us-east-1" });
@@ -50,7 +50,7 @@ Instead of embedding the password anywhere in your provisioning repositories, yo
 
 ```typescript
 // aws-infra/secrets.ts
-import { Secret } from "puls-dev";
+import { Secret } from "@puls-dev/core";
 
 export const IPA_PASSWORD = Secret.aws("IPA_CLIENT_PASSWORD", {
   region: "eu-west-1",
@@ -61,8 +61,8 @@ Inside your stack configuration, you import the secret and bind it to the builde
 
 ```typescript
 // proxmox-infra/stacks/vms.ts
-import { Stack, Deploy } from "puls-dev";
-import { Proxmox } from "puls-dev/proxmox";
+import { Stack, Deploy } from "@puls-dev/core";
+import { Proxmox } from "@puls-dev/proxmox";
 import { IPA_PASSWORD } from "../../aws-infra/secrets";
 
 @Deploy()

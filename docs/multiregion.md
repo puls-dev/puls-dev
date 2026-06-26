@@ -9,8 +9,8 @@ Puls supports first-class **Multi-Region Deployments** natively in the deploymen
 You can configure multi-region deployments simply by passing a `regions` array parameter to the class-level `@Deploy` or `@Destroy` decorators:
 
 ```typescript
-import { Stack, Deploy, REGION } from "puls-dev";
-import { AWS } from "puls-dev/aws";
+import { Stack, Deploy } from "@puls-dev/core";
+import { AWS, REGION } from "@puls-dev/aws";
 
 // This stack will be deployed sequentially to us-east-1, eu-central-1, and ap-northeast-1
 @Deploy({
@@ -46,8 +46,8 @@ When a stack is deployed across multiple regions, Puls generates a distinct stac
 Downstream stacks can retrieve outputs from a **specific regional deployment** by passing the region parameter to `Stack.from()`:
 
 ```typescript
-import { Stack, Deploy, REGION } from "puls-dev";
-import { AWS } from "puls-dev/aws";
+import { Stack, Deploy, REGION } from "@puls-dev/core";
+import { AWS } from "@puls-dev/aws";
 import { RegionalAppStack } from "./app-stack.js";
 
 @Deploy({ region: REGION.US_EAST_1 })

@@ -1151,7 +1151,7 @@
 </code></pre></div>
 <h3 id="key-benefits">Key Benefits:</h3>
 <ol>
-<li><strong>Zero-Configuration Auto-Registration</strong>: Provider plugins register themselves dynamically on import. When you import resources (e.g. <code>import { AWS } from "puls-dev/aws"</code>), the provider registers its configure, list, and visual rendering hooks automatically.</li>
+<li><strong>Zero-Configuration Auto-Registration</strong>: Provider plugins register themselves dynamically on import. When you import resources (e.g. <code>import { AWS } from "@puls-dev/aws"</code>), the provider registers its configure, list, and visual rendering hooks automatically.</li>
 <li><strong>Simplified Core Engine</strong>: The CLI visual checker now dynamically queries the registry to parse configuration files and display inventory tables, allowing it to remain completely agnostic of specific cloud providers.</li>
 <li><strong>Paving the Way for Community Providers</strong>: Developers can now call <code>registerProvider(myPlugin)</code> to write first-class custom providers (like Cloudflare, Hetzner, or Vultr) without modifying any core framework files.</li>
 </ol>

@@ -365,8 +365,8 @@ This example demonstrates deploying a secure stack consisting of a Cloud SQL dat
 ```typescript
 import "dotenv/config";
 import "reflect-metadata";
-import { Stack, Deploy, Config } from "puls-dev";
-import { GCP } from "puls-dev/gcp";
+import { Stack, Deploy, Config } from "@puls-dev/core";
+import { GCP } from "@puls-dev/gcp";
 
 Config.set({
   providers: {

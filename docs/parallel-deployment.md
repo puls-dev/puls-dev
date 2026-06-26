@@ -15,7 +15,7 @@ Parallel execution is an opt-in stack feature configured via the `@Deploy` and `
 To enable concurrent resource creation and updates during stack deployment, pass `parallel: true` to the `@Deploy` decorator:
 
 ```typescript
-import { Stack, Deploy, Proxmox } from "puls-dev";
+import { Stack, Deploy, Proxmox } from "@puls-dev/core";
 
 @Deploy({ parallel: true, proxmox: CONFIG.PRODUCTION })
 class AppStack extends Stack {
@@ -74,7 +74,7 @@ Puls's parallel scheduler ensures that:
 When one resource consumes an input parameter retrieved dynamically from the `Output<T>` of another resource, Puls **automatically infers the dependency relationship**. You do not need to call `.dependsOn()` in these scenarios.
 
 ```typescript
-import { Stack, Deploy, DO } from "puls-dev";
+import { Stack, Deploy, DO } from "@puls-dev/core";
 
 @Deploy({ parallel: true, token: CONFIG.DO_TOKEN })
 class WebStack extends Stack {

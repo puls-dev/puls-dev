@@ -157,8 +157,8 @@ Below is a complete Puls stack using Cloudflare:
 
 ```typescript
 import "dotenv/config";
-import { Stack, Deploy } from "puls-dev";
-import { CF } from "puls-dev/cloudflare";
+import { Stack, Deploy } from "@puls-dev/core";
+import { CF } from "@puls-dev/cloudflare";
 
 @Deploy({ dryRun: false })
 class CloudflareInfra extends Stack {

@@ -11,8 +11,8 @@ If any resource violates a registered policy rule, the execution aborts immediat
 You declare policy rules by calling `Policy.register()` and supplying a rule name and a `validate` function. The validation function receives each resource instance (inheriting from `BaseBuilder`) in your stacks and inspects its properties.
 
 ```typescript
-import { Policy } from "puls-dev";
-import { S3BucketBuilder } from "puls-dev/aws";
+import { Policy } from "@puls-dev/core";
+import { S3BucketBuilder } from "@puls-dev/aws";
 
 // Enforce versioning on all AWS S3 buckets
 Policy.register({
@@ -51,9 +51,9 @@ Here are common compliance policies you can integrate into your Puls stacks:
 Ensure no GCP Cloud SQL databases or AWS RDS instances are exposed to the public internet:
 
 ```typescript
-import { Policy } from "puls-dev";
-import { CloudSQLBuilder } from "puls-dev/gcp";
-import { RDSBuilder } from "puls-dev/aws";
+import { Policy } from "@puls-dev/core";
+import { CloudSQLBuilder } from "@puls-dev/gcp";
+import { RDSBuilder } from "@puls-dev/aws";
 
 Policy.register({
   name: "No Public Databases",
@@ -79,7 +79,7 @@ Policy.register({
 Enforce that all resources match specific naming conventions (e.g. prefixing or containing environment tags):
 
 ```typescript
-import { Policy } from "puls-dev";
+import { Policy } from "@puls-dev/core";
 
 Policy.register({
   name: "Resource Naming Convention",
@@ -96,8 +96,8 @@ Policy.register({
 Cap VM specifications (like Proxmox or GCP cores/memory) to control cloud costs:
 
 ```typescript
-import { Policy } from "puls-dev";
-import { GCPVMBuilder } from "puls-dev/gcp";
+import { Policy } from "@puls-dev/core";
+import { GCPVMBuilder } from "@puls-dev/gcp";
 
 Policy.register({
   name: "Cap GCP Compute Sizing",

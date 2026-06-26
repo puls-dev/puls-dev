@@ -1254,7 +1254,8 @@
 <li>Credentials for at least one provider</li>
 </ul>
 <h2 id="install">Install</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>npm<span class="w"> </span>install<span class="w"> </span>puls-dev
+<p>Install the core stack engine, and the specific cloud providers you want to manage (for example, <code>@puls-dev/aws</code>):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>npm<span class="w"> </span>install<span class="w"> </span>@puls-dev/core<span class="w"> </span>@puls-dev/aws
 </code></pre></div>
 <p>Copy the example env file and fill in your credentials:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env
@@ -1263,8 +1264,8 @@
 <p>Create a file - any name, anywhere in the project:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;dotenv/config&quot;</span><span class="p">;</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">import</span><span class="w"> </span><span class="s2">&quot;reflect-metadata&quot;</span><span class="p">;</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev&quot;</span><span class="p">;</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">AWS</span><span class="p">,</span><span class="w"> </span><span class="nx">REGION</span><span class="p">,</span><span class="w"> </span><span class="nx">RUNTIME</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;puls-dev/aws&quot;</span><span class="p">;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@puls-dev/core&quot;</span><span class="p">;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">AWS</span><span class="p">,</span><span class="w"> </span><span class="nx">REGION</span><span class="p">,</span><span class="w"> </span><span class="nx">RUNTIME</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@puls-dev/aws&quot;</span><span class="p">;</span>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">region</span><span class="o">:</span><span class="w"> </span><span class="kt">REGION.EU_CENTRAL_1</span><span class="w"> </span><span class="p">})</span>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="kd">class</span><span class="w"> </span><span class="nx">MyFirstStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
@@ -1274,7 +1275,7 @@
 <a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">}</span>
 </code></pre></div>
 <h2 id="the-puls-cli">The <code>puls</code> CLI</h2>
-<p><code>puls-dev</code> ships a <code>puls</code> binary. Run the one-time shell setup so you never need <code>npx</code> again:</p>
+<p><code>@puls-dev/core</code> ships a <code>puls</code> binary. Run the one-time shell setup so you never need <code>npx</code> again:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>npx<span class="w"> </span>puls<span class="w"> </span>install-shell
 </code></pre></div>
 <p>This creates a tiny launcher at <code>~/.puls/bin/puls</code> and adds it to your PATH in <code>~/.zshrc</code> / <code>~/.bashrc</code> / <code>~/.config/fish/config.fish</code>. After sourcing your shell config (or opening a new terminal), <code>puls</code> is available everywhere:</p>

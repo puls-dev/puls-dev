@@ -16,8 +16,8 @@ Every resource builder in the Puls framework natively inherits four fluent lifec
 ### Usage Example
 
 ```typescript
-import { Stack, Deploy } from "puls-dev";
-import { GCP } from "puls-dev/gcp";
+import { Stack, Deploy } from "@puls-dev/core";
+import { GCP } from "@puls-dev/gcp";
 
 @Deploy({ dryRun: false })
 class AppStack extends Stack {
@@ -44,8 +44,8 @@ A Puls `Stack` can declare class methods that run at the boundaries of the stack
 ### Usage Example
 
 ```typescript
-import { Stack, Deploy } from "puls-dev";
-import { DO } from "puls-dev/do";
+import { Stack, Deploy } from "@puls-dev/core";
+import { DO } from "@puls-dev/do";
 
 @Deploy({ dryRun: false })
 class StagingStack extends Stack {
@@ -71,8 +71,8 @@ Puls ships with a ready-to-use **Slack Notifier** helper (`SLACK.notify(webhookU
 * **Property inclusion**: Lists all simple, resolved output properties (such as IPs, URLs, regions) dynamically.
 
 ```typescript
-import { Stack, Deploy, SLACK } from "puls-dev";
-import { GCP } from "puls-dev/gcp";
+import { Stack, Deploy, SLACK } from "@puls-dev/core";
+import { GCP } from "@puls-dev/gcp";
 
 const SLACK_WEBHOOK = "https://hooks.slack.com/services/...";
 
@@ -95,8 +95,8 @@ Puls also supports **Discord Webhook** alerts (`DISCORD.notify(webhookUrl)`) sty
 * **Time-stamped logs**: Includes a native footer and timestamp of the deploy boundary.
 
 ```typescript
-import { Stack, Deploy, DISCORD } from "puls-dev";
-import { GCP } from "puls-dev/gcp";
+import { Stack, Deploy, DISCORD } from "@puls-dev/core";
+import { GCP } from "@puls-dev/gcp";
 
 const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/...";
 

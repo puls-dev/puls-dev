@@ -16,7 +16,7 @@ AWS_PROFILE=my-profile  # Optional: uses shared credentials file
 You can set project-wide AWS options programmatically via `Config.set`:
 
 ```typescript
-import { Config } from "puls-dev";
+import { Config } from "@puls-dev/core";
 
 Config.set({
   providers: {
@@ -35,7 +35,7 @@ A recommended pattern is to define these environments in a shared configuration 
 
 ```typescript
 // config/accounts.ts
-import { ProviderOpts } from "puls-dev";
+import { ProviderOpts } from "@puls-dev/core";
 
 export const AWS_ACCOUNTS = {
   PRODUCTION: {
@@ -56,8 +56,8 @@ export const AWS_ACCOUNTS = {
 Then reference them when declaring your stacks:
 
 ```typescript
-import { Deploy, Stack } from "puls-dev";
-import { AWS } from "puls-dev/aws";
+import { Deploy, Stack } from "@puls-dev/core";
+import { AWS } from "@puls-dev/aws";
 import { AWS_ACCOUNTS } from "./config/accounts.js";
 
 @Deploy({ aws: AWS_ACCOUNTS.PRODUCTION })
@@ -88,8 +88,8 @@ The `aws` configuration object accepts the following fields:
 To route AWS SDK calls to local emulator instances like **LocalStack**, you can configure the custom endpoint URL globally, in context decorators, or via the `AWS_ENDPOINT_URL` environment variable:
 
 ```typescript
-import { Deploy, Stack } from "puls-dev";
-import { AWS } from "puls-dev/aws";
+import { Deploy, Stack } from "@puls-dev/core";
+import { AWS } from "@puls-dev/aws";
 
 @Deploy({
   aws: {
@@ -110,7 +110,7 @@ AWS_ENDPOINT_URL=http://localhost:4566 puls deploy stack.ts
 **Constants**
 
 ```typescript
-import { AWS, REGION, RUNTIME, DB, DB_SIZE, DISTRO, BUCKET } from "puls-dev/aws";
+import { AWS, REGION, RUNTIME, DB, DB_SIZE, DISTRO, BUCKET } from "@puls-dev/aws";
 ```
 
 ---
@@ -400,7 +400,7 @@ AWS.Route53("example.com")
 **Domain registration**
 
 ```typescript
-import { REGION } from "puls-dev/aws";
+import { REGION } from "@puls-dev/aws";
 
 const DOMAIN_REGISTER = {
   FIRSTNAME: "Jane",
@@ -594,8 +594,8 @@ AWS.Alarm("db-storage-low")
 ```typescript
 import "dotenv/config";
 import "reflect-metadata";
-import { Stack, Deploy } from "puls-dev";
-import { AWS, REGION, RUNTIME, DB, DB_SIZE } from "puls-dev/aws";
+import { Stack, Deploy } from "@puls-dev/core";
+import { AWS, REGION, RUNTIME, DB, DB_SIZE } from "@puls-dev/aws";
 
 @Deploy({ region: REGION.EU_CENTRAL_1, dryRun: false })
 class AppStack extends Stack {

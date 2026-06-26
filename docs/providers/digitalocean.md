@@ -49,7 +49,7 @@ DO.Droplet("prod-web")
 **Constants**
 
 ```typescript
-import { DO, OS, REGION, SIZE } from "puls-dev/do";
+import { DO, OS, REGION, SIZE } from "@puls-dev/do";
 
 OS.UBUNTU_22_04   // "ubuntu-22-04-x64"
 OS.DEBIAN_11      // "debian-11-x64"
@@ -285,8 +285,8 @@ const db = DO.Database("prod-db")
 ## Full example
 
 ```typescript
-import { Stack, Deploy, Protected } from "puls-dev";
-import { DO, OS, REGION, SIZE } from "puls-dev/do";
+import { Stack, Deploy, Protected } from "@puls-dev/core";
+import { DO, OS, REGION, SIZE } from "@puls-dev/do";
 
 @Deploy({ token: process.env.DO_TOKEN! })
 class Production extends Stack {

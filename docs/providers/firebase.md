@@ -155,8 +155,8 @@ Firebase.RemoteConfig()
 ```typescript
 import "dotenv/config";
 import "reflect-metadata";
-import { Stack, Deploy } from "puls-dev";
-import { Firebase } from "puls-dev/firebase";
+import { Stack, Deploy } from "@puls-dev/core";
+import { Firebase } from "@puls-dev/firebase";
 
 @Deploy({ dryRun: false })
 class AppStack extends Stack {

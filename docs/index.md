@@ -96,7 +96,7 @@ Have questions or want to contribute? Join the conversation on Gitter|Matrix: **
 ## Install
 
 ```bash
-npm install puls-dev
+npm install @puls-dev/core
 cp .env.example .env  # fill in your credentials
 npx puls deploy your-stack.ts
 ```

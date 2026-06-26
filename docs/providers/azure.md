@@ -142,8 +142,8 @@ const password = Secret.azure("db-password", "my-vault-name");
 
 ```typescript
 import "dotenv/config";
-import { Stack, Deploy, Secret } from "puls-dev";
-import { Azure } from "puls-dev/azure";
+import { Stack, Deploy, Secret } from "@puls-dev/core";
+import { Azure } from "@puls-dev/azure";
 
 @Deploy({ dryRun: false })
 class AzureInfrastructure extends Stack {

@@ -11,7 +11,7 @@ With this feature, you can dynamically retrieve secrets from secure cloud vaults
 Puls provides a universal `Secret` class that acts as a secure, lazy wrapper. It supports multiple secret stores out of the box:
 
 ```typescript
-import { Secret } from "puls-dev";
+import { Secret } from "@puls-dev/core";
 
 // 1. Local environment variable (with optional fallback)
 const stripeKey = Secret.env("STRIPE_API_KEY", "fallback-key");
@@ -37,8 +37,8 @@ You can pass a `Secret` directly into any resource builder input that expects a 
 In the following example, the PostgreSQL database root credentials are dynamically retrieved from GCP Secret Manager during deployment:
 
 ```typescript
-import { Stack, Deploy, Secret } from "puls-dev";
-import { GCP } from "puls-dev/gcp";
+import { Stack, Deploy, Secret } from "@puls-dev/core";
+import { GCP } from "@puls-dev/gcp";
 
 // Retrieve database credentials securely at deploy time
 const dbUser = "db_admin";
@@ -58,8 +58,8 @@ class DatabaseStack extends Stack {
 In the following example, a Stripe API key is fetched and injected into the container environment variables for a Cloud Run service:
 
 ```typescript
-import { Stack, Deploy, Secret } from "puls-dev";
-import { GCP } from "puls-dev/gcp";
+import { Stack, Deploy, Secret } from "@puls-dev/core";
+import { GCP } from "@puls-dev/gcp";
 
 // Fetch Stripe API Key from GCP Secrets Manager
 const stripeApiKey = Secret.gcp("stripe-api-key");
@@ -84,8 +84,8 @@ When deploying virtual machines (using Proxmox or GCP) and running provisioning 
 Puls provides a first-class `.env()` configuration method on VM and Template builders. This method accepts a record of environment variables, automatically resolves any dynamic secrets or values, and injects them into the provisioning process:
 
 ```typescript
-import { Stack, Deploy, Secret } from "puls-dev";
-import { Proxmox } from "puls-dev/proxmox";
+import { Stack, Deploy, Secret } from "@puls-dev/core";
+import { Proxmox } from "@puls-dev/proxmox";
 
 const dbPassword = Secret.aws("prod/database/password");
 
@@ -143,7 +143,7 @@ Testing your infrastructure shouldn't require configuring real cloud credentials
 When you run more than one `Stack.deploy()` call sequentially inside the same Node.js process, Puls carries resolved secret values forward into each subsequent run's console-redaction filter by default. This is usually safe, but if you want a clean slate between runs you can clear the accumulated secret set:
 
 ```typescript
-import { clearResolvedSecrets } from "puls-dev";
+import { clearResolvedSecrets } from "@puls-dev/core";
 
 await StackA.deploy();
 clearResolvedSecrets(); // wipe resolved values before the next stack

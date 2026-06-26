@@ -79,8 +79,8 @@ Our own junior engineer couldn't make sense of it. He understood what the enviro
 The same infrastructure in Puls:
 
 ```typescript
-import { Stack, Deploy } from "puls-dev";
-import { AWS, REGION, DISTRO, BUCKET } from "puls-dev/aws";
+import { Stack, Deploy } from "@puls-dev/core";
+import { AWS, REGION, DISTRO, BUCKET } from "@puls-dev/aws";
 
 @Deploy({ region: REGION.US_EAST_1, dryRun: true })
 class GameEnvironment extends Stack {

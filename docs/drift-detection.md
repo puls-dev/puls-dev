@@ -59,7 +59,7 @@ Status meanings:
 `diff()` returns a `StackDiff` object you can use programmatically:
 
 ```typescript
-import type { StackDiff, ResourceDiff } from "puls-dev";
+import type { StackDiff, ResourceDiff } from "@puls-dev/core";
 
 const diff: StackDiff = await stack.diff();
 
@@ -130,8 +130,8 @@ Providers not in the table (S3, Route53, CloudFront, Firestore, Firebase Auth, e
 Override `getDiff(existing)` in your builder class. `existing` is whatever the builder's `discoveryPromise` resolved to- the raw API response.
 
 ```typescript
-import { BaseBuilder } from "puls-dev";
-import type { FieldDiff } from "puls-dev";
+import { BaseBuilder } from "@puls-dev/core";
+import type { FieldDiff } from "@puls-dev/core";
 
 export class MyBuilder extends BaseBuilder {
   private _size: string = "small";

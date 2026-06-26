@@ -8,8 +8,10 @@
 
 ## Install
 
+Install the core stack engine, and the specific cloud providers you want to manage (for example, `@puls-dev/aws`):
+
 ```bash
-npm install puls-dev
+npm install @puls-dev/core @puls-dev/aws
 ```
 
 Copy the example env file and fill in your credentials:
@@ -25,8 +27,8 @@ Create a file - any name, anywhere in the project:
 ```typescript
 import "dotenv/config";
 import "reflect-metadata";
-import { Stack, Deploy } from "puls-dev";
-import { AWS, REGION, RUNTIME } from "puls-dev/aws";
+import { Stack, Deploy } from "@puls-dev/core";
+import { AWS, REGION, RUNTIME } from "@puls-dev/aws";
 
 @Deploy({ region: REGION.EU_CENTRAL_1 })
 class MyFirstStack extends Stack {
@@ -38,7 +40,7 @@ class MyFirstStack extends Stack {
 
 ## The `puls` CLI
 
-`puls-dev` ships a `puls` binary. Run the one-time shell setup so you never need `npx` again:
+`@puls-dev/core` ships a `puls` binary. Run the one-time shell setup so you never need `npx` again:
 
 ```bash
 npx puls install-shell
