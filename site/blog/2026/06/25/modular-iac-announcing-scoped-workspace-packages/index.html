@@ -1156,10 +1156,12 @@
 <hr />
 <h2 id="under-the-hood-dynamic-resolution">Under the Hood: Dynamic Resolution</h2>
 <p>Splitting the packages required ensuring that <code>@puls-dev/core</code> remained completely decoupled from the provider SDKs while still allowing standard discovery.</p>
-<p>To achieve this:
-1. Core features dynamic plugin discovery. When running <code>puls plan</code>, core attempts to dynamically import registered providers. If a provider is not installed, it fails gracefully without stopping other operations.
-2. Credentials and low-level REST wrappers are cleanly encapsulated inside their respective provider directories.
-3. Common playbooks/metadata utilities have been promoted to core, eliminating any dependency loop between providers.</p>
+<p>To achieve this:</p>
+<ol>
+<li>Core features dynamic plugin discovery. When running <code>puls plan</code>, core attempts to dynamically import registered providers. If a provider is not installed, it fails gracefully without stopping other operations.</li>
+<li>Credentials and low-level REST wrappers are cleanly encapsulated inside their respective provider directories.</li>
+<li>Common playbooks/metadata utilities have been promoted to core, eliminating any dependency loop between providers.</li>
+</ol>
 <p>This layout paves the way for developers to publish third-party, custom provider packages (e.g. <code>@my-org/puls-kubernetes</code>) that integrate seamlessly with the <code>@puls-dev/core</code> stack runner.</p>
 
 

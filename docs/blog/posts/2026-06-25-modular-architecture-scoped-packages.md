@@ -69,6 +69,7 @@ class WebStack extends Stack {
 Splitting the packages required ensuring that `@puls-dev/core` remained completely decoupled from the provider SDKs while still allowing standard discovery.
 
 To achieve this:
+
 1. Core features dynamic plugin discovery. When running `puls plan`, core attempts to dynamically import registered providers. If a provider is not installed, it fails gracefully without stopping other operations.
 2. Credentials and low-level REST wrappers are cleanly encapsulated inside their respective provider directories.
 3. Common playbooks/metadata utilities have been promoted to core, eliminating any dependency loop between providers.
