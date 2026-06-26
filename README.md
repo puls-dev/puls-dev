@@ -1,8 +1,3 @@
-> [!IMPORTANT]
-> **DEPRECATION NOTICE**: The monolithic `puls-dev` package has been split into scoped sub-packages to eliminate dependency bloat. Please install `@puls-dev/core` and the specific provider packages you need (e.g. `@puls-dev/aws`) instead.
->
-> Visit [pulsdev.io](https://pulsdev.io/) for migration guides and documentation.
-
 # Pulsdev.io
 
 **State-free, eager-discovery Infrastructure-as-Code for TypeScript.**

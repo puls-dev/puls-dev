@@ -1,6 +1,10 @@
 {
-  "name": "puls-dev",
+  "name": "puls-monorepo",
+  "private": true,
   "description": "Monorepo for Puls intent-driven IaC",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "build": "npm run build -w @puls-dev/core && npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present"
@@ -15,9 +19,5 @@
     "@puls-dev/aws": "^0.5.0",
     "@puls-dev/core": "^0.5.0",
     "@puls-dev/proxmox": "^0.5.0"
-  },
-  "version": "0.5.0",
-  "files": [
-    "README.md"
-  ]
+  }
 }
