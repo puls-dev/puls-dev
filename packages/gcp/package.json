@@ -1,6 +1,6 @@
 {
   "name": "@puls-dev/gcp",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "GCP Provider for Puls IaC",
   "type": "module",
   "main": "./dist/index.js",
