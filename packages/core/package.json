@@ -1,6 +1,6 @@
 {
   "name": "@puls-dev/core",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Core engine for Puls intent-driven IaC",
   "type": "module",
   "main": "./dist/index.js",

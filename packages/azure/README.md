@@ -50,4 +50,4 @@ AZURE_TENANT_ID=your-tenant-id
 AZURE_SUBSCRIPTION_ID=your-subscription-id
 ```
 
-Learn more at **[pulsdev.io/providers/azure](https://pulsdev.io/providers/azure.md)**.
+Learn more at **[pulsdev.io/providers/azure](https://pulsdev.io/providers/azure)**.

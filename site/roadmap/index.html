@@ -880,6 +880,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../providers/hcloud/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hetzner Cloud
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1582,9 +1610,9 @@
 <h3 id="hetzner-cloud">Hetzner Cloud</h3>
 <p>Popular self-hosting alternative to DigitalOcean - similar API shape, easy to add.</p>
 <ul>
-<li>[ ] <strong>Server</strong> - analogous to DO Droplet; image, type, location, SSH key</li>
-<li>[ ] <strong>Network / VPC</strong> - private networking between servers</li>
-<li>[ ] <strong>Firewall</strong> - inbound/outbound rules</li>
+<li>[x] <strong>Server</strong> - analogous to DO Droplet; image, type, location, SSH key</li>
+<li>[x] <strong>Network / VPC</strong> - private networking between servers</li>
+<li>[x] <strong>Firewall</strong> - inbound/outbound rules</li>
 <li>[ ] <strong>Load Balancer</strong> - HTTP/HTTPS with health checks</li>
 <li>[ ] <strong>Volume</strong> - persistent block storage attached to servers</li>
 </ul>
@@ -1616,7 +1644,7 @@
 <li>[x] Add <code>"exports"</code> map with per-provider sub-paths so consumers can import only what they need (e.g. <code>puls-dev/aws</code>, <code>puls-dev/firebase</code>)</li>
 <li>[x] Ship compiled JS + <code>.d.ts</code> declarations</li>
 <li>[x] Standard dependencies for zero-friction out-of-the-box pre-1.0 install</li>
-<li>[ ] <strong>Scoped Monorepo Sub-Packages</strong> - Split <code>puls-dev</code> into separate scoped packages published to the registry (<code>@puls-dev/core</code>, <code>@puls-dev/aws</code>, <code>@puls-dev/gcp</code>, etc.) to provide zero-friction installs with zero dependency bloat</li>
+<li>[x] <strong>Scoped Monorepo Sub-Packages</strong> - Split <code>puls-dev</code> into separate scoped packages published to the registry (<code>@puls-dev/core</code>, <code>@puls-dev/aws</code>, <code>@puls-dev/gcp</code>, etc.) to provide zero-friction installs with zero dependency bloat</li>
 <li>[ ] Semver versioning - provider additions = minor, breaking DSL changes = major</li>
 </ul>
 <hr />

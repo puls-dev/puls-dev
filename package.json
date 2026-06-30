@@ -16,8 +16,14 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@puls-dev/aws": "^0.5.0",
-    "@puls-dev/core": "^0.5.0",
-    "@puls-dev/proxmox": "^0.5.0"
+    "@puls-dev/aws": "^0.5.3",
+    "@puls-dev/azure": "^0.5.3",
+    "@puls-dev/cloudflare": "^0.5.3",
+    "@puls-dev/core": "^0.5.3",
+    "@puls-dev/do": "^0.5.3",
+    "@puls-dev/firebase": "^0.5.3",
+    "@puls-dev/gcp": "^0.5.3",
+    "@puls-dev/hcloud": "^0.5.3",
+    "@puls-dev/proxmox": "^0.5.3"
   }
 }

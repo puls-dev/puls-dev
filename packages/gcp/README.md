@@ -45,4 +45,4 @@ Provide the path to your service account credential JSON file in your `.env` fil
 GCP_SA=./gcp/service-account.json
 ```
 
-Learn more at **[pulsdev.io/providers/gcp](https://pulsdev.io/providers/gcp.md)**.
+Learn more at **[pulsdev.io/providers/gcp](https://pulsdev.io/providers/gcp)**.

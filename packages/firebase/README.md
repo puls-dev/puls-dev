@@ -47,4 +47,4 @@ FIREBASE_SA=./firebase/service-account.json
 
 For local testing, the provider automatically checks for emulator variables (e.g. `FIRESTORE_EMULATOR_HOST`) and redirects API calls accordingly.
 
-Learn more at **[pulsdev.io/providers/firebase](https://pulsdev.io/providers/firebase.md)**.
+Learn more at **[pulsdev.io/providers/firebase](https://pulsdev.io/providers/firebase)**.

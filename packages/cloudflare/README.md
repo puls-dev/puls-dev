@@ -46,4 +46,4 @@ CLOUDFLARE_TOKEN=your-api-token
 CLOUDFLARE_ACCOUNT_ID=your-account-id
 ```
 
-Learn more at **[pulsdev.io/providers/cloudflare](https://pulsdev.io/providers/cloudflare.md)**.
+Learn more at **[pulsdev.io/providers/cloudflare](https://pulsdev.io/providers/cloudflare)**.

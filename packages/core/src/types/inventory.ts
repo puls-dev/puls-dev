@@ -223,6 +223,54 @@ export interface FirebaseInventory {
   remoteConfig?: FirebaseRemoteConfig;
 }
 
+// ─── Hetzner Cloud ────────────────────────────────────────────────────────────
+
+export interface HCloudServer {
+  id: number;
+  name: string;
+  status: string;
+  location: string;
+  serverType: string;
+  ip?: string;
+  monthlyCost: number;
+}
+
+export interface HCloudFirewall {
+  id: number;
+  name: string;
+  serverCount: number;
+}
+
+export interface HCloudNetwork {
+  id: number;
+  name: string;
+  ipRange: string;
+}
+
+export interface HCloudVolume {
+  id: number;
+  name: string;
+  size: number;
+  serverId?: number;
+}
+
+export interface HCloudLoadBalancer {
+  id: number;
+  name: string;
+  ip?: string;
+  location: string;
+  type: string;
+}
+
+export interface HCloudInventory {
+  servers: HCloudServer[];
+  firewalls: HCloudFirewall[];
+  networks: HCloudNetwork[];
+  volumes: HCloudVolume[];
+  loadBalancers: HCloudLoadBalancer[];
+  totalMonthlyCost: number;
+}
+
 // ─── Combined ─────────────────────────────────────────────────────────────────
 
 export interface InventoryError {
@@ -236,6 +284,8 @@ export interface InventoryResult {
   aws?: AwsInventory;
   gcp?: GcpInventory;
   firebase?: FirebaseInventory;
+  hcloud?: HCloudInventory;
   errors: InventoryError[];
   [key: string]: any;
 }
+

@@ -23,10 +23,25 @@ function applyConfig(opts: ProviderOpts) {
   if (opts.dryRun !== undefined) Config.set({ dryRun: opts.dryRun });
   if (opts.parallel !== undefined) Config.set({ parallel: opts.parallel });
   if (opts.offline !== undefined) Config.set({ offline: opts.offline });
-  if (opts.token)
-    Config.set({ providers: { do: { token: opts.token } } });
-  if (opts.region)
-    Config.set({ providers: { aws: { region: opts.region } } });
+  if (opts.token) {
+    Config.set({
+      providers: {
+        do: { token: opts.token },
+        cloudflare: { token: opts.token },
+        hcloud: { token: opts.token },
+      },
+    });
+  }
+  if (opts.region) {
+    Config.set({
+      providers: {
+        aws: { region: opts.region },
+        gcp: { region: opts.region },
+        do: { defaultRegion: opts.region },
+        hcloud: { region: opts.region },
+      },
+    });
+  }
 
   // For each registered plugin, run its configure hook
   const registered = providerRegistry.getAll();

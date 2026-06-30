@@ -45,4 +45,4 @@ PROXMOX_TOKEN_NAME=puls
 PROXMOX_TOKEN_SECRET=your-api-secret
 ```
 
-Learn more at **[pulsdev.io/providers/proxmox](https://pulsdev.io/providers/proxmox.md)**.
+Learn more at **[pulsdev.io/providers/proxmox](https://pulsdev.io/providers/proxmox)**.

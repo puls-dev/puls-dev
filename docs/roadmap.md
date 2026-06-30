@@ -99,9 +99,9 @@ class EdgeStack extends Stack {
 ### Hetzner Cloud
 Popular self-hosting alternative to DigitalOcean - similar API shape, easy to add.
 
-- [ ] **Server** - analogous to DO Droplet; image, type, location, SSH key
-- [ ] **Network / VPC** - private networking between servers
-- [ ] **Firewall** - inbound/outbound rules
+- [x] **Server** - analogous to DO Droplet; image, type, location, SSH key
+- [x] **Network / VPC** - private networking between servers
+- [x] **Firewall** - inbound/outbound rules
 - [ ] **Load Balancer** - HTTP/HTTPS with health checks
 - [ ] **Volume** - persistent block storage attached to servers
 
@@ -135,7 +135,7 @@ Enterprise CDN/edge - complex enough to warrant a dedicated maintainer; communit
 - [x] Add `"exports"` map with per-provider sub-paths so consumers can import only what they need (e.g. `puls-dev/aws`, `puls-dev/firebase`)
 - [x] Ship compiled JS + `.d.ts` declarations
 - [x] Standard dependencies for zero-friction out-of-the-box pre-1.0 install
-- [ ] **Scoped Monorepo Sub-Packages** - Split `puls-dev` into separate scoped packages published to the registry (`@puls-dev/core`, `@puls-dev/aws`, `@puls-dev/gcp`, etc.) to provide zero-friction installs with zero dependency bloat
+- [x] **Scoped Monorepo Sub-Packages** - Split `puls-dev` into separate scoped packages published to the registry (`@puls-dev/core`, `@puls-dev/aws`, `@puls-dev/gcp`, etc.) to provide zero-friction installs with zero dependency bloat
 - [ ] Semver versioning - provider additions = minor, breaking DSL changes = major
 
 

@@ -81,7 +81,7 @@ export const gcpPlugin = {
   configure: (pOpts: any) => {
     Config.set({
       providers: {
-        gcp: { ...Config.get().providers.gcp, ...pOpts },
+        gcp: pOpts,
       },
     });
   }

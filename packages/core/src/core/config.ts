@@ -54,16 +54,33 @@ export interface GlobalConfig {
   };
 }
 
+type DeepPartial<T> = {
+  [P in keyof T]?: NonNullable<T[P]> extends object ? DeepPartial<NonNullable<T[P]>> : T[P];
+};
+
 class ConfigManager {
   private config: GlobalConfig = {
     providers: {},
   };
 
-  set(newConfig: Partial<GlobalConfig>) {
+  set(newConfig: DeepPartial<GlobalConfig>) {
+    const mergedProviders = { ...this.config.providers };
+    if (newConfig.providers) {
+      for (const [key, value] of Object.entries(newConfig.providers)) {
+        if (value && typeof value === "object") {
+          mergedProviders[key] = {
+            ...mergedProviders[key],
+            ...value,
+          };
+        } else {
+          mergedProviders[key] = value;
+        }
+      }
+    }
     this.config = {
       ...this.config,
       ...newConfig,
-      providers: { ...this.config.providers, ...newConfig.providers },
+      providers: mergedProviders,
     };
   }
 

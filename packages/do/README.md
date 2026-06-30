@@ -48,4 +48,4 @@ Declare your API token in your `.env` file:
 DO_TOKEN=your-digitalocean-api-token
 ```
 
-Learn more at **[pulsdev.io/providers/digitalocean](https://pulsdev.io/providers/digitalocean.md)**.
+Learn more at **[pulsdev.io/providers/digitalocean](https://pulsdev.io/providers/digitalocean)**.

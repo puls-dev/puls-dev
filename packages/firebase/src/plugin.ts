@@ -88,7 +88,7 @@ export const firebasePlugin = {
     } else {
       Config.set({
         providers: {
-          firebase: { ...Config.get().providers.firebase, ...pOpts },
+          firebase: pOpts,
         },
       });
     }

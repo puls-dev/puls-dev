@@ -63,5 +63,6 @@ nav:
       - GCP: providers/gcp.md
       - Cloudflare: providers/cloudflare.md
       - Azure: providers/azure.md
+      - Hetzner Cloud: providers/hcloud.md
   - Contributing: contributing.md
   - Roadmap: roadmap.md

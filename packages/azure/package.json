@@ -1,6 +1,6 @@
 {
   "name": "@puls-dev/azure",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Azure Provider for Puls IaC",
   "type": "module",
   "main": "./dist/index.js",

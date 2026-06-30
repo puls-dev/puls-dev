@@ -83,7 +83,7 @@ export const awsPlugin = {
   configure: (pOpts: any) => {
     Config.set({
       providers: {
-        aws: { ...Config.get().providers.aws, ...pOpts },
+        aws: pOpts,
       },
     });
   }

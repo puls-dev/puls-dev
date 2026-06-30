@@ -51,4 +51,4 @@ AWS_SECRET_ACCESS_KEY=your-secret
 AWS_REGION=us-east-1
 ```
 
-Learn more at **[pulsdev.io/providers/aws](https://pulsdev.io/providers/aws.md)**.
+Learn more at **[pulsdev.io/providers/aws](https://pulsdev.io/providers/aws)**.

@@ -26,6 +26,7 @@ export abstract class Checker {
       import("@puls-dev/proxmox" as any).catch(() => {}),
       import("@puls-dev/cloudflare" as any).catch(() => {}),
       import("@puls-dev/azure" as any).catch(() => {}),
+      import("@puls-dev/hcloud" as any).catch(() => {}),
     ]);
 
     const registered = providerRegistry.getAll();
