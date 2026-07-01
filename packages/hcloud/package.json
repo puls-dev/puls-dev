@@ -1,6 +1,6 @@
 {
   "name": "@puls-dev/hcloud",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "Hetzner Cloud (HCloud) Provider for Puls IaC",
   "type": "module",
   "main": "./dist/index.js",
