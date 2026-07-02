@@ -1,4 +1,4 @@
-import { registerProvider, printSection, Config } from "@puls-dev/core";
+import { registerProvider, printSection, Config, DiscoveredResource, ResourceGroup } from "@puls-dev/core";
 import { listHCloudResources } from "./list.js";
 import type { HCloudInventory } from "@puls-dev/core";
 
@@ -79,6 +79,88 @@ export const hcloudPlugin = {
         hcloud: pOpts,
       },
     });
+  },
+  parseInventory: (inv: HCloudInventory): DiscoveredResource[] => {
+    const rawResources: DiscoveredResource[] = [];
+    const toPropertyName = (name: string) => name.replace(/[^a-zA-Z0-9]/g, "_").replace(/^([0-9])/, "_$1");
+
+    inv.networks?.forEach((n: any) =>
+      rawResources.push({
+        id: n.id,
+        name: n.name,
+        type: "HCloud.Network",
+        provider: "hcloud",
+        tier: "network",
+        propertyName: toPropertyName(n.name),
+        original: n,
+      })
+    );
+    inv.volumes?.forEach((v: any) =>
+      rawResources.push({
+        id: v.id,
+        name: v.name,
+        type: "HCloud.Volume",
+        provider: "hcloud",
+        tier: "database",
+        propertyName: toPropertyName(v.name),
+        original: v,
+      })
+    );
+    inv.servers?.forEach((s: any) =>
+      rawResources.push({
+        id: s.id,
+        name: s.name,
+        type: "HCloud.Server",
+        provider: "hcloud",
+        tier: "compute",
+        propertyName: toPropertyName(s.name),
+        original: s,
+      })
+    );
+    return rawResources;
+  },
+  groupResources: (resources: DiscoveredResource[]): ResourceGroup[] => {
+    const groups: ResourceGroup[] = [];
+    const processedIds = new Set<string | number>();
+
+    const networkBoundaries = resources.filter((r) => r.type === "HCloud.Network");
+    networkBoundaries.forEach((net) => {
+      processedIds.add(net.id);
+      groups.push({
+        id: `network:${net.id}`,
+        name: `🌐  Network: ${net.name}`,
+        provider: net.provider,
+        description: `HCloud Network boundary`,
+        resources: [net],
+      });
+    });
+
+    // Default standalone group for rest
+    resources.forEach((r) => {
+      if (processedIds.has(r.id)) return;
+      processedIds.add(r.id);
+      groups.push({
+        id: `standalone:${r.id}`,
+        name: `📦  [${r.type}] ${r.name}`,
+        provider: r.provider,
+        description: `Standalone resource`,
+        resources: [r],
+      });
+    });
+
+    return groups;
+  },
+  getPropertyChain: (res: DiscoveredResource): string => {
+    let chain = "";
+    if (res.type === "HCloud.Server") {
+      if (res.original?.serverType) {
+        chain += `\n    .serverType("${res.original.serverType}")`;
+      }
+      if (res.original?.location) {
+        chain += `\n    .location("${res.original.location}")`;
+      }
+    }
+    return chain;
   }
 };
 

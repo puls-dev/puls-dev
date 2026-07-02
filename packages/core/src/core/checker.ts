@@ -47,6 +47,11 @@ export abstract class Checker {
 
     await Promise.all(tasks);
 
+    if (process.env.PULS_JSON === "true") {
+      console.log(JSON.stringify({ type: "check", ...result }));
+      return result;
+    }
+
     // Call render for each plugin that executed successfully
     for (const plugin of registered) {
       const inv = (result as any)[plugin.name];

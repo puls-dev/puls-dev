@@ -13,6 +13,7 @@ export interface ResourceContext {
   hosts?: HostEntry[];
   stackName?: string;
   secrets: Set<string>;
+  providers?: Record<string, any>;
   aws?: {
     region?: string;
     profile?: string;

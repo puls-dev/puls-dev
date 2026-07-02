@@ -55,6 +55,7 @@ export async function listDoResources(): Promise<DoInventory> {
     id:           f.id,
     name:         f.name,
     dropletCount: (f.droplet_ids ?? []).length,
+    dropletIds:   f.droplet_ids ?? [],
   }));
 
   const loadBalancers: DoLoadBalancer[] = lbData.load_balancers.map((lb) => ({

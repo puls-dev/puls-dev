@@ -3,7 +3,7 @@ import assert from "node:assert";
 import fs from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { Secret } from "@puls-dev/core";
+import { Secret, clearResolvedSecrets } from "@puls-dev/core";
 import { Config } from "@puls-dev/core";
 import { Output } from "@puls-dev/core";
 
@@ -14,7 +14,8 @@ import { GoogleAuth } from "google-auth-library";
 
 describe("Secrets at Deploy Time Unit Tests", () => {
   beforeEach(() => {
-    // Reset global config before each test
+    // Reset global config and secret cache before each test
+    clearResolvedSecrets();
     Config.set({
       dryRun: false,
       providers: {},
@@ -244,5 +245,31 @@ describe("Secrets at Deploy Time Unit Tests", () => {
     const secret = Secret.azure("db-password", "my-kv-vault");
     const val = await secret.get();
     assert.strictEqual(val, "mock-azure-vault-secret-value");
+  });
+
+  test("Secret instances pointing to the same identifier deduplicate fetch calls", async () => {
+    let callCount = 0;
+    
+    // We mock process.env lookup by using env secrets with a tracking counter
+    process.env.TEST_DEDUPE = "yes";
+    
+    try {
+      const fetcher = async () => {
+        callCount++;
+        return process.env.TEST_DEDUPE!;
+      };
+
+      const s1 = new Secret("TEST_DEDUPE", fetcher, "env:TEST_DEDUPE");
+      const s2 = new Secret("TEST_DEDUPE", fetcher, "env:TEST_DEDUPE");
+      
+      const v1 = await s1.get();
+      const v2 = await s2.get();
+      
+      assert.strictEqual(v1, "yes");
+      assert.strictEqual(v2, "yes");
+      assert.strictEqual(callCount, 1, "Fetcher function should be called exactly once");
+    } finally {
+      delete process.env.TEST_DEDUPE;
+    }
   });
 });

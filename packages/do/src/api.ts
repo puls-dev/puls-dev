@@ -151,7 +151,8 @@ export class DoApiClient {
 }
 
 export function getDoApi(): DoApiClient {
-  const token = Config.get().providers.do?.token;
+  const ctx = resourceContextStorage.getStore();
+  const token = ctx?.providers?.do?.token ?? Config.get().providers.do?.token;
   if (!token) {
     if (Config.isOfflineMode() || Config.isGlobalDryRun()) {
       return new DoApiClient("mock-do-token");

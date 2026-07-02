@@ -58,10 +58,90 @@ type DeepPartial<T> = {
   [P in keyof T]?: NonNullable<T[P]> extends object ? DeepPartial<NonNullable<T[P]>> : T[P];
 };
 
+function loadEnvDefaults(): GlobalConfig {
+  const providers: any = {};
+
+  if (process.env.DO_TOKEN || process.env.DIGITALOCEAN_TOKEN) {
+    providers.do = {
+      token: process.env.DO_TOKEN || process.env.DIGITALOCEAN_TOKEN,
+      spacesAccessKey: process.env.SPACES_ACCESS_KEY_ID,
+      spacesSecretKey: process.env.SPACES_SECRET_ACCESS_KEY,
+    };
+  }
+
+  if (
+    process.env.AWS_ACCESS_KEY_ID ||
+    process.env.AWS_SECRET_ACCESS_KEY ||
+    process.env.AWS_REGION ||
+    process.env.AWS_DEFAULT_REGION ||
+    process.env.AWS_ENDPOINT_URL
+  ) {
+    providers.aws = {
+      region: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || "us-east-1",
+      endpoint: process.env.AWS_ENDPOINT_URL,
+    };
+  }
+
+  if (process.env.HCLOUD_TOKEN) {
+    providers.hcloud = {
+      token: process.env.HCLOUD_TOKEN,
+    };
+  }
+
+  if (process.env.CLOUDFLARE || process.env.CLOUDFLARE_API_TOKEN || process.env.CF_TOKEN) {
+    providers.cloudflare = {
+      token: process.env.CLOUDFLARE || process.env.CLOUDFLARE_API_TOKEN || process.env.CF_TOKEN,
+    };
+  }
+
+  if (process.env.PROXMOX_URL) {
+    providers.proxmox = {
+      url: process.env.PROXMOX_URL,
+      user: process.env.PROXMOX_USER,
+      tokenName: process.env.PROXMOX_TOKEN_NAME,
+      tokenSecret: process.env.PROXMOX_TOKEN_SECRET,
+      nodes: process.env.PROXMOX_NODES?.split(","),
+      dnsDomain: process.env.PROXMOX_DNS_DOMAIN,
+      dnsServers: process.env.PROXMOX_DNS_SERVERS?.split(","),
+      // Proxmox ships with self-signed certs — default false, opt-in to strict with PROXMOX_VERIFY_SSL=true
+      verifySsl: process.env.PROXMOX_VERIFY_SSL === "true",
+    };
+  }
+
+  if (process.env.FIREBASE_SA) {
+    providers.firebase = {
+      serviceAccountPath: process.env.FIREBASE_SA,
+    };
+  }
+
+  if (process.env.GCP_SA || process.env.GCP_PROJECT || process.env.GOOGLE_CLOUD_PROJECT) {
+    providers.gcp = {
+      serviceAccountPath: process.env.GCP_SA,
+      projectId: process.env.GCP_PROJECT || process.env.GOOGLE_CLOUD_PROJECT,
+    };
+  }
+
+  if (process.env.AZURE_CLIENT_ID) {
+    providers.azure = {
+      clientId: process.env.AZURE_CLIENT_ID,
+      clientSecret: process.env.AZURE_CLIENT_SECRET,
+      tenantId: process.env.AZURE_TENANT_ID,
+      subscriptionId: process.env.AZURE_SUBSCRIPTION_ID,
+      defaultLocation: process.env.AZURE_LOCATION || process.env.AZURE_DEFAULT_LOCATION || "eastus",
+    };
+  }
+
+  return { providers };
+}
+
 class ConfigManager {
   private config: GlobalConfig = {
     providers: {},
   };
+
+  constructor() {
+    this.config = loadEnvDefaults();
+  }
 
   set(newConfig: DeepPartial<GlobalConfig>) {
     const mergedProviders = { ...this.config.providers };

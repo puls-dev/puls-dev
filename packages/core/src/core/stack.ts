@@ -10,7 +10,6 @@ async function withRedactedConsole<T>(
   secrets: Set<string>,
   fn: () => Promise<T>,
 ): Promise<T> {
-  const originalLog = console.log;
   const redact = (message: any): any => {
     if (typeof message !== "string") return message;
     let result = message;
@@ -23,25 +22,44 @@ async function withRedactedConsole<T>(
     return result;
   };
 
-  console.log = (...args: any[]) => {
-    const redactedArgs = args.map((arg) => {
-      if (typeof arg === "string") return redact(arg);
-      try {
-        const str = String(arg);
-        const hasSecret = [...secrets].some(
-          (s) => s && s.length >= 3 && str.includes(s),
-        );
-        if (hasSecret) return redact(str);
-      } catch { }
-      return arg;
-    });
-    originalLog(...redactedArgs);
+  const patch = (original: (...args: any[]) => void) =>
+    (...args: any[]) => {
+      const redactedArgs = args.map((arg) => {
+        if (typeof arg === "string") return redact(arg);
+        try {
+          const str = String(arg);
+          const hasSecret = [...secrets].some(
+            (s) => s && s.length >= 3 && str.includes(s),
+          );
+          if (hasSecret) return redact(str);
+        } catch { }
+        return arg;
+      });
+      original(...redactedArgs);
+    };
+
+  const originals = {
+    log: console.log,
+    error: console.error,
+    warn: console.warn,
+    info: console.info,
+    debug: console.debug,
   };
+
+  console.log = patch(originals.log);
+  console.error = patch(originals.error);
+  console.warn = patch(originals.warn);
+  console.info = patch(originals.info);
+  console.debug = patch(originals.debug);
 
   try {
     return await fn();
   } finally {
-    console.log = originalLog;
+    console.log = originals.log;
+    console.error = originals.error;
+    console.warn = originals.warn;
+    console.info = originals.info;
+    console.debug = originals.debug;
   }
 }
 
@@ -137,6 +155,11 @@ export function formatEntry(val: any, parentKey?: string): OutputEntry {
 }
 
 function printOutputs(stackName: string, outputs: Record<string, any>) {
+  if (process.env.PULS_JSON === "true") {
+    console.log(JSON.stringify({ type: "outputs", stack: stackName, outputs }));
+    return;
+  }
+
   const title = ` ${stackName} `;
   const keyWidth = Math.max(...Object.keys(outputs).map((k) => k.length));
 
@@ -174,6 +197,11 @@ function printOutputs(stackName: string, outputs: Record<string, any>) {
 }
 
 function printDiff(diff: StackDiff): void {
+  if (process.env.PULS_JSON === "true") {
+    console.log(JSON.stringify({ type: "diff", ...diff }));
+    return;
+  }
+
   console.log(`\n🔍 Diff: ${diff.stackName}`);
 
   const propWidth = Math.max(...diff.resources.map((r) => r.prop.length), 4);
@@ -359,6 +387,7 @@ export abstract class Stack {
       hosts,
       stackName: this.constructor.name,
       secrets,
+      providers: Config.get().providers,
       aws: configOpts.aws,
       gcp: configOpts.gcp,
     };
@@ -551,6 +580,7 @@ export abstract class Stack {
       hosts,
       stackName: this.constructor.name,
       secrets,
+      providers: Config.get().providers,
       aws: configOpts.aws,
       gcp: configOpts.gcp,
     };

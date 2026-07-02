@@ -1,6 +1,5 @@
-import { registerProvider, printSection } from "@puls-dev/core";
+import { registerProvider, printSection, Config, DiscoveredResource, ResourceGroup } from "@puls-dev/core";
 import { listProxmoxVMs } from "./list.js";
-import { Config } from "@puls-dev/core";
 import type { ProxmoxInventory } from "@puls-dev/core";
 
 export const proxmoxPlugin = {
@@ -48,6 +47,88 @@ export const proxmoxPlugin = {
         proxmox: pOpts,
       },
     });
+  },
+  parseInventory: (inv: ProxmoxInventory): DiscoveredResource[] => {
+    const rawResources: DiscoveredResource[] = [];
+    const toPropertyName = (name: string) => name.replace(/[^a-zA-Z0-9]/g, "_").replace(/^([0-9])/, "_$1");
+
+    inv.vms?.forEach((v: any) =>
+      rawResources.push({
+        id: String(v.vmid),
+        name: v.name,
+        type: "Proxmox.VM",
+        provider: "proxmox",
+        tier: "compute",
+        propertyName: toPropertyName(v.name),
+        original: v,
+      })
+    );
+
+    inv.templates?.forEach((t: any) =>
+      rawResources.push({
+        id: String(t.vmid),
+        name: t.name,
+        type: "Proxmox.Template",
+        provider: "proxmox",
+        tier: "compute",
+        propertyName: toPropertyName(t.name),
+        original: t,
+      })
+    );
+
+    return rawResources;
+  },
+  groupResources: (resources: DiscoveredResource[]): ResourceGroup[] => {
+    const groups: ResourceGroup[] = [];
+    const processedIds = new Set<string | number>();
+
+    // Node-based groups
+    const nodes = Array.from(new Set(resources.map(r => r.original?.node).filter(Boolean)));
+    nodes.forEach(node => {
+      const children = resources.filter(r => r.original?.node === node);
+      children.forEach(c => processedIds.add(c.id));
+      groups.push({
+        id: `node:${node}`,
+        name: `🖥️  Node: ${node}`,
+        provider: "proxmox",
+        description: `Proxmox Node ${node} containing ${children.length} resources`,
+        resources: children,
+      });
+    });
+
+    // Default standalone group for rest
+    resources.forEach((r) => {
+      if (processedIds.has(r.id)) return;
+      processedIds.add(r.id);
+      groups.push({
+        id: `standalone:${r.id}`,
+        name: `📦  [${r.type}] ${r.name}`,
+        provider: r.provider,
+        description: `Standalone resource`,
+        resources: [r],
+      });
+    });
+
+    return groups;
+  },
+  getPropertyChain: (res: DiscoveredResource, allResources?: DiscoveredResource[]): string => {
+    let chain = "";
+    if (res.type === "Proxmox.VM") {
+      if (res.original?.cfgCores) {
+        chain += `\n    .cores(${res.original.cfgCores})`;
+      }
+      if (res.original?.cfgMemory) {
+        chain += `\n    .memory(${res.original.cfgMemory})`;
+      }
+      if (res.original?.node) {
+        chain += `\n    .node("${res.original.node}")`;
+      }
+    } else if (res.type === "Proxmox.Template") {
+      if (res.original?.node) {
+        chain += `\n    .node("${res.original.node}")`;
+      }
+    }
+    return chain;
   }
 };
 

@@ -6,7 +6,7 @@ export { Secret, clearResolvedSecrets, resolvedSecrets, extractJsonKey } from ".
 export { Output } from "./core/output.js";
 export { Config, type GlobalConfig } from "./core/config.js";
 export { providerRegistry, registerProvider, printSection } from "./core/provider.js";
-export type { ProviderPlugin } from "./core/provider.js";
+export type { ProviderPlugin, DiscoveredResource, ResourceGroup } from "./core/provider.js";
 
 export * from "./types/inventory.js";
 export type {

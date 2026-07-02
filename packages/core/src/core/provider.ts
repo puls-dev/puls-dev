@@ -1,11 +1,33 @@
 import { Config } from "./config.js";
 
+export interface DiscoveredResource {
+  id: string | number;
+  name: string;
+  type: string;
+  provider: string;
+  tier: "network" | "database" | "compute";
+  propertyName: string;
+  original: any;
+  vpcRef?: DiscoveredResource;
+}
+
+export interface ResourceGroup {
+  id: string;
+  name: string;
+  provider: string;
+  description: string;
+  resources: DiscoveredResource[];
+}
+
 export interface ProviderPlugin {
   name: string;
   isConfigured: (config: any) => boolean;
   list?: (config: any) => Promise<any>;
   render?: (inventory: any) => void;
   configure?: (opts: any) => void;
+  parseInventory?: (inventory: any) => DiscoveredResource[];
+  groupResources?: (resources: DiscoveredResource[]) => ResourceGroup[];
+  getPropertyChain?: (res: DiscoveredResource, allResources?: DiscoveredResource[]) => string;
 }
 
 class ProviderRegistry {

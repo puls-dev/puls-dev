@@ -36,6 +36,7 @@ export interface DoFirewall {
   id: string;
   name: string;
   dropletCount: number;
+  dropletIds?: (string | number)[];
 }
 
 export interface DoLoadBalancer {
@@ -91,6 +92,7 @@ export interface AwsDistribution {
   id: string;
   domain: string;
   aliases: string[];
+  origins?: Array<{ domainName?: string }>;
   status: string;
 }
 
@@ -116,6 +118,7 @@ export interface AwsHostedZone {
   name: string;
   id: string;
   recordCount: number;
+  records?: Array<{ name: string; type: string; value: string; ttl: number }>;
 }
 
 export interface AwsEc2Instance {

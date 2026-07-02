@@ -12,6 +12,12 @@ export abstract class BaseBuilder {
   _deployPromise!: Promise<any>;
   /** @internal */
   async _resolveDiscovery(): Promise<any> {
+    if (!this.discoveryPromise) {
+      throw new Error(
+        `[${this.constructor.name}("${this.name}")] discoveryPromise was never initialized. ` +
+        `The constructor must set this.discoveryPromise to an API read before returning.`
+      );
+    }
     return this.discoveryPromise;
   }
   /** @internal */

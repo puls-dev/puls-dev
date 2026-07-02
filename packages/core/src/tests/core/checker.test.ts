@@ -71,4 +71,47 @@ describe("Checker Unit Tests", () => {
     assert.strictEqual(result.errors[0].provider, "error-checker-prov");
     assert.strictEqual(result.errors[0].message, "API Connection Failed");
   });
+
+  test("outputs structured JSON when PULS_JSON environment variable is active", async () => {
+    process.env.PULS_JSON = "true";
+    let renderCalled = false;
+    let loggedOutput = "";
+
+    const originalLog = console.log;
+    console.log = (msg: any) => {
+      loggedOutput = String(msg);
+    };
+
+    const jsonPlugin: ProviderPlugin = {
+      name: "json-checker-prov",
+      isConfigured: (cfg) => !!cfg?.enabled,
+      list: async () => {
+        return { items: ["a"] };
+      },
+      render: () => {
+        renderCalled = true;
+      },
+    };
+
+    registerProvider(jsonPlugin);
+
+    Config.set({
+      providers: {
+        "json-checker-prov": { enabled: true },
+      },
+    });
+
+    try {
+      const checker = new MockChecker();
+      await checker.check();
+
+      assert.strictEqual(renderCalled, false, "render should not be called when PULS_JSON is true");
+      const parsed = JSON.parse(loggedOutput);
+      assert.strictEqual(parsed.type, "check");
+      assert.deepStrictEqual(parsed["json-checker-prov"], { items: ["a"] });
+    } finally {
+      console.log = originalLog;
+      delete process.env.PULS_JSON;
+    }
+  });
 });

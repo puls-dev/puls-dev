@@ -102,8 +102,8 @@ Popular self-hosting alternative to DigitalOcean - similar API shape, easy to ad
 - [x] **Server** - analogous to DO Droplet; image, type, location, SSH key
 - [x] **Network / VPC** - private networking between servers
 - [x] **Firewall** - inbound/outbound rules
-- [ ] **Load Balancer** - HTTP/HTTPS with health checks
-- [ ] **Volume** - persistent block storage attached to servers
+- [x] **Load Balancer** - HTTP/HTTPS with health checks
+- [x] **Volume** - persistent block storage attached to servers
 
 ### Vultr
 Excellent global footprint with high-performance compute, bare-metal options, and GPU cloud support.

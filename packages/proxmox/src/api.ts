@@ -150,6 +150,6 @@ export function getPMClient(): ProxmoxApiClient {
     cfg.user,
     cfg.tokenName,
     cfg.tokenSecret,
-    cfg.verifySsl ?? true,
+    cfg.verifySsl ?? false,
   );
 }

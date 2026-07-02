@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "dotenv": "^17.4.2",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "vis-network": "^10.1.0"
   },
   "files": [
     "dist"

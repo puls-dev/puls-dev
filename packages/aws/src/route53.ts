@@ -125,12 +125,11 @@ export class Route53Builder extends BaseBuilder {
     if (arguments.length === 1 && typeof nameOrPath === "string" && (nameOrPath.endsWith(".yaml") || nameOrPath.endsWith(".yml") || nameOrPath.endsWith(".json"))) {
       const loaded = loadRecordsFromFile(nameOrPath);
       for (const r of loaded) {
-        this.records.push({
-          name: r.name,
-          type: r.type,
-          value: r.value,
-          ttl: r.ttl ?? 300,
-        });
+        // YAML supports a separate `priority` field for MX; reconstruct "10 host" format AWS expects.
+        const value = (r.type === "MX" && r.priority !== undefined)
+          ? `${r.priority} ${r.value}`
+          : r.value;
+        this.records.push({ name: r.name, type: r.type, value, ttl: r.ttl ?? 300 });
       }
       return this;
     }

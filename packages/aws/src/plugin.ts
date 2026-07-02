@@ -1,11 +1,10 @@
-import { registerProvider, printSection } from "@puls-dev/core";
+import { registerProvider, printSection, Config, DiscoveredResource, ResourceGroup } from "@puls-dev/core";
 import { listAwsResources } from "./list.js";
-import { Config } from "@puls-dev/core";
 import type { AwsInventory } from "@puls-dev/core";
 
 export const awsPlugin = {
   name: "aws",
-  isConfigured: (cfg: any) => !!cfg?.region,
+  isConfigured: (cfg: any) => !!(cfg?.region || process.env.AWS_ACCESS_KEY_ID || process.env.AWS_SECRET_ACCESS_KEY || process.env.AWS_PROFILE),
   list: listAwsResources,
   render: (inv: AwsInventory) => {
     if (inv.ec2Instances.length > 0) {
@@ -86,6 +85,117 @@ export const awsPlugin = {
         aws: pOpts,
       },
     });
+  },
+  parseInventory: (inv: AwsInventory): DiscoveredResource[] => {
+    const rawResources: DiscoveredResource[] = [];
+    const toPropertyName = (name: string) => name.replace(/[^a-zA-Z0-9]/g, "_").replace(/^([0-9])/, "_$1");
+
+    inv.hostedZones?.forEach((z: any) =>
+      rawResources.push({
+        id: z.id,
+        name: z.name,
+        type: "AWS.Route53",
+        provider: "aws",
+        tier: "network",
+        propertyName: toPropertyName(z.name),
+        original: z,
+      })
+    );
+    inv.buckets?.forEach((b: any) =>
+      rawResources.push({
+        id: b.name,
+        name: b.name,
+        type: "AWS.S3",
+        provider: "aws",
+        tier: "database",
+        propertyName: toPropertyName(b.name),
+        original: b,
+      })
+    );
+    inv.rdsInstances?.forEach((i: any) =>
+      rawResources.push({
+        id: i.identifier,
+        name: i.identifier,
+        type: "AWS.RDS",
+        provider: "aws",
+        tier: "database",
+        propertyName: toPropertyName(i.identifier),
+        original: i,
+      })
+    );
+    inv.distributions?.forEach((d: any) =>
+      rawResources.push({
+        id: d.id,
+        name: d.id,
+        type: "AWS.CloudFront",
+        provider: "aws",
+        tier: "compute",
+        propertyName: toPropertyName(d.id),
+        original: d,
+      })
+    );
+    inv.ec2Instances?.forEach((i: any) =>
+      rawResources.push({
+        id: i.id,
+        name: i.name,
+        type: "AWS.EC2",
+        provider: "aws",
+        tier: "compute",
+        propertyName: toPropertyName(i.name),
+        original: i,
+      })
+    );
+    return rawResources;
+  },
+  groupResources: (resources: DiscoveredResource[]): ResourceGroup[] => {
+    const groups: ResourceGroup[] = [];
+    const processedIds = new Set<string | number>();
+
+    const dnsZones = resources.filter((r) => r.type === "AWS.Route53");
+    dnsZones.forEach((zone) => {
+      processedIds.add(zone.id);
+      const recordCount = zone.original?.records?.length ?? 0;
+
+      groups.push({
+        id: `dns:${zone.id}`,
+        name: `🗺️  DNS Zone: ${zone.name}`,
+        provider: zone.provider,
+        description: `Hosted Zone boundary with ${recordCount} records`,
+        resources: [zone],
+      });
+    });
+
+    // Default standalone group for rest
+    resources.forEach((r) => {
+      if (processedIds.has(r.id)) return;
+      processedIds.add(r.id);
+      groups.push({
+        id: `standalone:${r.id}`,
+        name: `📦  [${r.type}] ${r.name}`,
+        provider: r.provider,
+        description: `Standalone resource`,
+        resources: [r],
+      });
+    });
+
+    return groups;
+  },
+  getPropertyChain: (res: DiscoveredResource): string => {
+    let chain = "";
+    if (res.type === "AWS.EC2") {
+      if (res.original?.type) {
+        chain += `\n    .instanceType("${res.original.type}")`;
+      }
+    } else if (res.type === "AWS.Route53") {
+      if (res.original?.records) {
+        res.original.records.forEach((rec: any) => {
+          if (rec.type === "NS" || rec.type === "SOA") return;
+          const escapedVal = String(rec.value).replace(/"/g, '\\"');
+          chain += `\n    .record("${rec.name}", "${rec.type}", "${escapedVal}", ${rec.ttl})`;
+        });
+      }
+    }
+    return chain;
   }
 };
 

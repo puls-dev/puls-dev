@@ -235,14 +235,11 @@ export class HCloudApiClient {
   }
 }
 
-let apiInstance: HCloudApiClient | null = null;
-
 export function getHCloudApi(): HCloudApiClient {
-  if (apiInstance) return apiInstance;
-  const token = process.env.HCLOUD_TOKEN || Config.get().providers.hcloud?.token;
+  const ctx = resourceContextStorage.getStore();
+  const token = process.env.HCLOUD_TOKEN || ctx?.providers?.hcloud?.token || Config.get().providers.hcloud?.token;
   if (!token && !Config.isOfflineMode()) {
     throw new Error("Hetzner Cloud token not configured. Set HCLOUD_TOKEN environment variable.");
   }
-  apiInstance = new HCloudApiClient(token || "mock-hcloud-token");
-  return apiInstance;
+  return new HCloudApiClient(token || "mock-hcloud-token");
 }
