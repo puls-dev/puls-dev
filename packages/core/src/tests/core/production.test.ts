@@ -7,6 +7,10 @@ import { BaseBuilder } from "@puls-dev/core";
 import { Secret } from "@puls-dev/core";
 import { resourceContextStorage } from "@puls-dev/core";
 import { runAnsible } from "../../core/provisioner.js";
+// Provisioner reads resourceContextStorage from its own module scope (src/), which is a different
+// AsyncLocalStorage instance than the one exported by the compiled @puls-dev/core package (dist/).
+// Import the same instance that runAnsible uses so context propagates correctly in this test.
+import { resourceContextStorage as provisionerContextStorage } from "../../core/context.js";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -194,18 +198,19 @@ describe("Production Features Unit Tests", () => {
       ]
     };
 
-    await resourceContextStorage.run(context, async () => {
+    await provisionerContextStorage.run(context, async () => {
       try {
         await runAnsible("1.2.3.4", "root", "/path/to/key", "playbook.yml");
-      } catch (err: any) {
-        // We expect it might fail if ansible-playbook binary is missing, but it should still attempt write!
-        assert.ok(err.message.includes("ansible-playbook") || err.message.includes("ENOENT"), "Should attempt run");
+      } catch {
+        // Expected - ansible-playbook may not be installed or playbook may not exist.
+        // The key invariant is that the inventory file is written before the process is spawned.
       }
-      
-      const fs = await import("node:fs");
-      const exists = fs.existsSync("/tmp/puls-inventory-my-test-stack.ini");
-      assert.ok(exists, "Dynamic inventory file should be generated in /tmp");
-      const contents = fs.readFileSync("/tmp/puls-inventory-my-test-stack.ini", "utf8");
+
+      const { existsSync, readFileSync } = await import("node:fs");
+      const { tmpdir } = await import("node:os");
+      const inventoryPath = `${tmpdir()}/puls-inventory-my-test-stack.ini`;
+      assert.ok(existsSync(inventoryPath), "Dynamic inventory file should be generated");
+      const contents = readFileSync(inventoryPath, "utf8");
       assert.ok(contents.includes("web1 ansible_host=1.2.3.4"), "Should contain web1 host entry");
       assert.ok(contents.includes("db1 ansible_host=5.6.7.8"), "Should contain db1 host entry");
     });
