@@ -10,13 +10,9 @@
       
       
       
-        <link rel="canonical" href="https://pulsdev.io/blog/">
+        <link rel="canonical" href="https://pulsdev.io/spec/">
       
       
-        <link rel="prev" href="../why/">
-      
-      
-        <link rel="next" href="../getting-started/">
       
       
         
@@ -27,7 +23,7 @@
     
     
       
-        <title>Blog - Pulsdev.io</title>
+        <title>Puls 1.0: Core Behavioral Specification - Pulsdev.io</title>
       
     
     
@@ -76,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#blog" class="md-skip">
+        <a href="#puls-10-core-behavioral-specification" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Blog
+              Puls 1.0: Core Behavioral Specification
             
           </span>
         </div>
@@ -285,23 +281,12 @@
       
   
   
-    
-  
   
     
-      
-    
   
   
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../blog/" class="md-nav__link">
         
   
   
@@ -317,7 +302,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1003,6 +987,164 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-idempotency-the-discovery-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Idempotency &amp; The Discovery Lifecycle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Idempotency &amp; The Discovery Lifecycle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#eager-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eager Discovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diffing-state-matching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diffing &amp; State Matching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mutation-dispatch-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mutation Dispatch rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-dag-execution-determinism" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. DAG Execution &amp; Determinism
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. DAG Execution &amp; Determinism">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#execution-lifecycles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution Lifecycles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependency-resolution-via-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependency Resolution via Outputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failure-boundaries-abort-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure Boundaries &amp; Abort Semantics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-preflight-compliance-policy-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Preflight Compliance (Policy Engine)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Preflight Compliance (Policy Engine)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pre-deployment-guarantee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pre-Deployment Guarantee
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-context-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Context Isolation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-secret-security-lifetimes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Secret Security &amp; Lifetimes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1010,282 +1152,104 @@
             
           
           
-  <div class="md-content" data-md-component="content">
-    <div class="md-content__inner">
-      <header class="md-typeset">
-        <h1 id="blog">Blog</h1>
-      </header>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="https://github.com/github.png" alt="Bia">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-07-02 00:00:00+00:00">July 2, 2026</time></li>
-        
-          <li class="md-meta__item">
-            in
-            
-              <a href="category/releases/" class="md-meta__link">Releases</a>, 
-              <a href="category/features/" class="md-meta__link">Features</a></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              3 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="introducing-puls-importer-the-visual-interactive-cloud-migration-engine"><a class="toclink" href="2026/07/02/introducing-puls-importer-the-visual-interactive-cloud-migration-engine/">Introducing Puls Importer: The Visual Interactive Cloud Migration Engine</a></h2>
-<p>Migrating legacy cloud infrastructure into modern Infrastructure-as-Code (IaC) is one of the most tedious, error-prone tasks in cloud engineering. Traditionally, developers had to manually inspect cloud consoles, copy resource IDs one by one, and write hundreds of lines of code from scratch.</p>
-<p>To solve this, we are building <strong>Puls Importer</strong> - a visual, interactive cloud migration wizard that auto-discovers and maps cloud configurations directly into clean, modular TypeScript stacks.</p>
-
-    
-      <nav class="md-post__action">
-        <a href="2026/07/02/introducing-puls-importer-the-visual-interactive-cloud-migration-engine/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="https://github.com/github.png" alt="Bia">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-06-25 00:00:00+00:00">June 25, 2026</time></li>
-        
-          <li class="md-meta__item">
-            in
-            
-              <a href="category/releases/" class="md-meta__link">Releases</a>, 
-              <a href="category/architecture/" class="md-meta__link">Architecture</a></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              2 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="modular-iac-announcing-scoped-workspace-packages"><a class="toclink" href="2026/06/25/modular-iac-announcing-scoped-workspace-packages/">Modular IaC: Announcing Scoped Workspace Packages</a></h2>
-<p>Puls is taking its next major step toward modularity and zero dependency-bloat. We have split the monolithic <code>puls-dev</code> codebase into separate, scoped sub-packages within an npm workspace monorepo layout: <code>@puls-dev/core</code> and individual provider packages like <code>@puls-dev/aws</code>, <code>@puls-dev/gcp</code>, <code>@puls-dev/do</code>, and <code>@puls-dev/firebase</code>.</p>
-
-    
-      <nav class="md-post__action">
-        <a href="2026/06/25/modular-iac-announcing-scoped-workspace-packages/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="https://github.com/github.png" alt="Bia">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-06-24 00:00:00+00:00">June 24, 2026</time></li>
-        
-          <li class="md-meta__item">
-            in
-            
-              <a href="category/releases/" class="md-meta__link">Releases</a>, 
-              <a href="category/architecture/" class="md-meta__link">Architecture</a></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              2 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="decoupling-cloud-providers-introducing-the-puls-plugin-api"><a class="toclink" href="2026/06/24/decoupling-cloud-providers-introducing-the-puls-plugin-api/">Decoupling Cloud Providers: Introducing the Puls Plugin API</a></h2>
-<p>Today, we are excited to release Puls <code>v0.4.9</code>! This release marks a significant architectural milestone for Puls as we decouple the core infrastructure engine from individual cloud provider implementations. We have also added complete support for local E2E testing against <strong>Firebase Local Emulators</strong>.</p>
-
-    
-      <nav class="md-post__action">
-        <a href="2026/06/24/decoupling-cloud-providers-introducing-the-puls-plugin-api/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="https://github.com/github.png" alt="Bia">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-06-24 00:00:00+00:00">June 24, 2026</time></li>
-        
-          <li class="md-meta__item">
-            in
-            
-              <a href="category/architecture/" class="md-meta__link">Architecture</a>, 
-              <a href="category/philosophy/" class="md-meta__link">Philosophy</a></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              3 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="infrastructure-as-code-without-state-files-and-without-the-headaches"><a class="toclink" href="2026/06/24/infrastructure-as-code-without-state-files-and-without-the-headaches/">Infrastructure as Code Without State Files (and Without the Headaches)</a></h2>
-<p>If you've managed cloud resources over the last decade, you've likely had a run-in with a <strong>state file</strong>. </p>
-<p>Whether it's Terraform's <code>.tfstate</code> or Pulumi's stack state, traditional Infrastructure-as-Code (IaC) tools rely on a centralized ledger. This file is their source of truth-a mapping of declared resource names to physical cloud IDs, tracking metadata and dependencies.</p>
-<p>While state files solved a major problem in the early days of cloud automation, they introduced a host of operational challenges that teams spend hundreds of engineering hours managing.</p>
-<p>Puls is built around a different philosophy: <strong>what if we didn't need state files at all?</strong></p>
-
-    
-      <nav class="md-post__action">
-        <a href="2026/06/24/infrastructure-as-code-without-state-files-and-without-the-headaches/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="https://github.com/github.png" alt="Bia">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-06-24 00:00:00+00:00">June 24, 2026</time></li>
-        
-          <li class="md-meta__item">
-            in
-            
-              <a href="category/architecture/" class="md-meta__link">Architecture</a>, 
-              <a href="category/security/" class="md-meta__link">Security</a></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              3 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="dynamic-secret-injection-zero-hardcoding-credentials-in-puls"><a class="toclink" href="2026/06/24/dynamic-secret-injection-zero-hardcoding-credentials-in-puls/">Dynamic Secret Injection: Zero-Hardcoding Credentials in Puls</a></h2>
-<p>Hardcoding credentials in your version control system is one of the most common ways security leaks happen. Whether it's an API token, a database root password, or a service account key, committing credentials to Git is a recipe for disaster.</p>
-<p>Yet, managing these secrets on team projects is often painful. Developers end up sharing <code>.env</code> files via Slack, updating private vaults manually, or writing complex bootstrap scripts.</p>
-<p>Puls solves this with <strong>Secrets at Deploy Time</strong>: a lazy-resolved, type-safe secret engine that fetches passwords directly from secure cloud vaults when deploying, with native injection into your VM environments and provisioning scripts.</p>
-
-    
-      <nav class="md-post__action">
-        <a href="2026/06/24/dynamic-secret-injection-zero-hardcoding-credentials-in-puls/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-      
-        
-          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
 
 
-
-<nav class="md-pagination">
   
-</nav>
-        
-      
-    </div>
-  </div>
+  
 
+
+<h1 id="puls-10-core-behavioral-specification">Puls 1.0: Core Behavioral Specification</h1>
+<p>This document defines the formal behavioral contract and execution guarantees of the Puls IaC engine. These guarantees form the stable runtime specification of the system. All provider plugins and core engine refactors must adhere strictly to these rules.</p>
+<hr />
+<h2 id="1-idempotency-the-discovery-lifecycle">1. Idempotency &amp; The Discovery Lifecycle</h2>
+<p>Puls is stateless: it does not use local or remote state files. The live cloud environment is the single source of truth.</p>
+<h3 id="eager-discovery">Eager Discovery</h3>
+<ul>
+<li><strong>The Guarantee</strong>: Declaring a resource immediately initiates discovery.</li>
+<li><strong>Mechanism</strong>: The constructor of any <code>BaseBuilder</code> subclass must dispatch an asynchronous API read in the background, stored inside <code>discoveryPromise</code>. </li>
+<li><strong>Rule</strong>: Eager discovery must not perform any API writes or mutations. It is strictly read-only.</li>
+</ul>
+<h3 id="diffing-state-matching">Diffing &amp; State Matching</h3>
+<p>Before any mutation is run:
+1. <code>discoveryPromise</code> is awaited to obtain the live cloud resource state.
+2. If no resource is found, the status is <code>missing</code>.
+3. If a resource is found, the builder runs <code>getDiff()</code>.
+   - If <code>getDiff()</code> returns an empty array, the status is <code>in-sync</code>.
+   - If it returns field changes, the status is <code>drift</code>.</p>
+<h3 id="mutation-dispatch-rules">Mutation Dispatch rules</h3>
+<ul>
+<li><strong><code>in-sync</code></strong>: <code>deploy()</code> is a no-op. No API write call is dispatched.</li>
+<li><strong><code>missing</code></strong>: <code>deploy()</code> runs creation logic.</li>
+<li><strong><code>drift</code></strong>: <code>deploy()</code> runs update or recreate logic.</li>
+<li><strong><code>adopted</code></strong>: If <code>.adoptId()</code> is configured, creation is skipped.</li>
+</ul>
+<hr />
+<h2 id="2-dag-execution-determinism">2. DAG Execution &amp; Determinism</h2>
+<p>Puls stacks represent directed acyclic graphs (DAGs) of resource builders.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>[Resource A] ──(Output Resolution)──&gt; [Resource B]
+</code></pre></div>
+<h3 id="execution-lifecycles">Execution Lifecycles</h3>
+<ul>
+<li><strong>Sequential Mode</strong>: Stacks deploy resources sequentially in the exact order they are declared in the class definition.</li>
+<li><strong>Parallel Mode</strong>: Stacks deploy independent branches concurrently. A node begins execution only when all nodes it depends on (via explicit <code>dependsOn()</code> or implicit Output interpolation) have resolved their <code>_deployPromise</code>.</li>
+</ul>
+<h3 id="dependency-resolution-via-outputs">Dependency Resolution via Outputs</h3>
+<ul>
+<li><strong>Implicit Dependency</strong>: If property <code>B</code> references <code>A.out.someField</code>, an implicit dependency is established. <code>B</code> is blocked from deploying until <code>A.out.someField</code> resolves.</li>
+<li><strong>Eager Resolution</strong>: Outputs can be adopted or resolved ahead of deployment (e.g. using <code>adoptOutput()</code>) to unblock parallel execution paths.</li>
+</ul>
+<h3 id="failure-boundaries-abort-semantics">Failure Boundaries &amp; Abort Semantics</h3>
+<ul>
+<li>If any node in the graph throws an error during <code>deploy()</code>:</li>
+<li>The global stack deployment is aborted.</li>
+<li>In parallel mode, any pending nodes that have not yet started are cancelled immediately (fail-fast).</li>
+<li>Already completed deployments are <strong>not</strong> automatically rolled back by the engine; they remain intact on the cloud.</li>
+</ul>
+<hr />
+<h2 id="3-preflight-compliance-policy-engine">3. Preflight Compliance (Policy Engine)</h2>
+<p>Compliance checks must run before the stack attempts to execute any resource deployment actions.</p>
+<h3 id="pre-deployment-guarantee">Pre-Deployment Guarantee</h3>
+<ul>
+<li><strong>The Contract</strong>: Stacks compile the list of declared builders, evaluate them against configured <code>Policy</code> rules, and run validation <strong>before</strong> calling <code>deploy()</code> on any resource.</li>
+<li><strong>Behavior</strong>: If validation fails, Puls prints the compliance report and exits immediately. Zero cloud writes are allowed.</li>
+</ul>
+<hr />
+<h2 id="4-context-isolation">4. Context Isolation</h2>
+<p>Puls supports running multiple deployments concurrently in the same Node process (e.g. multi-region or multi-tenant setups).</p>
+<ul>
+<li><strong>The Guarantee</strong>: Configuration options, secrets, and provider credentials do not bleed across stack executions.</li>
+<li><strong>Mechanism</strong>: All provider-specific options are bound to the execution thread using <code>resourceContextStorage</code> (leveraging <code>AsyncLocalStorage</code>).</li>
+<li><strong>Rule</strong>: Global state modules must never hold configuration credentials. They must query the active context.</li>
+</ul>
+<hr />
+<h2 id="5-secret-security-lifetimes">5. Secret Security &amp; Lifetimes</h2>
+<p>Secrets are sensitive strings resolved dynamically during the stack run.</p>
+<ul>
+<li><strong>Lazy Evaluation</strong>: Secrets are never resolved during stack compilation; they are fetched asynchronously only when stack execution is triggered.</li>
+<li><strong>Redaction Invariant</strong>: Any value resolved from a <code>Secret</code> is automatically appended to the active run's redaction index. The console output interceptor must scrub these values, replacing them with <code>********</code>.</li>
+<li><strong>Instance Lifetime</strong>: A <code>Secret</code> promise resolves once and holds the value. It remains in memory for the duration of the Node process run and is cleared when the process exits.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
           
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>

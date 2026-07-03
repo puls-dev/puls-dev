@@ -10,6 +10,7 @@ export async function listProxmoxVMs(): Promise<ProxmoxInventory> {
       vmid:    r.vmid,
       node:    r.node,
       status:  r.status,
+      maxcpu:  r.maxcpu  ?? 0,
       maxmem:  r.maxmem  ?? 0,
       maxdisk: r.maxdisk ?? 0,
     }));

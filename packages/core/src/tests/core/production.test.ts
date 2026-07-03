@@ -6,7 +6,7 @@ import { Output } from "@puls-dev/core";
 import { BaseBuilder } from "@puls-dev/core";
 import { Secret } from "@puls-dev/core";
 import { resourceContextStorage } from "@puls-dev/core";
-import { runAnsible } from "@puls-dev/core";
+import { runAnsible } from "../../core/provisioner.js";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -212,7 +212,7 @@ describe("Production Features Unit Tests", () => {
   });
 
   test("formatEntry formats objects, arrays, and dictionaries cleanly", async () => {
-    const { formatEntry } = await import("@puls-dev/core");
+    const { formatEntry } = await import("../../core/stack.js");
 
     // 1. Simple array of values
     const arrayResult = formatEntry(["val1", "val2"]);

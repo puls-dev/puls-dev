@@ -5,6 +5,7 @@ export interface ProxmoxVm {
   vmid: number;
   node: string;
   status: string;
+  maxcpu: number;
   maxmem: number; // bytes
   maxdisk: number; // bytes
 }

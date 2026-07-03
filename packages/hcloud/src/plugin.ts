@@ -117,6 +117,28 @@ export const hcloudPlugin = {
         original: s,
       })
     );
+    inv.firewalls?.forEach((f: any) =>
+      rawResources.push({
+        id: f.id,
+        name: f.name,
+        type: "HCloud.Firewall",
+        provider: "hcloud",
+        tier: "network",
+        propertyName: toPropertyName(f.name),
+        original: f,
+      })
+    );
+    inv.loadBalancers?.forEach((lb: any) =>
+      rawResources.push({
+        id: lb.id,
+        name: lb.name,
+        type: "HCloud.LoadBalancer",
+        provider: "hcloud",
+        tier: "network",
+        propertyName: toPropertyName(lb.name),
+        original: lb,
+      })
+    );
     return rawResources;
   },
   groupResources: (resources: DiscoveredResource[]): ResourceGroup[] => {
@@ -153,12 +175,11 @@ export const hcloudPlugin = {
   getPropertyChain: (res: DiscoveredResource): string => {
     let chain = "";
     if (res.type === "HCloud.Server") {
-      if (res.original?.serverType) {
-        chain += `\n    .serverType("${res.original.serverType}")`;
-      }
-      if (res.original?.location) {
-        chain += `\n    .location("${res.original.location}")`;
-      }
+      if (res.original?.serverType) chain += `\n    .serverType("${res.original.serverType}")`;
+      if (res.original?.location)   chain += `\n    .location("${res.original.location}")`;
+    } else if (res.type === "HCloud.LoadBalancer") {
+      if (res.original?.location) chain += `\n    .location("${res.original.location}")`;
+      if (res.original?.type)     chain += `\n    .type("${res.original.type}")`;
     }
     return chain;
   }

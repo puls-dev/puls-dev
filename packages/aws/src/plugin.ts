@@ -145,6 +145,17 @@ export const awsPlugin = {
         original: i,
       })
     );
+    inv.lambdas?.forEach((f: any) =>
+      rawResources.push({
+        id: f.name,
+        name: f.name,
+        type: "AWS.Lambda",
+        provider: "aws",
+        tier: "compute",
+        propertyName: toPropertyName(f.name),
+        original: f,
+      })
+    );
     return rawResources;
   },
   groupResources: (resources: DiscoveredResource[]): ResourceGroup[] => {
@@ -186,6 +197,9 @@ export const awsPlugin = {
       if (res.original?.type) {
         chain += `\n    .instanceType("${res.original.type}")`;
       }
+    } else if (res.type === "AWS.Lambda") {
+      if (res.original?.runtime)    chain += `\n    .runtime("${res.original.runtime}")`;
+      if (res.original?.memorySizeMb) chain += `\n    .memorySize(${res.original.memorySizeMb})`;
     } else if (res.type === "AWS.Route53") {
       if (res.original?.records) {
         res.original.records.forEach((rec: any) => {

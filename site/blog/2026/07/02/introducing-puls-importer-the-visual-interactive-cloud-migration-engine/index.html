@@ -10,13 +10,11 @@
       
       
       
-        <link rel="canonical" href="https://pulsdev.io/blog/2026/06/25/modular-iac-announcing-scoped-workspace-packages/">
+        <link rel="canonical" href="https://pulsdev.io/blog/2026/07/02/introducing-puls-importer-the-visual-interactive-cloud-migration-engine/">
       
       
-        <link rel="prev" href="../../24/decoupling-cloud-providers-introducing-the-puls-plugin-api/">
+        <link rel="prev" href="../../../06/25/modular-iac-announcing-scoped-workspace-packages/">
       
-      
-        <link rel="next" href="../../../07/02/introducing-puls-importer-the-visual-interactive-cloud-migration-engine/">
       
       
         
@@ -27,7 +25,7 @@
     
     
       
-        <title>Modular IaC: Announcing Scoped Workspace Packages - Pulsdev.io</title>
+        <title>Introducing Puls Importer: The Visual Interactive Cloud Migration Engine - Pulsdev.io</title>
       
     
     
@@ -76,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#modular-iac-announcing-scoped-workspace-packages" class="md-skip">
+        <a href="#introducing-puls-importer-the-visual-interactive-cloud-migration-engine" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Modular IaC: Announcing Scoped Workspace Packages
+              Introducing Puls Importer: The Visual Interactive Cloud Migration Engine
             
           </span>
         </div>
@@ -1004,10 +1002,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-new-monorepo-topology" class="md-nav__link">
+  <a href="#the-vision-why-we-built-puls-importer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The New Monorepo Topology
+        The Vision: Why We Built Puls Importer
       
     </span>
   </a>
@@ -1015,21 +1013,71 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-use-scoped-packages" class="md-nav__link">
+  <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How to Use Scoped Packages
+        How It Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ephemeral-local-server-scan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Ephemeral Local Server Scan
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#under-the-hood-dynamic-resolution" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#2-high-density-interactive-tree-view" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Under the Hood: Dynamic Resolution
+        2. High-Density Interactive Tree View
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-modular-stack-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Modular Stack Generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-cross-tier-code-linking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Cross-Tier Code Linking
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#launching-in-v100" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Launching in v1.0.0
       
     </span>
   </a>
@@ -1092,7 +1140,7 @@
                     <li class="md-nav__item">
                       <div class="md-nav__link">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 19H5V8h14m-3-7v2H8V1H6v2H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-1V1m-1 11h-5v5h5z"/></svg>
-                        <time datetime="2026-06-25 00:00:00+00:00" class="md-ellipsis">June 25, 2026</time>
+                        <time datetime="2026-07-02 00:00:00+00:00" class="md-ellipsis">July 2, 2026</time>
                       </div>
                     </li>
                     
@@ -1104,7 +1152,7 @@
                             in
                             
                               <a href="../../../../category/releases/">Releases</a>, 
-                              <a href="../../../../category/architecture/">Architecture</a></span>
+                              <a href="../../../../category/features/">Features</a></span>
                         </div>
                       </li>
                     
@@ -1115,7 +1163,7 @@
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 20a8 8 0 0 0 8-8 8 8 0 0 0-8-8 8 8 0 0 0-8 8 8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10 10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67-.75 1.23L11 13V7z"/></svg>
                           <span class="md-ellipsis">
                             
-                              2 min read
+                              3 min read
                             
                           </span>
                         </div>
@@ -1142,57 +1190,77 @@
   
 
 
-<h1 id="modular-iac-announcing-scoped-workspace-packages">Modular IaC: Announcing Scoped Workspace Packages</h1>
-<p>Puls is taking its next major step toward modularity and zero dependency-bloat. We have split the monolithic <code>puls-dev</code> codebase into separate, scoped sub-packages within an npm workspace monorepo layout: <code>@puls-dev/core</code> and individual provider packages like <code>@puls-dev/aws</code>, <code>@puls-dev/gcp</code>, <code>@puls-dev/do</code>, and <code>@puls-dev/firebase</code>.</p>
+<h1 id="introducing-puls-importer-the-visual-interactive-cloud-migration-engine">Introducing Puls Importer: The Visual Interactive Cloud Migration Engine</h1>
+<p>Migrating legacy cloud infrastructure into modern Infrastructure-as-Code (IaC) is one of the most tedious, error-prone tasks in cloud engineering. Traditionally, developers had to manually inspect cloud consoles, copy resource IDs one by one, and write hundreds of lines of code from scratch.</p>
+<p>To solve this, we are building <strong>Puls Importer</strong> - a visual, interactive cloud migration wizard that auto-discovers and maps cloud configurations directly into clean, modular TypeScript stacks.</p>
 <!-- more -->
 
-<p>Previously, installing <code>puls-dev</code> meant downloading the entire cloud landscape: AWS SDKs, Google Auth libraries, Azure Vault credentials, and Undici clients. Whether you only wanted to manage a single DigitalOcean Droplet or deploy a Firebase web application, the dependency footprint was unnecessarily large.</p>
-<p>Starting today, we have partitioned the project to give you complete control over your installation footprint.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Status</strong>: Currently in active development. Scheduled for official release in version <strong><code>1.0.0</code></strong>.</p>
+</div>
 <hr />
-<h2 id="the-new-monorepo-topology">The New Monorepo Topology</h2>
-<p>Puls is now organized as a set of scoped packages under the <code>@puls-dev</code> namespace:</p>
-<ul>
-<li><strong><code>@puls-dev/core</code></strong>: The central engine containing CLI commands, stack decorators (<code>@Deploy</code>, <code>@Destroy</code>), dependency resolution, cost estimation, and the resource execution lifecycle.</li>
-<li><strong>Provider Packages</strong>: Separate modules containing resource declarations, API configurations, and discovery lists for each provider:</li>
-<li><code>@puls-dev/aws</code></li>
-<li><code>@puls-dev/do</code></li>
-<li><code>@puls-dev/gcp</code></li>
-<li><code>@puls-dev/firebase</code></li>
-<li><code>@puls-dev/proxmox</code></li>
-<li><code>@puls-dev/azure</code></li>
-<li><code>@puls-dev/cloudflare</code></li>
-</ul>
-<hr />
-<h2 id="how-to-use-scoped-packages">How to Use Scoped Packages</h2>
-<p>In your project's <code>package.json</code>, you now declare only the core engine and the specific providers you need:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">&quot;@puls-dev/core&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^0.5.0&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nt">&quot;@puls-dev/firebase&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^0.5.0&quot;</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">}</span>
-</code></pre></div>
-<p>In your stack code, you import the stack decorators from <code>@puls-dev/core</code> and the resource builders from their respective provider modules:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Firebase</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@puls-dev/firebase&quot;</span><span class="p">;</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Deploy</span><span class="p">,</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@puls-dev/core&quot;</span><span class="p">;</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kd">@Deploy</span><span class="p">()</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="kd">class</span><span class="w"> </span><span class="nx">WebStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nx">site</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Firebase</span><span class="p">.</span><span class="nx">Hosting</span><span class="p">(</span><span class="s2">&quot;my-site&quot;</span><span class="p">)</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="p">.</span><span class="nx">source</span><span class="p">(</span><span class="s2">&quot;./dist&quot;</span><span class="p">)</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="p">.</span><span class="nx">domain</span><span class="p">(</span><span class="s2">&quot;example.com&quot;</span><span class="p">);</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="p">}</span>
-</code></pre></div>
-<hr />
-<h2 id="under-the-hood-dynamic-resolution">Under the Hood: Dynamic Resolution</h2>
-<p>Splitting the packages required ensuring that <code>@puls-dev/core</code> remained completely decoupled from the provider SDKs while still allowing standard discovery.</p>
-<p>To achieve this:</p>
+<h2 id="the-vision-why-we-built-puls-importer">The Vision: Why We Built Puls Importer</h2>
+<p>The goal of Puls is to make cloud infrastructure declarative, type-safe, and incredibly easy to manage. However, most companies aren't starting from scratch-they have hundreds of active virtual machines, load balancers, DNS records, and firewalls already running.</p>
+<p>We built the Puls Importer to:</p>
 <ol>
-<li>Core features dynamic plugin discovery. When running <code>puls plan</code>, core attempts to dynamically import registered providers. If a provider is not installed, it fails gracefully without stopping other operations.</li>
-<li>Credentials and low-level REST wrappers are cleanly encapsulated inside their respective provider directories.</li>
-<li>Common playbooks/metadata utilities have been promoted to core, eliminating any dependency loop between providers.</li>
+<li><strong>Reduce Onboarding Friction</strong>: Auto-discover existing resources across AWS, DigitalOcean, and Proxmox in seconds.</li>
+<li><strong>Expose Dependency Relationships</strong>: Visualize complex hierarchies (e.g., firewall rules connected to VMs, or CloudFront distributions mapped to S3 buckets and Route53 records) before adopting them.</li>
+<li><strong>Generate Production-Ready Code</strong>: Produce clean, nested stack structures instead of dumping all resources into a single giant file.</li>
 </ol>
-<p>This layout paves the way for developers to publish third-party, custom provider packages (e.g. <code>@my-org/puls-kubernetes</code>) that integrate seamlessly with the <code>@puls-dev/core</code> stack runner.</p>
+<hr />
+<h2 id="how-it-works">How It Works</h2>
+<h3 id="1-ephemeral-local-server-scan">1. Ephemeral Local Server Scan</h3>
+<p>Running the command:</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>puls<span class="w"> </span>import
+</code></pre></div>
+instantly starts a local secured HTTP server, loads your credentials from <code>.env</code> or config files, and automatically opens your web browser to the interactive dashboard.</p>
+<h3 id="2-high-density-interactive-tree-view">2. High-Density Interactive Tree View</h3>
+<p>Puls scans your cloud provider and displays resources in a collapsible, hierarchical tree. Rather than showing a cluttered, floating nodes canvas, Puls Importer uses a structured connection tree designed specifically to fit standard laptop screens:</p>
+<p><img alt="Puls Importer Web Interface" src="../../../../assets/design.png" /></p>
+<ul>
+<li><strong>Cascading Selections</strong>: Selecting any resource (such as a VM) automatically cascades and adopts all of its connected dependencies (such as its network firewall rules) underneath it.</li>
+<li><strong>Component Search Filter</strong>: Instantly filter hundreds of cloud resources by name, type, or provider.</li>
+<li><strong>Property Inspector</strong>: Inspect raw metadata, resource IDs, and custom name mappings in the sidebar.</li>
+</ul>
+<h3 id="3-modular-stack-generation">3. Modular Stack Generation</h3>
+<p>Once you click <strong>Adopt</strong>, Puls partitions the resources by their transitive dependency tree roots and writes them to a clean folder structure inside your codebase. </p>
+<p>For example, adopting a compute group like <code>puls-web</code> generates a directory layout in your workspace under <code>infra/</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>infra/
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>└── puls-web/
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    ├── compute-stack.ts      # Droplets, EC2s, and VM instances
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    └── network/
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>        └── network-stack.ts  # Firewalls, VPCs, and Subnets
+</code></pre></div>
+<h3 id="4-cross-tier-code-linking">4. Cross-Tier Code Linking</h3>
+<p>The generated TypeScript builders are fully linked across stack files. For example, your database or compute files will automatically reference and import sibling network configurations:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// infra/puls-web/compute-stack.ts</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@puls-dev/core&quot;</span><span class="p">;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">NetworkStack</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;./network/network-stack.js&quot;</span><span class="p">;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">ComputeStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="nx">network</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Stack</span><span class="p">.</span><span class="kr">from</span><span class="p">(</span><span class="nx">NetworkStack</span><span class="p">);</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="nx">puls_web01</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">DO</span><span class="p">.</span><span class="nx">Droplet</span><span class="p">(</span><span class="s2">&quot;puls-web01&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="p">.</span><span class="nx">adoptId</span><span class="p">(</span><span class="s2">&quot;581807348&quot;</span><span class="p">);</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">}</span>
+</code></pre></div>
+<p>While the network stack automatically attaches configurations to their targets:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">// infra/puls-web/network/network-stack.ts</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Stack</span><span class="p">,</span><span class="w"> </span><span class="nx">Deploy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@puls-dev/core&quot;</span><span class="p">;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">dryRun</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">})</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">NetworkStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="nx">allow_from_home</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">DO</span><span class="p">.</span><span class="nx">Firewall</span><span class="p">(</span><span class="s2">&quot;allow-from-home&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="p">.</span><span class="nx">adoptId</span><span class="p">(</span><span class="s2">&quot;2d0eaad0-5ea6-44c5-9e28-b3f95a3452f8&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="p">.</span><span class="nx">attachTo</span><span class="p">(</span><span class="s2">&quot;puls-web01&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// &lt;-- Automatically linked across files!</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="launching-in-v100">Launching in v1.0.0</h2>
+<p>Puls Importer is currently undergoing testing and integration with more cloud providers (including GCP and Azure). It will launch officially as a core feature in <strong>version <code>1.0.0</code></strong>.</p>
+<p>Stay tuned for more updates, and happy migrating!</p>
 
 
 

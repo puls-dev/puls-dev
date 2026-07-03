@@ -154,6 +154,28 @@ export const doPlugin = {
         original: f,
       })
     );
+    inv.loadBalancers?.forEach((lb: any) =>
+      rawResources.push({
+        id: lb.id,
+        name: lb.name,
+        type: "DO.LoadBalancer",
+        provider: "do",
+        tier: "network",
+        propertyName: toPropertyName(lb.name),
+        original: lb,
+      })
+    );
+    inv.domains?.forEach((d: any) =>
+      rawResources.push({
+        id: d.name,
+        name: d.name,
+        type: "DO.Domain",
+        provider: "do",
+        tier: "network",
+        propertyName: toPropertyName(d.name),
+        original: d,
+      })
+    );
     return rawResources;
   },
   groupResources: (resources: DiscoveredResource[]): ResourceGroup[] => {
@@ -199,12 +221,11 @@ export const doPlugin = {
   getPropertyChain: (res: DiscoveredResource, allResources?: DiscoveredResource[]): string => {
     let chain = "";
     if (res.type === "DO.Droplet") {
-      if (res.original?.size) {
-        chain += `\n    .size("${res.original.size}")`;
-      }
-      if (res.original?.region) {
-        chain += `\n    .region("${res.original.region}")`;
-      }
+      if (res.original?.size)   chain += `\n    .size("${res.original.size}")`;
+      if (res.original?.region) chain += `\n    .region("${res.original.region}")`;
+    }
+    if (res.type === "DO.LoadBalancer") {
+      if (res.original?.region) chain += `\n    .region("${res.original.region}")`;
     }
     if (res.type === "DO.Firewall") {
       const dropletIds = res.original?.dropletIds || [];

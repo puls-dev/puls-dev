@@ -8,7 +8,15 @@ function resolveFirebaseConfig() {
   const isOffline = Config.isOfflineMode() || Config.isGlobalDryRun();
   const hasEmulator = !!(process.env.FIREBASE_AUTH_EMULATOR_HOST || process.env.FIRESTORE_EMULATOR_HOST);
   const cfg = Config.get().providers.firebase;
-  if (cfg?.serviceAccountPath) return cfg;
+  if (cfg?.serviceAccountPath) {
+    if (!cfg.projectId && fs.existsSync(cfg.serviceAccountPath)) {
+      try {
+        const sa = JSON.parse(fs.readFileSync(cfg.serviceAccountPath, 'utf8'));
+        cfg.projectId = sa.project_id;
+      } catch {}
+    }
+    return cfg;
+  }
   if (cfg?.projectId) {
     return { projectId: cfg.projectId, serviceAccountPath: "/mock/sa.json" };
   }

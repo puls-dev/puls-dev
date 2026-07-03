@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import net from "node:net";
-import { homedir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 
 import { writeFileSync, existsSync, readFileSync } from "node:fs";
 import { resourceContextStorage } from "./context.js";
@@ -54,7 +54,7 @@ export function runAnsible(
     const args = [playbook];
 
     if (hosts.length > 0) {
-      const inventoryPath = `/tmp/puls-inventory-${stackName}.ini`;
+      const inventoryPath = `${tmpdir()}/puls-inventory-${stackName}.ini`;
       let inventoryContent = "[all]\n";
       for (const h of hosts) {
         const hKeyPath = resolveSshKeyPath(h.sshKey);

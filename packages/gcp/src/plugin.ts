@@ -1,6 +1,5 @@
-import { registerProvider, printSection } from "@puls-dev/core";
+import { registerProvider, printSection, Config, DiscoveredResource, ResourceGroup } from "@puls-dev/core";
 import { listGcpResources } from "./list.js";
-import { Config } from "@puls-dev/core";
 import type { GcpInventory } from "@puls-dev/core";
 
 export const gcpPlugin = {
@@ -79,12 +78,73 @@ export const gcpPlugin = {
     }
   },
   configure: (pOpts: any) => {
-    Config.set({
-      providers: {
-        gcp: pOpts,
-      },
-    });
-  }
+    Config.set({ providers: { gcp: pOpts } });
+  },
+  parseInventory: (inv: GcpInventory): DiscoveredResource[] => {
+    const toPropertyName = (name: string) => name.replace(/[^a-zA-Z0-9]/g, "_").replace(/^([0-9])/, "_$1");
+    const resources: DiscoveredResource[] = [];
+
+    inv.vms.forEach((v) => resources.push({
+      id: v.name, name: v.name, type: "GCP.VM",
+      provider: "gcp", tier: "compute",
+      propertyName: toPropertyName(v.name), original: v,
+    }));
+
+    inv.rdsInstances.forEach((i) => resources.push({
+      id: i.name, name: i.name, type: "GCP.CloudSQL",
+      provider: "gcp", tier: "database",
+      propertyName: toPropertyName(i.name), original: i,
+    }));
+
+    inv.distributions.forEach((s) => resources.push({
+      id: s.name, name: s.name, type: "GCP.CloudRun",
+      provider: "gcp", tier: "compute",
+      propertyName: toPropertyName(s.name), original: s,
+    }));
+
+    inv.hostedZones.forEach((z) => resources.push({
+      id: z.name, name: z.dnsName.replace(/\.$/, "") || z.name, type: "GCP.CloudDNS",
+      provider: "gcp", tier: "network",
+      propertyName: toPropertyName(z.name), original: z,
+    }));
+
+    inv.pubSubTopics.forEach((t) => resources.push({
+      id: t.name, name: t.name, type: "GCP.PubSub",
+      provider: "gcp", tier: "compute",
+      propertyName: toPropertyName(t.name), original: t,
+    }));
+
+    inv.secrets.forEach((s) => resources.push({
+      id: s.name, name: s.name, type: "GCP.Secret",
+      provider: "gcp", tier: "compute",
+      propertyName: toPropertyName(s.name), original: s,
+    }));
+
+    return resources;
+  },
+  getPropertyChain: (res: DiscoveredResource): string => {
+    let chain = "";
+    if (res.type === "GCP.VM") {
+      if (res.original?.zone)        chain += `\n    .zone("${res.original.zone}")`;
+      if (res.original?.machineType) chain += `\n    .machineType("${res.original.machineType}")`;
+    } else if (res.type === "GCP.CloudRun") {
+      if (res.original?.region) chain += `\n    .region("${res.original.region}")`;
+    } else if (res.type === "GCP.CloudSQL") {
+      if (res.original?.engine) {
+        const raw: string = res.original.engine as string;
+        const lower = raw.toLowerCase();
+        if (lower.startsWith("postgres")) {
+          const ver = raw.match(/(\d+)/)?.[1] ?? "16";
+          chain += `\n    .engine({ engine: "postgres", version: "${ver}" })`;
+        } else if (lower.startsWith("mysql")) {
+          const ver = raw.match(/(\d+[._]\d*)/)?.[1]?.replace(/_/g, ".") ?? "8.0";
+          chain += `\n    .engine({ engine: "mysql", version: "${ver}" })`;
+        }
+      }
+      if (res.original?.tier) chain += `\n    .size("${res.original.tier}")`;
+    }
+    return chain;
+  },
 };
 
 registerProvider(gcpPlugin);

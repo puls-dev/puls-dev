@@ -1,4 +1,4 @@
-export * from "./core/stack.js";
+export { Stack } from "./core/stack.js";
 export * from "./core/decorators.js";
 export * from "./core/checker.js";
 export * from "./core/resource.js";
@@ -19,6 +19,6 @@ export { SLACK, DISCORD } from "./core/hooks.js";
 export * from "./core/policy.js";
 export * from "./core/hash.js";
 export { withRetry } from "./core/retry.js";
-export { checkPort, runProvisioner, writeEnvPulsFile, runAnsible } from "./core/provisioner.js";
+export { checkPort, runProvisioner, writeEnvPulsFile } from "./core/provisioner.js";
 export { loadRecordsFromFile, parseYaml } from "./core/parser.js";
 export { resourceContextStorage } from "./core/context.js";

@@ -1,17 +1,39 @@
 {
   "name": "@puls-dev/do",
-  "version": "0.5.3",
+  "version": "1.0.0",
   "description": "DigitalOcean Provider for Puls IaC",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/puls-dev/puls-dev.git",
+    "directory": "packages/do"
+  },
+  "keywords": [
+    "iac",
+    "infrastructure-as-code",
+    "puls",
+    "digitalocean",
+    "cloud",
+    "deploy"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "find src -name '*.test.ts' | xargs tsx --test --test-concurrency=1"
   },
+  "peerDependencies": {
+    "@puls-dev/core": "^1.0.0"
+  },
   "dependencies": {
-    "@puls-dev/core": "*",
     "undici": "^8.3.0"
   },
   "files": [

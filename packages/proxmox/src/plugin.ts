@@ -114,11 +114,11 @@ export const proxmoxPlugin = {
   getPropertyChain: (res: DiscoveredResource, allResources?: DiscoveredResource[]): string => {
     let chain = "";
     if (res.type === "Proxmox.VM") {
-      if (res.original?.cfgCores) {
-        chain += `\n    .cores(${res.original.cfgCores})`;
+      if (res.original?.maxcpu) {
+        chain += `\n    .cores(${res.original.maxcpu})`;
       }
-      if (res.original?.cfgMemory) {
-        chain += `\n    .memory(${res.original.cfgMemory})`;
+      if (res.original?.maxmem) {
+        chain += `\n    .memory(${Math.round(res.original.maxmem / 1024 / 1024)})`;
       }
       if (res.original?.node) {
         chain += `\n    .node("${res.original.node}")`;

@@ -70,7 +70,6 @@ type OutputEntry = {
   sub?: string[];
 };
 
-/** @internal */
 export function formatEntry(val: any, parentKey?: string): OutputEntry {
   const isSensitiveKey = (k: string) => /password|secret|token|key/i.test(k);
 

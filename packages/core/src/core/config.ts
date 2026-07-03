@@ -38,6 +38,12 @@ export interface GlobalConfig {
       region?: string;
       sshUser?: string;
     };
+    hcloud?: {
+      token: string;
+      region?: string;
+      defaultLocation?: string;
+      sshUser?: string;
+    };
     cloudflare?: {
       token: string;
       accountId?: string;
