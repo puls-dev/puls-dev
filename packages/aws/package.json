@@ -54,6 +54,10 @@
     "@aws-sdk/credential-providers": "^3.1071.0"
   },
   "files": [
-    "dist"
-  ]
+    "dist",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

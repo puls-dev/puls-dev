@@ -37,6 +37,10 @@
     "undici": "^8.3.0"
   },
   "files": [
-    "dist"
-  ]
+    "dist",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

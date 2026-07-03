@@ -42,6 +42,10 @@
     "vis-network": "^10.1.0"
   },
   "files": [
-    "dist"
-  ]
+    "dist",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
