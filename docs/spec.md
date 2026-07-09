@@ -1,6 +1,6 @@
 # Puls 1.0: Core Behavioral Specification
 
-This document defines the formal behavioral contract and execution guarantees of the Puls IaC engine. These guarantees form the stable runtime specification of the system. All provider plugins and core engine refactors must adhere strictly to these rules.
+This document defines the formal behavioral contract and execution guarantees of the Puls runtime. These guarantees form the stable specification of the framework. All provider plugins and core engine refactors must adhere strictly to these rules.
 
 ---
 

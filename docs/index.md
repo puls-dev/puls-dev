@@ -1,6 +1,6 @@
 # Pulsdev.io
 
-**Intent-driven infrastructure-as-code. Describe what you want - Puls figures out create, update, or skip.**
+**TypeScript-native cloud infrastructure framework. Describe what you want - Puls discovers live state, diffs, and acts.**
 
 No state files. No plan step. No YAML. Just TypeScript against real APIs, idempotent by default.
 
@@ -84,6 +84,16 @@ class AppStack extends Stack {
     .dlq("resize-jobs-dlq", 3);
 }
 ```
+
+## Visual Import & Resource Adoption
+
+Puls is designed for adopting existing cloud environments. Running the command:
+
+```bash
+puls import
+```
+
+starts an ephemeral local web server and opens a visual migration dashboard. Puls scans your cloud environment, models your resource dependencies (such as VM firewalls, or DNS records routing to content delivery distributions), and generates clean, modular TypeScript stack files directly inside your repository.
 
 ---
 

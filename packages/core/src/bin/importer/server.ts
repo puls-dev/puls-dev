@@ -129,7 +129,7 @@ export function createImporterServer(state: ScanState): http.Server {
       }
       if (state.scanComplete) {
         res.write("event: done\ndata: {}\n\n");
-        // Do NOT call res.end() here — that causes EventSource to auto-reconnect,
+        // Do NOT call res.end() here - that causes EventSource to auto-reconnect,
         // replaying all events as duplicates on every retry.
         req.on("close", () => {});
         return;

@@ -325,6 +325,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#visual-import-resource-adoption" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Visual Import &amp; Resource Adoption
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#community" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1131,6 +1142,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#visual-import-resource-adoption" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Visual Import &amp; Resource Adoption
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#community" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1173,7 +1195,7 @@
 
 
 <h1 id="pulsdevio">Pulsdev.io</h1>
-<p><strong>Intent-driven infrastructure-as-code. Describe what you want - Puls figures out create, update, or skip.</strong></p>
+<p><strong>TypeScript-native cloud infrastructure framework. Describe what you want - Puls discovers live state, diffs, and acts.</strong></p>
 <p>No state files. No plan step. No YAML. Just TypeScript against real APIs, idempotent by default.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">@Deploy</span><span class="p">({</span><span class="w"> </span><span class="nx">proxmox</span><span class="o">:</span><span class="w"> </span><span class="kt">CONFIG.STAGING</span><span class="w"> </span><span class="p">})</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">class</span><span class="w"> </span><span class="nx">GameInfra</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
@@ -1270,14 +1292,19 @@
 <a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">    </span><span class="p">.</span><span class="nx">dlq</span><span class="p">(</span><span class="s2">&quot;resize-jobs-dlq&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">3</span><span class="p">);</span>
 <a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="p">}</span>
 </code></pre></div>
+<h2 id="visual-import-resource-adoption">Visual Import &amp; Resource Adoption</h2>
+<p>Puls is designed for adopting existing cloud environments. Running the command:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>puls<span class="w"> </span>import
+</code></pre></div>
+<p>starts an ephemeral local web server and opens a visual migration dashboard. Puls scans your cloud environment, models your resource dependencies (such as VM firewalls, or DNS records routing to content delivery distributions), and generates clean, modular TypeScript stack files directly inside your repository.</p>
 <hr />
 <h2 id="community">Community</h2>
 <p>Have questions or want to contribute? Join the conversation on Gitter|Matrix: <strong>pulsdev.io</strong> (<a href="https://matrix.to/#/#pulsdevio:gitter.im">Join</a>)</p>
 <hr />
 <h2 id="install">Install</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>npm<span class="w"> </span>install<span class="w"> </span>@puls-dev/core
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env<span class="w">  </span><span class="c1"># fill in your credentials</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>npx<span class="w"> </span>puls<span class="w"> </span>deploy<span class="w"> </span>your-stack.ts
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>npm<span class="w"> </span>install<span class="w"> </span>@puls-dev/core
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env<span class="w">  </span><span class="c1"># fill in your credentials</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>npx<span class="w"> </span>puls<span class="w"> </span>deploy<span class="w"> </span>your-stack.ts
 </code></pre></div>
 <p>Requires Node 20+.</p>
 

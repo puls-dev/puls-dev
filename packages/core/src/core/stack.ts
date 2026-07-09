@@ -348,6 +348,10 @@ export abstract class Stack {
         status = changes.length > 0 ? "drift" : "in-sync";
       }
 
+      if (status === "drift") {
+        Policy.triggerDrift(resource, changes, existing);
+      }
+
       const currentCost = existing ? (resource.getMonthlyCost(existing) ?? 0) : 0;
       const newCost = status === "adopted" ? currentCost : (resource.getMonthlyCost() ?? 0);
       totalCurrentCost += currentCost;

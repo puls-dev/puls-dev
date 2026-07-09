@@ -7,7 +7,7 @@ categories:
   - Architecture
 ---
 
-# Modular IaC: Announcing Scoped Workspace Packages
+# Modular Architecture: Announcing Scoped Workspace Packages
 
 Puls is taking its next major step toward modularity and zero dependency-bloat. We have split the monolithic `puls-dev` codebase into separate, scoped sub-packages within an npm workspace monorepo layout: `@puls-dev/core` and individual provider packages like `@puls-dev/aws`, `@puls-dev/gcp`, `@puls-dev/do`, and `@puls-dev/firebase`.
 

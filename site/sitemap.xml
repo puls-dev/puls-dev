@@ -2,150 +2,158 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://pulsdev.io/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/concepts/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/contributing/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/decorators/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/drift-detection/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/getting-started/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/github-actions/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/hooks/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/multiregion/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/parallel-deployment/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/policy/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/resource-adoption/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/roadmap/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/secrets/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/spec/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/stack-outputs/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/why/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/blog/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/blog/2026/06/24/decoupling-cloud-providers-introducing-the-puls-plugin-api/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/blog/2026/06/24/infrastructure-as-code-without-state-files-and-without-the-headaches/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/blog/2026/06/24/dynamic-secret-injection-zero-hardcoding-credentials-in-puls/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
-         <loc>https://pulsdev.io/blog/2026/06/25/modular-iac-announcing-scoped-workspace-packages/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <loc>https://pulsdev.io/blog/2026/06/25/modular-architecture-announcing-scoped-workspace-packages/</loc>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/blog/2026/07/02/introducing-puls-importer-the-visual-interactive-cloud-migration-engine/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
+    </url>
+    <url>
+         <loc>https://pulsdev.io/blog/2026/07/04/puls-100-released-general-availability/</loc>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/providers/aws/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/providers/azure/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/providers/cloudflare/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/providers/digitalocean/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/providers/firebase/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/providers/gcp/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/providers/hcloud/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/providers/proxmox/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/blog/archive/2026/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/blog/category/releases/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
+    </url>
+    <url>
+         <loc>https://pulsdev.io/blog/category/releases-10/</loc>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/blog/category/features/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/blog/category/architecture/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/blog/category/philosophy/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
     <url>
          <loc>https://pulsdev.io/blog/category/security/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-04</lastmod>
     </url>
 </urlset>

@@ -148,4 +148,101 @@ describe("Policy-as-Code Engine", () => {
       }
     );
   });
+
+  test("triggers drift policies on stack diff (warn mode)", async () => {
+    let triggered = false;
+    let receivedExpected: any = null;
+    let receivedActual: any = null;
+
+    class DriftTestResourceBuilder extends BaseBuilder {
+      constructor(name: string, public size: number) {
+        super(name);
+      }
+      async _resolveDiscovery() {
+        return { size: 50 };
+      }
+      getDiff(existing: any) {
+        if (this.size !== existing.size) {
+          return [{ field: "size", declared: this.size, live: existing.size }];
+        }
+        return [];
+      }
+      async deploy() {
+        return { name: this.name, size: this.size };
+      }
+    }
+
+    Policy.register({
+      name: "drift-detection-warn",
+      mode: "warn",
+      onDrift(resource, expected, actual) {
+        triggered = true;
+        receivedExpected = expected;
+        receivedActual = actual;
+      },
+    });
+
+    class WarnDriftStack extends Stack {
+      res = new DriftTestResourceBuilder("drifted-res", 100);
+    }
+
+    const stack = new WarnDriftStack();
+    await stack.diff();
+
+    assert.strictEqual(triggered, true);
+    assert.strictEqual(receivedExpected[0].field, "size");
+    assert.strictEqual(receivedExpected[0].declared, 100);
+    assert.strictEqual(receivedExpected[0].live, 50);
+    assert.strictEqual(receivedActual.size, 50);
+  });
+
+  test("triggers drift policies and throws on stack diff (fail mode)", async () => {
+    let triggered = false;
+
+    class DriftTestResourceBuilder extends BaseBuilder {
+      constructor(name: string, public size: number) {
+        super(name);
+      }
+      async _resolveDiscovery() {
+        return { size: 50 };
+      }
+      getDiff(existing: any) {
+        if (this.size !== existing.size) {
+          return [{ field: "size", declared: this.size, live: existing.size }];
+        }
+        return [];
+      }
+      async deploy() {
+        return { name: this.name, size: this.size };
+      }
+    }
+
+    Policy.register({
+      name: "drift-detection-fail",
+      mode: "fail",
+      onDrift(resource, expected, actual) {
+        triggered = true;
+      },
+    });
+
+    class FailDriftStack extends Stack {
+      res = new DriftTestResourceBuilder("drifted-res", 100);
+    }
+
+    const stack = new FailDriftStack();
+    await assert.rejects(
+      async () => {
+        await stack.diff();
+      },
+      (err: any) => {
+        return (
+          err instanceof Error &&
+          err.message.includes("Policy compliance checks failed") &&
+          err.message.includes("Drift policy \"drift-detection-fail\" failed")
+        );
+      }
+    );
+
+    assert.strictEqual(triggered, true);
+  });
 });

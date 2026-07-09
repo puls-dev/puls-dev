@@ -109,7 +109,7 @@ function loadEnvDefaults(): GlobalConfig {
       nodes: process.env.PROXMOX_NODES?.split(","),
       dnsDomain: process.env.PROXMOX_DNS_DOMAIN,
       dnsServers: process.env.PROXMOX_DNS_SERVERS?.split(","),
-      // Proxmox ships with self-signed certs — default false, opt-in to strict with PROXMOX_VERIFY_SSL=true
+      // Proxmox ships with self-signed certs - default false, opt-in to strict with PROXMOX_VERIFY_SSL=true
       verifySsl: process.env.PROXMOX_VERIFY_SSL === "true",
     };
   }

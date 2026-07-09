@@ -25,5 +25,6 @@
     "@puls-dev/gcp": "^1.0.0",
     "@puls-dev/hcloud": "^1.0.0",
     "@puls-dev/proxmox": "^1.0.0"
-  }
+  },
+  "version": ""
 }

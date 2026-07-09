@@ -1,6 +1,6 @@
 # GitHub Actions Integration
 
-Puls ships a composite GitHub Action that brings the standard IaC workflow to any repo:
+Puls ships a composite GitHub Action that automates the full deploy lifecycle for any repo:
 
 - **Plan on PR**- runs `puls plan` and posts the output as a comment on every pull request that touches your infra files
 - **Deploy on merge**- runs `puls deploy` automatically when changes land on `main`

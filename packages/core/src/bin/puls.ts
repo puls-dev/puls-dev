@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { installShell, uninstallShell } from "./install-shell.js";
 import { runImporterWizard } from "./importer-wizard.js";
+import { runInit } from "./init.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +45,7 @@ Usage:
   puls diff             <file>   Compare declared intent against live cloud state
   puls check            [file]   Check active infrastructure inventory (audits cloud resources)
   puls import                    Start the interactive cloud migration importer wizard
+  puls init             <provider>  Scaffold a new infra project (aws, proxmox)
   puls install-shell             Add puls to your shell so you never need npx again
   puls uninstall-shell           Remove the puls shell integration
 
@@ -107,6 +109,7 @@ const COMMANDS = [
   "diff",
   "check",
   "import",
+  "init",
   "install-shell",
   "uninstall-shell",
 ] as const;
@@ -130,6 +133,10 @@ if (command === "uninstall-shell") {
 }
 if (command === "import") {
   await runImporterWizard();
+  process.exit(0);
+}
+if (command === "init") {
+  await runInit(positionals[1]);
   process.exit(0);
 }
 

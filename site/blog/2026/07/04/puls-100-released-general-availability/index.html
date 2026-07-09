@@ -10,13 +10,11 @@
       
       
       
-        <link rel="canonical" href="https://pulsdev.io/blog/2026/06/24/decoupling-cloud-providers-introducing-the-puls-plugin-api/">
+        <link rel="canonical" href="https://pulsdev.io/blog/2026/07/04/puls-100-released-general-availability/">
       
       
-        <link rel="prev" href="../infrastructure-as-code-without-state-files-and-without-the-headaches/">
+        <link rel="prev" href="../../02/introducing-puls-importer-the-visual-interactive-cloud-migration-engine/">
       
-      
-        <link rel="next" href="../../25/modular-architecture-announcing-scoped-workspace-packages/">
       
       
         
@@ -27,7 +25,7 @@
     
     
       
-        <title>Decoupling Cloud Providers: Introducing the Puls Plugin API - Pulsdev.io</title>
+        <title>Puls 1.0.0 Released: General Availability - Pulsdev.io</title>
       
     
     
@@ -76,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#decoupling-cloud-providers-introducing-the-puls-plugin-api" class="md-skip">
+        <a href="#puls-100-released-general-availability" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Decoupling Cloud Providers: Introducing the Puls Plugin API
+              Puls 1.0.0 Released: General Availability
             
           </span>
         </div>
@@ -1004,22 +1002,99 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-decoupled-provider-plugin-api" class="md-nav__link">
+  <a href="#whats-new-in-100" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Decoupled Provider Plugin API
+        What’s New in 1.0.0
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="The Decoupled Provider Plugin API">
+    <nav class="md-nav" aria-label="What’s New in 1.0.0">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#key-benefits" class="md-nav__link">
+  <a href="#visual-interactive-importer-wizard" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Key Benefits:
+        Visual Interactive Importer Wizard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#native-proxmox-digitalocean-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Native Proxmox &amp; DigitalOcean Discovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zero-configuration-ssl-bypass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zero-Configuration SSL Bypass
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#type-safe-dependency-chaining-with-outputt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type-Safe Dependency Chaining with Output&lt;T&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#secret-management-with-automatic-redaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Secret Management with Automatic Redaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-compliance-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy &amp; Compliance Engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-cloud-package-suite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Cloud Package Suite
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deployment-notifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment Notifications
       
     </span>
   </a>
@@ -1032,10 +1107,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#firebase-local-emulator-suite-integration" class="md-nav__link">
+  <a href="#getting-started" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Firebase Local Emulator Suite Integration
+        Getting Started
       
     </span>
   </a>
@@ -1043,10 +1118,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#whats-next" class="md-nav__link">
+  <a href="#thank-you" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What's Next?
+        Thank You
       
     </span>
   </a>
@@ -1109,7 +1184,7 @@
                     <li class="md-nav__item">
                       <div class="md-nav__link">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 19H5V8h14m-3-7v2H8V1H6v2H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-1V1m-1 11h-5v5h5z"/></svg>
-                        <time datetime="2026-06-24 00:00:00+00:00" class="md-ellipsis">June 24, 2026</time>
+                        <time datetime="2026-07-04 00:00:00+00:00" class="md-ellipsis">July 4, 2026</time>
                       </div>
                     </li>
                     
@@ -1121,7 +1196,7 @@
                             in
                             
                               <a href="../../../../category/releases/">Releases</a>, 
-                              <a href="../../../../category/architecture/">Architecture</a></span>
+                              <a href="../../../../category/releases-10/">Releases-1.0</a></span>
                         </div>
                       </li>
                     
@@ -1132,7 +1207,7 @@
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 20a8 8 0 0 0 8-8 8 8 0 0 0-8-8 8 8 0 0 0-8 8 8 8 0 0 0 8 8m0-18a10 10 0 0 1 10 10 10 10 0 0 1-10 10C6.47 22 2 17.5 2 12A10 10 0 0 1 12 2m.5 5v5.25l4.5 2.67-.75 1.23L11 13V7z"/></svg>
                           <span class="md-ellipsis">
                             
-                              2 min read
+                              4 min read
                             
                           </span>
                         </div>
@@ -1159,47 +1234,132 @@
   
 
 
-<h1 id="decoupling-cloud-providers-introducing-the-puls-plugin-api">Decoupling Cloud Providers: Introducing the Puls Plugin API</h1>
-<p>Today, we are excited to release Puls <code>v0.4.9</code>! This release marks a significant architectural milestone for Puls as we decouple the core infrastructure engine from individual cloud provider implementations. We have also added complete support for local E2E testing against <strong>Firebase Local Emulators</strong>.</p>
+<h1 id="puls-100-released-general-availability">Puls 1.0.0 Released: General Availability</h1>
+<p>Today, we are thrilled to announce the official release of <strong>Puls 1.0.0</strong> - the first stable, production-ready version of our TypeScript-native cloud infrastructure framework.</p>
+<p>Puls is not a configuration language and it is not a wrapper around Terraform. It is a framework: you write real TypeScript, import the providers you need, and Puls handles the gap between your declared intent and live cloud state on every run. Instead of state files and plan stages, Puls uses <strong>eager discovery</strong> - each deployment starts by reading the live cloud, computes the diff in memory, and reconciles immediately, in a single step. No lock files. No apply confirmation prompts. No drift between what the plan said and what actually happened.</p>
 <!-- more -->
 
-<p>Puls was built on a simple premise: describe the infrastructure you want, and let Puls figure out how to safely create, update, or skip resources without state files or manual configuration drifts. </p>
-<p>As we expand support for more cloud systems, keeping provider-specific configurations, list APIs, and console visualizers inside the core framework code was becoming a bottleneck. Today's release introduces the <strong>Provider Plugin API</strong>, moving Puls closer to a pluggable community-driven ecosystem.</p>
 <hr />
-<h2 id="the-decoupled-provider-plugin-api">The Decoupled Provider Plugin API</h2>
-<p>Previously, core framework files like the CLI <code>Checker</code> and configuration decorator <code>applyConfig</code> contained hardcoded mappings for <code>aws</code>, <code>do</code> (DigitalOcean), <code>gcp</code>, <code>firebase</code>, and <code>proxmox</code>. </p>
-<p>With <code>v0.4.9</code>, we've introduced the <code>ProviderPlugin</code> interface and a global <code>providerRegistry</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">export</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="nx">ProviderPlugin</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nx">isConfigured</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nx">list</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">any</span><span class="o">&gt;</span><span class="p">;</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="nx">render</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">inventory</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="p">;</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="nx">configure</span><span class="o">?:</span><span class="w"> </span><span class="p">(</span><span class="nx">opts</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="p">;</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">}</span>
-</code></pre></div>
-<h3 id="key-benefits">Key Benefits:</h3>
-<ol>
-<li><strong>Zero-Configuration Auto-Registration</strong>: Provider plugins register themselves dynamically on import. When you import resources (e.g. <code>import { AWS } from "@puls-dev/aws"</code>), the provider registers its configure, list, and visual rendering hooks automatically.</li>
-<li><strong>Simplified Core Engine</strong>: The CLI visual checker now dynamically queries the registry to parse configuration files and display inventory tables, allowing it to remain completely agnostic of specific cloud providers.</li>
-<li><strong>Paving the Way for Community Providers</strong>: Developers can now call <code>registerProvider(myPlugin)</code> to write first-class custom providers (like Cloudflare, Hetzner, or Vultr) without modifying any core framework files.</li>
-</ol>
-<hr />
-<h2 id="firebase-local-emulator-suite-integration">Firebase Local Emulator Suite Integration</h2>
-<p>As part of our commitment to local-first development, we have also shipped E2E testing capabilities for the Firebase provider utilizing the local <strong>Firebase Emulator Suite</strong> (specifically targeting <strong>Firebase Auth</strong> and <strong>Cloud Firestore</strong>).</p>
-<p>When the standard emulator host environment variables are set:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">FIRESTORE_EMULATOR_HOST</span><span class="o">=</span>localhost:8080
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">FIREBASE_AUTH_EMULATOR_HOST</span><span class="o">=</span>localhost:9099
-</code></pre></div>
-<p>Puls automatically redirects its GCP and Identity Toolkit API calls:</p>
+<h2 id="whats-new-in-100">What’s New in 1.0.0</h2>
+<p>Puls 1.0.0 brings a suite of powerful features designed to make legacy cloud migrations and resource management simple, safe, and intuitive.</p>
+<h3 id="visual-interactive-importer-wizard">Visual Interactive Importer Wizard</h3>
+<p>The headline feature of v1.0.0 is the <strong>Puls Importer</strong> (run via <code>puls import</code>).</p>
 <ul>
-<li><strong>Service Account Bypass</strong>: Bypasses production service account configuration checks and executes authenticated resources locally using mock credentials.</li>
-<li><strong>Emulator Rules Translation</strong>: Intercepts GCP ruleset updates and automatically posts them to the Firestore emulator rules evaluation engine.</li>
-<li><strong>Graceful No-ops</strong>: Mock-succeeds Firestore composite index management and Auth provider config (which are not supported or needed by local emulators), allowing you to run deployment pipelines locally without errors.</li>
+<li><strong>Collapsible Connection Tree</strong>: Visualizes your existing cloud resources and their dependencies (e.g., firewall rules mapped under VMs, or Route53 records connected to CloudFront distributions).</li>
+<li><strong>Cascading Selections</strong>: Adopting a parent resource automatically selects all of its connected dependencies.</li>
+<li><strong>Transitive Root Grouping</strong>: Generated files are automatically partitioned into nested directories based on their dependency tree roots (e.g., <code>infra/puls-web/</code>), with compute files separated from network files (<code>network/network-stack.ts</code>).</li>
+<li><strong>Cross-Tier Linking</strong>: Automatically links stack declarations together in output code (e.g., using relative TS imports and generating <code>.attachTo("vm-name")</code> configuration calls across stacks).</li>
 </ul>
+<p>For details, read our dedicated blog post: <a href="../../02/introducing-puls-importer-the-visual-interactive-cloud-migration-engine/">Introducing Puls Importer: The Visual Interactive Cloud Migration Engine</a>.</p>
+<h3 id="native-proxmox-digitalocean-discovery">Native Proxmox &amp; DigitalOcean Discovery</h3>
+<ul>
+<li><strong>Proxmox Virtual Environment</strong>: Fully supports discovering cluster VMs and VM templates, node-based grouping (e.g. <code>Node: pve1</code>), and automatically mapping cores, memory, and node selections to typescript builders.</li>
+<li><strong>DigitalOcean Firewalls</strong>: Automatically maps droplet ID relationships, parsing and grouping firewalls as sub-dependencies of droplets in the visual tree and stacking them correctly in code.</li>
+</ul>
+<h3 id="zero-configuration-ssl-bypass">Zero-Configuration SSL Bypass</h3>
+<p>Developing locally against private IP endpoints (like private Proxmox hypervisors or local Kubernetes clusters) often involves self-signed SSL certificates. Puls 1.0.0 registers an early TLS bypass module in the CLI:
+* Honors <code>NODE_TLS_REJECT_UNAUTHORIZED=0</code> and <code>PROXMOX_VERIFY_SSL=false</code> defined in your local <code>.env</code>.
+* Executes at the absolute beginning of the CLI bootstrap to guarantee Node's TLS subsystem ignores SSL verification issues for these dev endpoints.</p>
+<h3 id="type-safe-dependency-chaining-with-outputt">Type-Safe Dependency Chaining with <code>Output&lt;T&gt;</code></h3>
+<p>At the heart of Puls is <code>Output&lt;T&gt;</code> - a typed, lazy reference that lets resources depend on each other without manual <code>await</code> calls or explicit ordering. When one builder produces an output (like a network ID or server IP), another builder can consume it directly at declaration time:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">network</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">NetworkBuilder</span><span class="p">(</span><span class="s2">&quot;prod-net&quot;</span><span class="p">).</span><span class="nx">ipRange</span><span class="p">(</span><span class="s2">&quot;10.0.0.0/16&quot;</span><span class="p">);</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">const</span><span class="w"> </span><span class="nx">server</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ServerBuilder</span><span class="p">(</span><span class="s2">&quot;web-01&quot;</span><span class="p">).</span><span class="nx">network</span><span class="p">(</span><span class="nx">network</span><span class="p">.</span><span class="nx">out</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span>
+</code></pre></div>
+<p>Puls resolves the dependency graph automatically during deployment. <code>Output&lt;T&gt;</code> is also composable - <code>.apply()</code> transforms a value lazily, so you can derive new outputs from existing ones without breaking the graph.</p>
+<h3 id="secret-management-with-automatic-redaction">Secret Management with Automatic Redaction</h3>
+<p><code>Secret</code> is a first-class primitive for handling credentials. Secrets are fetched lazily at deploy time (never at construction), deduplicated across resources via an internal cache, and automatically registered for global redaction:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">dbPassword</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Secret</span><span class="p">.</span><span class="nx">aws</span><span class="p">(</span><span class="s2">&quot;prod/db-password&quot;</span><span class="p">);</span><span class="w">        </span><span class="c1">// AWS Secrets Manager</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">const</span><span class="w"> </span><span class="nx">apiToken</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Secret</span><span class="p">(</span><span class="s2">&quot;stripe-key&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">fetchFromVault</span><span class="p">);</span><span class="w"> </span><span class="c1">// custom fetcher</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">// Any console.log or deployment table output that contains the resolved value</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1">// is automatically replaced with ******** - no manual scrubbing required.</span>
+</code></pre></div>
+<p>Secrets support <code>.jsonKey("field")</code> to extract a single key from a JSON secret, and resolve to a placeholder string in dry-run mode so pipelines never touch live credentials.</p>
+<h3 id="policy-compliance-engine">Policy &amp; Compliance Engine</h3>
+<p><code>Policy</code> lets platform teams encode compliance rules that run before every deployment and abort with a structured error if violated:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Policy</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@puls-dev/core&quot;</span><span class="p">;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nx">Policy</span><span class="p">.</span><span class="nx">register</span><span class="p">({</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;require-ssh-key&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nx">validate</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">resource</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">resource</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">startsWith</span><span class="p">(</span><span class="s2">&quot;vm-&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="nx">resource</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">any</span><span class="p">).</span><span class="nx">sshKey</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="sb">`Resource &quot;</span><span class="si">${</span><span class="nx">resource</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb">&quot; must have an SSH key configured`</span><span class="p">;</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">});</span>
+</code></pre></div>
+<p>Rules receive every resource in the stack and can return a string (violation message), <code>false</code>, or throw. All violations are collected and printed together before the deployment is blocked - no silent partial failures.</p>
+<h3 id="multi-cloud-package-suite">Multi-Cloud Package Suite</h3>
+<p>Puls 1.0.0 ships as nine independently installable scoped packages so you only pull in what you need:</p>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Cloud / Platform</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@puls-dev/core</code></td>
+<td>Core runtime, CLI, <code>Stack</code>, <code>Output</code>, <code>Secret</code>, <code>Policy</code></td>
+</tr>
+<tr>
+<td><code>@puls-dev/aws</code></td>
+<td>EC2, RDS, S3, Route53, API Gateway, Secrets Manager, Lambda</td>
+</tr>
+<tr>
+<td><code>@puls-dev/gcp</code></td>
+<td>Compute Engine, Cloud DNS, Cloud Run</td>
+</tr>
+<tr>
+<td><code>@puls-dev/firebase</code></td>
+<td>Firestore rules &amp; indexes, Remote Config, Hosting</td>
+</tr>
+<tr>
+<td><code>@puls-dev/hcloud</code></td>
+<td>Hetzner Cloud servers, networks, firewalls</td>
+</tr>
+<tr>
+<td><code>@puls-dev/do</code></td>
+<td>DigitalOcean Droplets, Spaces, DNS, Firewalls</td>
+</tr>
+<tr>
+<td><code>@puls-dev/cloudflare</code></td>
+<td>DNS records, pages, workers</td>
+</tr>
+<tr>
+<td><code>@puls-dev/proxmox</code></td>
+<td>Proxmox VE VMs and templates</td>
+</tr>
+<tr>
+<td><code>@puls-dev/azure</code></td>
+<td>Azure VMs, Key Vault, DNS</td>
+</tr>
+</tbody>
+</table>
+<p>All packages peer-depend on <code>@puls-dev/core</code> and integrate natively with the <code>Output&lt;T&gt;</code>, <code>Secret</code>, and <code>Policy</code> primitives.</p>
+<h3 id="deployment-notifications">Deployment Notifications</h3>
+<p><code>SLACK.notify()</code> and <code>DISCORD.notify()</code> are built-in lifecycle hooks that post a rich embed to a webhook URL whenever a resource is deployed or destroyed - no third-party library required:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">SLACK</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@puls-dev/core&quot;</span><span class="p">;</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kd">class</span><span class="w"> </span><span class="nx">ProdStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nx">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ServerBuilder</span><span class="p">(</span><span class="s2">&quot;web-01&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="p">.</span><span class="nx">onDeployed</span><span class="p">(</span><span class="nx">SLACK</span><span class="p">.</span><span class="nx">notify</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">SLACK_WEBHOOK_URL</span><span class="o">!</span><span class="p">));</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="p">}</span>
+</code></pre></div>
+<p>In dry-run mode the notification is printed to the terminal instead of sent, keeping CI pipelines safe.</p>
 <hr />
-<h2 id="whats-next">What's Next?</h2>
-<p>With the provider decoupling API completed, our next major milestone is <strong>splitting <code>puls-dev</code> into monorepo sub-packages</strong> (e.g., <code>@puls-dev/core</code>, <code>@puls-dev/aws</code>, <code>@puls-dev/firebase</code>) to dramatically reduce dependency bloat, ensuring developers only download the SDKs and providers they actively use.</p>
-<p>Stay tuned for more updates, and happy coding!</p>
+<h2 id="getting-started">Getting Started</h2>
+<p>To get started with Puls 1.0.0, install the core CLI package:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>npm<span class="w"> </span>install<span class="w"> </span>@puls-dev/core
+</code></pre></div>
+<p>Configure your credentials in <code>.env</code> (see our <a href="https://pulsdev.io/getting-started">Getting Started</a> guide for templates), and run the importer:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>puls<span class="w"> </span>import
+</code></pre></div>
+<hr />
+<h2 id="thank-you">Thank You</h2>
+<p>A huge thank you to everyone in our community who is downloading and using Puls. This is merely the beginning and further development is always in motion. </p>
+<p>Happy deploying!</p>
 
 
 

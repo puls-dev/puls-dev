@@ -16,7 +16,7 @@ To solve this, we are building **Puls Importer** - a visual, interactive cloud m
 <!-- more -->
 
 !!! note
-    **Status**: Currently in active development. Scheduled for official release in version **`1.0.0`**.
+    **Status**: Officially released and live in version **`1.0.0`**.
 
 ---
 
@@ -97,7 +97,7 @@ export class NetworkStack extends Stack {
 
 ---
 
-## Launching in v1.0.0
-Puls Importer is currently undergoing testing and integration with more cloud providers (including GCP and Azure). It will launch officially as a core feature in **version `1.0.0`**.
+## Released in v1.0.0
+Puls Importer is generally available as a core feature in **version `1.0.0`**. Get started today by running `puls import` in your terminal!
 
-Stay tuned for more updates, and happy migrating!
+Happy migrating!

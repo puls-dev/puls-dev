@@ -87,8 +87,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
       <div class="space-y-1.5">
         <label class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Output Layout</label>
         <select id="strategy" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors">
-          <option value="By Tier">By Tier — network / db / compute stacks</option>
-          <option value="Flat File">Flat File — single infra.ts</option>
+          <option value="By Tier">By Tier - network / db / compute stacks</option>
+          <option value="Flat File">Flat File - single infra.ts</option>
         </select>
       </div>
 
@@ -579,7 +579,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
       });
       if (r.ok) {
         const { count } = await r.json();
-        toast('✅  ' + count + ' file' + (count !== 1 ? 's' : '') + ' written to infra/ — you can close this tab', false);
+        toast('✅  ' + count + ' file' + (count !== 1 ? 's' : '') + ' written to infra/ - you can close this tab', false);
         btn.textContent = 'Done ✓';
       } else {
         toast('❌  ' + await r.text(), true);
@@ -638,7 +638,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         if (data.renames)   Object.assign(renames, data.renames);
         if (data.strategy)  document.getElementById('strategy').value = data.strategy;
         rebuildTree(); refreshCheckboxes(); updateGenerateButton();
-        toast('Session restored — ' + selectedIds.size + ' resource' + (selectedIds.size !== 1 ? 's' : '') + ' pre-selected', false);
+        toast('Session restored - ' + selectedIds.size + ' resource' + (selectedIds.size !== 1 ? 's' : '') + ' pre-selected', false);
       }
     } catch {}
   }
