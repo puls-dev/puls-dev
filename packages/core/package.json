@@ -1,6 +1,6 @@
 {
   "name": "@puls-dev/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Core engine for Puls intent-driven IaC",
   "license": "MIT",
   "type": "module",
