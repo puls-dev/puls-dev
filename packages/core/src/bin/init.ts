@@ -31,11 +31,11 @@ PROXMOX_DNS_SERVERS=1.1.1.1
 
 const AWS_FILES: Record<string, string> = {
   "infra/aws/compute.ts": `import { Stack, Deploy } from "@puls-dev/core";
-import { EC2VMBuilder } from "@puls-dev/aws";
+import { AWS } from "@puls-dev/aws";
 
 @Deploy({ dryRun: true })
 export class ComputeStack extends Stack {
-  webServer = new EC2VMBuilder("web-server")
+  webServer = AWS.EC2("web-server")
     .instanceType("t3.small")
     .ami(process.env.AWS_AMI_ID!)
     .keyName(process.env.AWS_KEY_NAME!)
@@ -43,60 +43,60 @@ export class ComputeStack extends Stack {
 }
 `,
   "infra/aws/storage.ts": `import { Stack, Deploy } from "@puls-dev/core";
-import { S3BucketBuilder } from "@puls-dev/aws";
+import { AWS } from "@puls-dev/aws";
 
 @Deploy({ dryRun: true })
 export class StorageStack extends Stack {
-  assets = new S3BucketBuilder("my-assets")
+  assets = AWS.S3("my-assets")
     .region(process.env.AWS_REGION ?? "us-east-1")
     .versioning(true);
 
-  site = new S3BucketBuilder("my-site")
+  site = AWS.S3("my-site")
     .region(process.env.AWS_REGION ?? "us-east-1")
     .staticSite("index.html", "404.html");
 }
 `,
   "infra/aws/database.ts": `import { Stack, Deploy } from "@puls-dev/core";
-import { RDSBuilder, SecretsBuilder } from "@puls-dev/aws";
+import { AWS } from "@puls-dev/aws";
 
 @Deploy({ dryRun: true })
 export class DatabaseStack extends Stack {
-  dbPassword = new SecretsBuilder("app/db-password")
+  dbPassword = AWS.Secret("app/db-password")
     .plainText("change-me-in-production");
 
-  db = new RDSBuilder("app-db")
+  db = AWS.RDS("app-db")
     .engine({ engine: "postgres", version: "16" })
     .size("db.t3.micro")
     .storage(20);
 }
 `,
   "infra/aws/serverless.ts": `import { Stack, Deploy } from "@puls-dev/core";
-import { LambdaBuilder, APIGatewayBuilder } from "@puls-dev/aws";
+import { AWS } from "@puls-dev/aws";
 
 @Deploy({ dryRun: true })
 export class ServerlessStack extends Stack {
-  handler = new LambdaBuilder("app-handler")
+  handler = AWS.Lambda("app-handler")
     .code("./src")
     .handler("index.handler")
     .runtime("nodejs20.x")
     .memory(256)
     .env({ NODE_ENV: "production" });
 
-  api = new APIGatewayBuilder("app-api")
+  api = AWS.APIGateway("app-api")
     .route("GET /health", this.handler)
     .proxy(this.handler);
 }
 `,
   "infra/aws/dns.ts": `import { Stack, Deploy } from "@puls-dev/core";
-import { Route53Builder, CloudFrontBuilder } from "@puls-dev/aws";
+import { AWS } from "@puls-dev/aws";
 import { StorageStack } from "./storage.js";
 
 @Deploy({ dryRun: true })
 export class DnsStack extends Stack {
-  domain = new Route53Builder(process.env.DOMAIN_NAME ?? "example.com")
+  domain = AWS.Route53(process.env.DOMAIN_NAME ?? "example.com")
     .withWildcardSSL();
 
-  cdn = new CloudFrontBuilder("site-cdn")
+  cdn = AWS.CloudFront("site-cdn")
     .originBucket(Stack.from(StorageStack).site);
 }
 `,
@@ -104,11 +104,11 @@ export class DnsStack extends Stack {
 
 const PROXMOX_FILES: Record<string, string> = {
   "infra/proxmox/templates.ts": `import { Stack, Deploy } from "@puls-dev/core";
-import { TemplateBuilder } from "@puls-dev/proxmox";
+import { Proxmox } from "@puls-dev/proxmox";
 
 @Deploy({ dryRun: true })
 export class TemplateStack extends Stack {
-  ubuntuBase = new TemplateBuilder("ubuntu-24-base")
+  ubuntuBase = Proxmox.Template("ubuntu-24-base")
     .image({
       name: "ubuntu-24.04",
       url: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img",
@@ -120,12 +120,12 @@ export class TemplateStack extends Stack {
 }
 `,
   "infra/proxmox/vms.ts": `import { Stack, Deploy } from "@puls-dev/core";
-import { VMBuilder } from "@puls-dev/proxmox";
+import { Proxmox } from "@puls-dev/proxmox";
 import { TemplateStack } from "./templates.js";
 
 @Deploy({ dryRun: true })
 export class VMStack extends Stack {
-  web01 = new VMBuilder("web-01")
+  web01 = Proxmox.VM("web-01")
     .fromTemplate(Stack.from(TemplateStack).ubuntuBase)
     .cores(2)
     .memory(4096)
@@ -133,7 +133,7 @@ export class VMStack extends Stack {
     .gateway("192.168.1.1")
     .provision("./playbooks/web.yaml");
 
-  db01 = new VMBuilder("db-01")
+  db01 = Proxmox.VM("db-01")
     .fromTemplate(Stack.from(TemplateStack).ubuntuBase)
     .cores(4)
     .memory(8192)
